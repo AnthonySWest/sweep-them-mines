@@ -1,0 +1,31 @@
+#!/bin/sh
+
+echo "## Git Pre-Commit hook execution"
+
+PrettyExe="uncrustify.exe"
+[[ $(type -P "$PrettyExe") ]] || { echo "$PrettyExe is NOT in PATH" 1>&2; exit 1; }
+
+##########################################################################
+## UNCRUSTIFY CONFIGURATION                                             ##
+##########################################################################
+# set uncrustify config location
+UNCRUST_CONFIG=".uncrustify.cfg"
+# get list of staged files
+# This command doesn't work for leaving out files during an amend
+#staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|h|cpp|hpp)$')
+# This command works for regular commits and amend commits
+staged_files=$(git status -s | awk '/^[ACM] / { printf("%s %s %s %s\n", $2, $3, $4, $5) }' | sed -n 's/ *$//p' | tr -d '"' | grep -E '\.(c|h|cpp|hpp)$')
+if [ -n "$staged_files" ]; then
+    echo "## Executing uncrustify..."
+    while IFS= read -r file ; do
+        $PrettyExe -l CPP -c $UNCRUST_CONFIG "$file" --replace --no-backup
+        if [ $? -ne 0 ]; then
+            echo "exit"
+            exit 1
+        fi
+        git add "$file" || exit 1
+    done <<< "$staged_files"
+    echo "## Pretty changes commited"
+else
+    echo "## Nothing to make pretty"
+fi
