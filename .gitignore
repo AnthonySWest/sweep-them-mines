@@ -27,7 +27,8 @@
 [Rr]elease/**
 
 # Don't ignore certain folders under release
-#![Rr]elease/some-file.txt
+![Rr]elease/[Ii]mages/
+![Rr]elease/[Ii]mages/**
 
 #C++ Builder
 *.bpl
