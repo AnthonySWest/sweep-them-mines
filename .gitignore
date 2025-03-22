@@ -27,19 +27,7 @@
 [Rr]elease/**
 
 # Don't ignore certain folders under release
-![Rr]elease/_Aleph-Bet.txt
-![Rr]elease/AboutUri.rtf
-![Rr]elease/BMW_Heb_Font.ttf
-![Rr]elease/Introduction.rtf
-![Rr]elease/UrisPassing.rtf
-![Rr]elease/[Bb]ooks/
-![Rr]elease/[Bb]ooks/**
-![Rr]elease/[Hh]ints/
-![Rr]elease/[Hh]ints/**
-![Rr]elease/[Ss]ounds/
-![Rr]elease/[Ss]ounds/**
-![Rr]elease/[Tt]extures/
-![Rr]elease/[Tt]extures/**
+#![Rr]elease/some-file.txt
 
 #C++ Builder
 *.bpl
