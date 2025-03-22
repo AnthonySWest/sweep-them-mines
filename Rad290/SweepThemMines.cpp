@@ -4,6 +4,8 @@
 #pragma hdrstop
 #include <tchar.h>
 //---------------------------------------------------------------------------
+#include <Vcl.Styles.hpp>
+#include <Vcl.Themes.hpp>
 USEFORM("..\Source\MainForm.cpp", FormMain);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
@@ -12,6 +14,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
     {
         Application->Initialize();
         Application->MainFormOnTaskBar = true;
+        TStyleManager::TrySetStyle("Cobalt XEMedia");
         Application->Title = "Sweep Them Mines";
         Application->CreateForm(__classid(TFormMain), &FormMain);
         Application->Run();
