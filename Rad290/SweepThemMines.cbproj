@@ -92,8 +92,8 @@
         <UWP_CppLogo44>..\Resource\land-mine_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>..\Resource\land-mine_150.png</UWP_CppLogo150>
         <SanitizedProjectName>SweepThemMines</SanitizedProjectName>
-        <IncludePath>..\Source\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\Source\Subroutines\;..\Source\;$(IncludePath)</IncludePath>
+        <ILINK_LibraryPath>..\Source\Subroutines\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
@@ -195,6 +195,26 @@
             <FormType>dfm</FormType>
             <DependentOn>..\Source\MainForm.h</DependentOn>
             <BuildOrder>2</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\Subroutines\AppTool.cpp">
+            <DependentOn>..\Source\Subroutines\AppTool.h</DependentOn>
+            <BuildOrder>5</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\Subroutines\BasicINI.cpp">
+            <DependentOn>..\Source\Subroutines\BasicINI.h</DependentOn>
+            <BuildOrder>6</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\Subroutines\PathTool.cpp">
+            <DependentOn>..\Source\Subroutines\PathTool.h</DependentOn>
+            <BuildOrder>9</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\Subroutines\StringTool.cpp">
+            <DependentOn>..\Source\Subroutines\StringTool.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\Subroutines\Version.cpp">
+            <DependentOn>..\Source\Subroutines\Version.h</DependentOn>
+            <BuildOrder>7</BuildOrder>
         </CppCompile>
         <ResourceCompile Include="..\Source\Version.rc">
             <Form>Version.res</Form>
