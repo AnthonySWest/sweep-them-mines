@@ -32,7 +32,7 @@ limitations under the License.
 #include <vector>
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ public:
     static bool IsEmptyGUID(GUID const& guid);
 };
 
-} // namespace Subroutines
+} // namespace ASWTools
 
 //---------------------------------------------------------------------------
 #endif // #ifndef StringToolH

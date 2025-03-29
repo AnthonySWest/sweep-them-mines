@@ -25,7 +25,7 @@ limitations under the License.
 #include "Version.h"
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -274,4 +274,4 @@ bool TVersion::operator>=(ThisType const& right) const
 }
 //---------------------------------------------------------------------------
 
-} // namespace Subroutines
+} // namespace ASWTools

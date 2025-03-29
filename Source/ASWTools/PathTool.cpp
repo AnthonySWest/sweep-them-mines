@@ -39,7 +39,7 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -447,4 +447,4 @@ std::wstring TPathTool::Path_GenerateRandomName(size_t len, const std::wstring& 
 
 //---------------------------------------------------------------------------
 
-} // namespace Subroutines
+} // namespace ASWTools

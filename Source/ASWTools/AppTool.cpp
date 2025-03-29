@@ -29,7 +29,7 @@ limitations under the License.
 #include <winver.h>
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -245,4 +245,4 @@ bool TAppTool::GetAppVersion(const wchar_t* appOrDLLPath, WORD* outMajorVer, WOR
 }
 //---------------------------------------------------------------------------
 
-} // namespace Subroutines
+} // namespace ASWTools

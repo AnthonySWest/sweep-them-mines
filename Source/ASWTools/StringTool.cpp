@@ -63,7 +63,7 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2266,4 +2266,4 @@ bool TStrTool::IsEmptyGUID(GUID const& guid)
 
 //---------------------------------------------------------------------------
 
-} // namespace Subroutines
+} // namespace ASWTools

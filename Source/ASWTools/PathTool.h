@@ -29,7 +29,7 @@ limitations under the License.
 #include <string>
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ public:
     static std::wstring Path_GenerateRandomName(size_t len, const std::wstring& charList);
 };
 
-} // namespace Subroutines
+} // namespace ASWTools
 
 //---------------------------------------------------------------------------
 #endif // #ifndef PathToolH

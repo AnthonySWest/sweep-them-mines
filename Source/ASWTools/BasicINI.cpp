@@ -30,7 +30,7 @@ limitations under the License.
 #include "StringTool.h"
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 namespace BasicINI
@@ -974,4 +974,4 @@ EErrINI TBasicINI::Save(FILE* fOut, const char assignOperator)
 
 } // namespace BasicINI
 
-} // namespace Subroutines
+} // namespace ASWTools

@@ -29,7 +29,7 @@ limitations under the License.
 #include <string>
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ public:
     bool operator>=(ThisType const& right) const;
 };
 
-} // namespace Subroutines
+} // namespace ASWTools
 
 //---------------------------------------------------------------------------
 #endif // #ifndef VersionH

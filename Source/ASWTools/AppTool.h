@@ -28,7 +28,7 @@ limitations under the License.
 #include "Version.h"
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -78,6 +78,6 @@ public:
         WORD* outRevision);
 };
 
-} // namespace Subroutines
+} // namespace ASWTools
 
 #endif // #ifndef AppToolH

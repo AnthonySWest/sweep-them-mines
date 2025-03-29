@@ -92,8 +92,8 @@
         <UWP_CppLogo44>..\Resource\land-mine_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>..\Resource\land-mine_150.png</UWP_CppLogo150>
         <SanitizedProjectName>SweepThemMines</SanitizedProjectName>
-        <IncludePath>..\Source\Subroutines\;..\Source\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>..\Source\Subroutines\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
+        <ILINK_LibraryPath>..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
@@ -190,31 +190,31 @@
             <BuildOrder>1</BuildOrder>
             <PCH>true</PCH>
         </PCHCompile>
+        <CppCompile Include="..\Source\ASWTools\AppTool.cpp">
+            <DependentOn>..\Source\ASWTools\AppTool.h</DependentOn>
+            <BuildOrder>5</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\BasicINI.cpp">
+            <DependentOn>..\Source\ASWTools\BasicINI.h</DependentOn>
+            <BuildOrder>6</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\PathTool.cpp">
+            <DependentOn>..\Source\ASWTools\PathTool.h</DependentOn>
+            <BuildOrder>9</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\StringTool.cpp">
+            <DependentOn>..\Source\ASWTools\StringTool.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\Version.cpp">
+            <DependentOn>..\Source\ASWTools\Version.h</DependentOn>
+            <BuildOrder>7</BuildOrder>
+        </CppCompile>
         <CppCompile Include="..\Source\MainForm.cpp">
             <Form>FormMain</Form>
             <FormType>dfm</FormType>
             <DependentOn>..\Source\MainForm.h</DependentOn>
             <BuildOrder>2</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\Subroutines\AppTool.cpp">
-            <DependentOn>..\Source\Subroutines\AppTool.h</DependentOn>
-            <BuildOrder>5</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\Subroutines\BasicINI.cpp">
-            <DependentOn>..\Source\Subroutines\BasicINI.h</DependentOn>
-            <BuildOrder>6</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\Subroutines\PathTool.cpp">
-            <DependentOn>..\Source\Subroutines\PathTool.h</DependentOn>
-            <BuildOrder>9</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\Subroutines\StringTool.cpp">
-            <DependentOn>..\Source\Subroutines\StringTool.h</DependentOn>
-            <BuildOrder>8</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\Subroutines\Version.cpp">
-            <DependentOn>..\Source\Subroutines\Version.h</DependentOn>
-            <BuildOrder>7</BuildOrder>
         </CppCompile>
         <ResourceCompile Include="..\Source\Version.rc">
             <Form>Version.res</Form>

@@ -31,7 +31,7 @@ limitations under the License.
 #include <vector>
 //---------------------------------------------------------------------------
 
-namespace Subroutines
+namespace ASWTools
 {
 
 namespace BasicINI
@@ -229,7 +229,7 @@ public:
 
 } // namespace BasicINI
 
-} // namespace Subroutines
+} // namespace ASWTools
 
 //---------------------------------------------------------------------------
 #endif // #ifndef BasicINIH
