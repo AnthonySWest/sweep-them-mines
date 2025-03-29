@@ -74,39 +74,39 @@ public:
     static bool IsDots(std::string str);
     static bool IsDots(std::wstring str);
 
-    static bool Path_IsRelative(std::string const& path);
-    static bool Path_IsRelative(std::wstring const& path);
+    static bool IsRelative(std::string const& path);
+    static bool IsRelative(std::wstring const& path);
 
-    static bool Path_IsEnvironment(const std::string& path);
-    static bool Path_IsEnvironment(const std::wstring& path);
+    static bool IsEnvironment(const std::string& path);
+    static bool IsEnvironment(const std::wstring& path);
 
-    static bool Path_IsNetwork(const std::string& path);
-    static bool Path_IsNetwork(const std::wstring& path);
+    static bool IsNetwork(const std::string& path);
+    static bool IsNetwork(const std::wstring& path);
 
-    static std::string Path_Combine(const std::string& path1, const std::string& path2);
-    static std::wstring Path_Combine(const std::wstring& path1, const std::wstring& path2);
+    static std::string Combine(const std::string& path1, const std::string& path2);
+    static std::wstring Combine(const std::wstring& path1, const std::wstring& path2);
 
-    static bool Path_ExpandEnvironmentVars(const std::string& path, std::string& dest);
-    static bool Path_ExpandEnvironmentVars(const std::wstring& path, std::wstring& dest);
+    static bool ExpandEnvironmentVars(const std::string& path, std::string& dest);
+    static bool ExpandEnvironmentVars(const std::wstring& path, std::wstring& dest);
 
-    static std::string Path_ExtractDir(const std::string& fileName, bool keepTrailSlash = true);
-    static std::wstring Path_ExtractDir(const std::wstring& fileName, bool keepTrailSlash = true);
+    static std::string ExtractDir(const std::string& fileName, bool keepTrailSlash = true);
+    static std::wstring ExtractDir(const std::wstring& fileName, bool keepTrailSlash = true);
 
-    static std::string Path_ExtractFileName(const std::string& path);
-    static std::wstring Path_ExtractFileName(const std::wstring& path);
-    static std::string Path_ExtractFileName(const std::string& path, bool removeExtension);
-    static std::wstring Path_ExtractFileName(const std::wstring& path, bool removeExtension);
+    static std::string ExtractFileName(const std::string& path);
+    static std::wstring ExtractFileName(const std::wstring& path);
+    static std::string ExtractFileName(const std::string& path, bool removeExtension);
+    static std::wstring ExtractFileName(const std::wstring& path, bool removeExtension);
 
-    static std::string Path_RemoveExtension(const std::string& path);
-    static std::wstring Path_RemoveExtension(const std::wstring& path);
+    static std::string RemoveExtension(const std::string& path);
+    static std::wstring RemoveExtension(const std::wstring& path);
 
-    static std::string Path_GetExtension(const std::string& path);
-    static std::wstring Path_GetExtension(const std::wstring& path);
+    static std::string GetExtension(const std::string& path);
+    static std::wstring GetExtension(const std::wstring& path);
 
-    static std::string Path_GenerateRandomNameA(size_t len);
-    static std::string Path_GenerateRandomName(size_t len, const std::string& charList);
-    static std::wstring Path_GenerateRandomNameW(size_t len);
-    static std::wstring Path_GenerateRandomName(size_t len, const std::wstring& charList);
+    static std::string GenerateRandomNameA(size_t len);
+    static std::string GenerateRandomName(size_t len, const std::string& charList);
+    static std::wstring GenerateRandomNameW(size_t len);
+    static std::wstring GenerateRandomName(size_t len, const std::wstring& charList);
 };
 
 } // namespace ASWTools

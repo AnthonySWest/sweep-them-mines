@@ -97,49 +97,49 @@ bool TPathTool::IsDots(std::wstring str)
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true if: no drive found, not a network path, and doesn't start with an environment var.
-bool TPathTool::Path_IsRelative(std::string const& path)
+bool TPathTool::IsRelative(std::string const& path)
 {
     return (path.find(":") == std::string::npos) && !(path.find("%") == 0) && !(path.find("\\\\") == 0);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true if: no drive found, not a network path, and doesn't start with an environment var.
-bool TPathTool::Path_IsRelative(std::wstring const& path)
+bool TPathTool::IsRelative(std::wstring const& path)
 {
     return (path.find(L":") == std::wstring::npos) && !(path.find(L"%") == 0) && !(path.find(L"\\\\") == 0);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true if environment var symbol found in the path.
-bool TPathTool::Path_IsEnvironment(const std::string& path)
+bool TPathTool::IsEnvironment(const std::string& path)
 {
     return (path.find("%") != std::string::npos);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true if environment var symbol found in the path.
-bool TPathTool::Path_IsEnvironment(const std::wstring& path)
+bool TPathTool::IsEnvironment(const std::wstring& path)
 {
     return (path.find(L"%") != std::wstring::npos);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true path starts with network slashes.
-bool TPathTool::Path_IsNetwork(const std::string& path)
+bool TPathTool::IsNetwork(const std::string& path)
 {
     return (path.find("\\\\") == 0);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true path starts with network slashes.
-bool TPathTool::Path_IsNetwork(const std::wstring& path)
+bool TPathTool::IsNetwork(const std::wstring& path)
 {
     return (path.find(L"\\\\") == 0);
 }
 //---------------------------------------------------------------------------
 // -Static
 // - Combines two paths while properly handling directory separator chars.
-std::string TPathTool::Path_Combine(const std::string& path1, const std::string& path2)
+std::string TPathTool::Combine(const std::string& path1, const std::string& path2)
 {
     //this method doesn't seem to be available
     //std::filesystem::path full_path = path1 / path2;
@@ -173,7 +173,7 @@ std::string TPathTool::Path_Combine(const std::string& path1, const std::string&
 //---------------------------------------------------------------------------
 // -Static
 // - Combines two paths while properly handling directory separator chars.
-std::wstring TPathTool::Path_Combine(const std::wstring& path1, const std::wstring& path2)
+std::wstring TPathTool::Combine(const std::wstring& path1, const std::wstring& path2)
 {
     if (path1.length() == 0)
     {
@@ -202,13 +202,13 @@ std::wstring TPathTool::Path_Combine(const std::wstring& path1, const std::wstri
 //---------------------------------------------------------------------------
 // -Static
 // - Expands the environment variable in the path to the actual path.
-bool TPathTool::Path_ExpandEnvironmentVars(const std::string& path, std::string& dest)
+bool TPathTool::ExpandEnvironmentVars(const std::string& path, std::string& dest)
 {
 #ifdef USE_ELOG
-    const wchar_t codeSectionStr[] = L"TPathTool::Path_ExpandEnvironmentVars(A)";
+    const wchar_t codeSectionStr[] = L"TPathTool::ExpandEnvironmentVars(A)";
 #endif
 
-    if (path.length() == 0 || !Path_IsEnvironment(path))
+    if (path.length() == 0 || !IsEnvironment(path))
     {
         dest = path;
         return true;
@@ -247,13 +247,13 @@ bool TPathTool::Path_ExpandEnvironmentVars(const std::string& path, std::string&
 //---------------------------------------------------------------------------
 // -Static
 // - Expands the environment variable in the path to the actual path.
-bool TPathTool::Path_ExpandEnvironmentVars(const std::wstring& path, std::wstring& dest)
+bool TPathTool::ExpandEnvironmentVars(const std::wstring& path, std::wstring& dest)
 {
 #ifdef USE_ELOG
-    const wchar_t codeSectionStr[] = L"TPathTool::Path_ExpandEnvironmentVars(W)";
+    const wchar_t codeSectionStr[] = L"TPathTool::ExpandEnvironmentVars(W)";
 #endif
 
-    if (path.length() == 0 || !Path_IsEnvironment(path))
+    if (path.length() == 0 || !IsEnvironment(path))
     {
         dest = path;
         return true;
@@ -293,7 +293,7 @@ bool TPathTool::Path_ExpandEnvironmentVars(const std::wstring& path, std::wstrin
 // -Static
 // -Returns folder path with trailing backslash, if requested
 // -"keepTrailSlash" defaults to true
-std::string TPathTool::Path_ExtractDir(const std::string& fileName, bool keepTrailSlash)
+std::string TPathTool::ExtractDir(const std::string& fileName, bool keepTrailSlash)
 {
     size_t splitIdx = fileName.find_last_of("/\\");
     if (splitIdx == std::string::npos)
@@ -304,7 +304,7 @@ std::string TPathTool::Path_ExtractDir(const std::string& fileName, bool keepTra
 // -Static
 // -Returns folder path with trailing backslash, if requested
 // -"keepTrailSlash" defaults to true
-std::wstring TPathTool::Path_ExtractDir(const std::wstring& fileName, bool keepTrailSlash)
+std::wstring TPathTool::ExtractDir(const std::wstring& fileName, bool keepTrailSlash)
 {
     size_t splitIdx = fileName.find_last_of(L"/\\");
     if (splitIdx == std::wstring::npos)
@@ -315,7 +315,7 @@ std::wstring TPathTool::Path_ExtractDir(const std::wstring& fileName, bool keepT
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::string TPathTool::Path_ExtractFileName(const std::string& path)
+std::string TPathTool::ExtractFileName(const std::string& path)
 {
     size_t splitIdx = path.find_last_of("/\\");
     if (splitIdx == std::string::npos)
@@ -326,7 +326,7 @@ std::string TPathTool::Path_ExtractFileName(const std::string& path)
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::wstring TPathTool::Path_ExtractFileName(const std::wstring& path)
+std::wstring TPathTool::ExtractFileName(const std::wstring& path)
 {
     size_t splitIdx = path.find_last_of(L"/\\");
     if (splitIdx == std::wstring::npos)
@@ -337,27 +337,27 @@ std::wstring TPathTool::Path_ExtractFileName(const std::wstring& path)
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::string TPathTool::Path_ExtractFileName(const std::string& path, bool removeExtension)
+std::string TPathTool::ExtractFileName(const std::string& path, bool removeExtension)
 {
     if (!removeExtension)
-        return Path_ExtractFileName(path);
-    return Path_RemoveExtension(Path_ExtractFileName(path));
+        return ExtractFileName(path);
+    return RemoveExtension(ExtractFileName(path));
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::wstring TPathTool::Path_ExtractFileName(const std::wstring& path, bool removeExtension)
+std::wstring TPathTool::ExtractFileName(const std::wstring& path, bool removeExtension)
 {
     if (!removeExtension)
-        return Path_ExtractFileName(path);
-    return Path_RemoveExtension(Path_ExtractFileName(path));
+        return ExtractFileName(path);
+    return RemoveExtension(ExtractFileName(path));
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Removes the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns entire contents of path.
-std::string TPathTool::Path_RemoveExtension(const std::string& path)
+std::string TPathTool::RemoveExtension(const std::string& path)
 {
     size_t splitIdx = path.find_last_of(".");
     if (splitIdx == std::string::npos)
@@ -368,7 +368,7 @@ std::string TPathTool::Path_RemoveExtension(const std::string& path)
 // -Static
 // -Removes the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns entire contents of path.
-std::wstring TPathTool::Path_RemoveExtension(const std::wstring& path)
+std::wstring TPathTool::RemoveExtension(const std::wstring& path)
 {
     size_t splitIdx = path.find_last_of(L".");
     if (splitIdx == std::wstring::npos)
@@ -379,7 +379,7 @@ std::wstring TPathTool::Path_RemoveExtension(const std::wstring& path)
 // -Static
 // -Gets the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns empty string.
-std::string TPathTool::Path_GetExtension(const std::string& path)
+std::string TPathTool::GetExtension(const std::string& path)
 {
     size_t splitIdx = path.find_last_of(".");
     if (splitIdx == std::string::npos)
@@ -390,7 +390,7 @@ std::string TPathTool::Path_GetExtension(const std::string& path)
 // -Static
 // -Gets the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns empty string.
-std::wstring TPathTool::Path_GetExtension(const std::wstring& path)
+std::wstring TPathTool::GetExtension(const std::wstring& path)
 {
     size_t splitIdx = path.find_last_of(L".");
     if (splitIdx == std::wstring::npos)
@@ -400,14 +400,14 @@ std::wstring TPathTool::Path_GetExtension(const std::wstring& path)
 //---------------------------------------------------------------------------
 // -Static
 // - Generates a random name of given length, using the default charset in AlphaCharsA
-std::string TPathTool::Path_GenerateRandomNameA(size_t len)
+std::string TPathTool::GenerateRandomNameA(size_t len)
 {
-    return Path_GenerateRandomName(len, "");
+    return GenerateRandomName(len, "");
 }
 //---------------------------------------------------------------------------
 // -Static
 // -If parameter charList is zero length, default AlphaCharsA is used.
-std::string TPathTool::Path_GenerateRandomName(size_t len, const std::string& charList)
+std::string TPathTool::GenerateRandomName(size_t len, const std::string& charList)
 {
     if (0 == len)
         return "";
@@ -423,14 +423,14 @@ std::string TPathTool::Path_GenerateRandomName(size_t len, const std::string& ch
 //---------------------------------------------------------------------------
 // -Static
 // - Generates a random name of given length, using the default charset in AlphaCharsW
-std::wstring TPathTool::Path_GenerateRandomNameW(size_t len)
+std::wstring TPathTool::GenerateRandomNameW(size_t len)
 {
-    return Path_GenerateRandomName(len, L"");
+    return GenerateRandomName(len, L"");
 }
 //---------------------------------------------------------------------------
 // -Static
 // -If parameter charList is zero length, default AlphaCharsW is used.
-std::wstring TPathTool::Path_GenerateRandomName(size_t len, const std::wstring& charList)
+std::wstring TPathTool::GenerateRandomName(size_t len, const std::wstring& charList)
 {
     if (0 == len)
         return L"";
