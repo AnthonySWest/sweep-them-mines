@@ -78,7 +78,7 @@
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
         <IntermediateOutputDir>..\Obj\$(Platform)\$(Config)</IntermediateOutputDir>
-        <FinalOutputDir>..\Release\$(Platform)\$(Config)</FinalOutputDir>
+        <FinalOutputDir>..\Release\</FinalOutputDir>
         <BCC_wpar>false</BCC_wpar>
         <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
         <BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>
@@ -158,7 +158,6 @@
     <PropertyGroup Condition="'$(Cfg_1_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <LinkPackageStatics>rtl.lib;vcl.lib</LinkPackageStatics>
-        <FinalOutputDir>..\Release\</FinalOutputDir>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
@@ -190,6 +189,10 @@
         <CppCompile Include="..\Source\ASWTools\BasicINI.cpp">
             <DependentOn>..\Source\ASWTools\BasicINI.h</DependentOn>
             <BuildOrder>6</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\ConsoleHelper.cpp">
+            <DependentOn>..\Source\ASWTools\ConsoleHelper.h</DependentOn>
+            <BuildOrder>10</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\Source\ASWTools\PathTool.cpp">
             <DependentOn>..\Source\ASWTools\PathTool.h</DependentOn>

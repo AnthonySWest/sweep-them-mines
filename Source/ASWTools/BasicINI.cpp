@@ -605,7 +605,7 @@ bool TBasicINI::File_Open(
     //If the file is being opened for write, make sure that the path to the file exists.
     if (NULL != wcschr(fileType, L'w'))
     {
-        std::wstring path = TPathTool::Path_ExtractDir(fileName);
+        std::wstring path = TPathTool::ExtractDir(fileName);
 
         if (!Dir_Exists_WinAPI(path))
             Dir_CreateDirWithSubs(path);
