@@ -22,6 +22,7 @@ limitations under the License.
 #pragma hdrstop
 
 //---------------------------------------------------------------------------
+// Module header
 #include "MainForm.h"
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -31,8 +32,7 @@ limitations under the License.
 // MsgDlg
 // A messagebox wrapper
 // //////////////////////////////////////////////////////////////////////////
-int MsgDlg(const UnicodeString& msg, const UnicodeString& title, TMsgDlgType dlgType,
-    TMsgDlgButtons buttons)
+int MsgDlg(UnicodeString const& msg, UnicodeString const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons)
 {
     TForm* msgDlg = CreateMessageDialog(msg, dlgType, buttons);
     TModalResult mRes;
@@ -67,5 +67,10 @@ TFormMain* FormMain;
 __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner)
 {
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormDestroy(TObject* /*Sender*/)
+{
+    // Clean up
 }
 //---------------------------------------------------------------------------

@@ -147,5 +147,6 @@ object FormMain: TFormMain
     000000000000000000000000000000000000000000000000000000000000}
   Position = poScreenCenter
   Scaled = False
+  OnDestroy = FormDestroy
   TextHeight = 15
 end

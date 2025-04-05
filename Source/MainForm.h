@@ -35,13 +35,17 @@ limitations under the License.
 class TFormMain : public TForm
 {
 __published: // IDE-managed Components
+    void __fastcall FormDestroy(TObject* Sender);
 private: // User declarations
+
 public:  // User declarations
     __fastcall TFormMain(TComponent* Owner);
 };
 
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain* FormMain;
+
+int MsgDlg(UnicodeString const& msg, UnicodeString const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons);
 //---------------------------------------------------------------------------
 
 #endif // #ifndef MainFormH
