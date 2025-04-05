@@ -28,6 +28,8 @@ limitations under the License.
 #ifndef ConsoleHelperH
 #define ConsoleHelperH
 //---------------------------------------------------------------------------
+#include "ASWTools_Common.h"
+//---------------------------------------------------------------------------
 
 namespace ASWTools
 {

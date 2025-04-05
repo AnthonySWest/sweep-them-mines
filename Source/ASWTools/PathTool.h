@@ -28,6 +28,8 @@ limitations under the License.
 #include <windows.h>
 #include <string>
 //---------------------------------------------------------------------------
+#include "ASWTools_Common.h"
+//---------------------------------------------------------------------------
 
 namespace ASWTools
 {

@@ -413,11 +413,12 @@ std::string TPathTool::GenerateRandomName(size_t len, const std::string& charLis
         return "";
 
     const std::string* charListP = charList.length() == 0 ? &AlphaCharsA : &charList;
+    int randMax = static_cast<int>(charListP->length() - 1);
     std::string randName;
     randName.reserve(len);
 
     for (size_t i = 0; i < len; i++)
-        randName += (*charListP)[rand() % (charListP->length() - 1)];
+        randName += (*charListP)[static_cast<size_t>(rand() % randMax)];
     return randName;
 }
 //---------------------------------------------------------------------------
@@ -436,11 +437,12 @@ std::wstring TPathTool::GenerateRandomName(size_t len, const std::wstring& charL
         return L"";
 
     const std::wstring* charListP = charList.length() == 0 ? &AlphaCharsW : &charList;
+    int randMax = static_cast<int>(charListP->length() - 1);
     std::wstring randName;
     randName.reserve(len);
 
     for (size_t i = 0; i < len; i++)
-        randName += (*charListP)[rand() % (charListP->length() - 1)];
+        randName += (*charListP)[static_cast<size_t>(rand() % randMax)];
     return randName;
 }
 //---------------------------------------------------------------------------

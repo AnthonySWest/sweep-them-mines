@@ -81,11 +81,10 @@ std::string TAppTool::GetAppPathA()
 {
     //see: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getlongpathnamea
     const size_t maxFileNameLen = MaxLen_UnicodeFileName;
-    int numCharsWritten;
     char* appNamePath = new char[maxFileNameLen + 1];
     std::unique_ptr<char[]> auto_appNamePath(appNamePath);
     DWORD lenCopied;
-    HINSTANCE hInstance = ::GetModuleHandle(NULL);
+    HINSTANCE hInstance = ::GetModuleHandle(nullptr);
 
     *appNamePath = '\0';
     lenCopied = ::GetModuleFileNameA(hInstance, appNamePath, static_cast<DWORD>(maxFileNameLen));
@@ -129,11 +128,10 @@ std::wstring TAppTool::GetAppPathW()
 {
     //see: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getlongpathnamea
     const size_t maxFileNameLen = MaxLen_UnicodeFileName;
-    int numCharsWritten;
     wchar_t* appNamePath = new wchar_t[maxFileNameLen + 1];
     std::unique_ptr<wchar_t[]> auto_appNamePath(appNamePath);
     DWORD lenCopied;
-    HINSTANCE hInstance = ::GetModuleHandle(NULL);
+    HINSTANCE hInstance = ::GetModuleHandle(nullptr);
 
     *appNamePath = L'\0';
     lenCopied = ::GetModuleFileNameW(hInstance, appNamePath, static_cast<DWORD>(maxFileNameLen));
@@ -188,14 +186,14 @@ bool TAppTool::GetAppVersion(const char* appOrDLLPath, WORD* outMajorVer, WORD* 
     if (!dwLen)
         return false;
 
-    lpData = (LPVOID)malloc(dwLen);
+    lpData = static_cast<LPVOID>(malloc(dwLen));
     if (nullptr == lpData)
         return false;
     std::unique_ptr<void, decltype(free) *> auto_lpData(lpData, free);
 
     bool result = ::GetFileVersionInfoA(appOrDLLPath, 0, dwLen, lpData);
 
-    if(result && ::VerQueryValueA(lpData, "\\", (LPVOID*)&pFileInfo, (PUINT)&bufLen ))
+    if(result && ::VerQueryValueA(lpData, "\\", reinterpret_cast<LPVOID*>(&pFileInfo), static_cast<PUINT>(&bufLen) ))
     {
         *outMajorVer = HIWORD(pFileInfo->dwFileVersionMS);
         *outMinorVer = LOWORD(pFileInfo->dwFileVersionMS);
@@ -226,14 +224,14 @@ bool TAppTool::GetAppVersion(const wchar_t* appOrDLLPath, WORD* outMajorVer, WOR
     if (!dwLen)
         return false;
 
-    lpData = (LPVOID)malloc(dwLen);
+    lpData = static_cast<LPVOID>(malloc(dwLen));
     if (nullptr == lpData)
         return false;
     std::unique_ptr<void, decltype(free) *> auto_lpData(lpData, free);
 
     bool result = ::GetFileVersionInfoW(appOrDLLPath, 0, dwLen, lpData);
 
-    if(result && ::VerQueryValueW(lpData, L"\\", (LPVOID*)&pFileInfo, (PUINT)&bufLen ))
+    if(result && ::VerQueryValueW(lpData, L"\\", reinterpret_cast<LPVOID*>(&pFileInfo), static_cast<PUINT>(&bufLen) ))
     {
         *outMajorVer = HIWORD(pFileInfo->dwFileVersionMS);
         *outMinorVer = LOWORD(pFileInfo->dwFileVersionMS);

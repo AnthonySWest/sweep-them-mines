@@ -23,7 +23,7 @@ limitations under the License.
 ************************************************************************** */
 
 //---------------------------------------------------------------------------
-#include <Windows.h>
+#include <windows.h>
 #include <iostream>
 //---------------------------------------------------------------------------
 // Module header
@@ -91,19 +91,19 @@ bool TConsole::ReleaseConsole()
     if (freopen_s(&fp, "NUL:", "r", stdin) != 0)
         result = false;
     else
-        setvbuf(stdin, NULL, _IONBF, 0);
+        setvbuf(stdin, nullptr, _IONBF, 0);
 
     // Redirect STDOUT to NUL
     if (freopen_s(&fp, "NUL:", "w", stdout) != 0)
         result = false;
     else
-        setvbuf(stdout, NULL, _IONBF, 0);
+        setvbuf(stdout, nullptr, _IONBF, 0);
 
     // Redirect STDERR to NUL
     if (freopen_s(&fp, "NUL:", "w", stderr) != 0)
         result = false;
     else
-        setvbuf(stderr, NULL, _IONBF, 0);
+        setvbuf(stderr, nullptr, _IONBF, 0);
 
     // Detach from console
     if (!::FreeConsole())
@@ -124,7 +124,7 @@ bool TConsole::RedirectConsoleIO()
         if (freopen_s(&fp, "CONIN$", "r", stdin) != 0)
             result = false;
         else
-            setvbuf(stdin, NULL, _IONBF, 0);
+            setvbuf(stdin, nullptr, _IONBF, 0);
     }
 
     // Redirect STDOUT if the console has an output handle
@@ -133,7 +133,7 @@ bool TConsole::RedirectConsoleIO()
         if (freopen_s(&fp, "CONOUT$", "w", stdout) != 0)
             result = false;
         else
-            setvbuf(stdout, NULL, _IONBF, 0);
+            setvbuf(stdout, nullptr, _IONBF, 0);
     }
 
     // Redirect STDERR if the console has an error handle
@@ -142,7 +142,7 @@ bool TConsole::RedirectConsoleIO()
         if (freopen_s(&fp, "CONOUT$", "w", stderr) != 0)
             result = false;
         else
-            setvbuf(stderr, NULL, _IONBF, 0);
+            setvbuf(stderr, nullptr, _IONBF, 0);
     }
 
     // Make C++ standard streams point to console as well.
@@ -202,7 +202,7 @@ bool TConsole::IsStandardOutAConsole()
 {
     HANDLE consoleOutput = ::GetStdHandle(STD_OUTPUT_HANDLE);
 
-    if (NULL == consoleOutput || INVALID_HANDLE_VALUE == consoleOutput)
+    if (nullptr == consoleOutput || INVALID_HANDLE_VALUE == consoleOutput)
         return false;
 
     int systemOutput = _open_osfhandle(intptr_t(consoleOutput), _O_TEXT);
@@ -238,6 +238,9 @@ void TConsole::TestConsole()
 
     std::cout << std::endl << "Press any key to continue..." << std::endl;
     int ch = _getch();
+    if ('a' == ch)
+    {
+    }
 }
 
 //---------------------------------------------------------------------------

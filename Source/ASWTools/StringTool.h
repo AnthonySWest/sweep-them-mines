@@ -31,6 +31,8 @@ limitations under the License.
 #include <string>
 #include <vector>
 //---------------------------------------------------------------------------
+#include "ASWTools_Common.h"
+//---------------------------------------------------------------------------
 
 namespace ASWTools
 {

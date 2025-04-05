@@ -112,14 +112,28 @@ bool TStrTool::Reset() //virtual
 // - Static
 std::string TStrTool::UnicodeStrToUtf8(std::wstring const& str)
 {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif // #ifdef __clang__
     std::wstring_convert<std::codecvt_utf8<wchar_t> > myconv;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // #ifdef __clang__
     return myconv.to_bytes(str);
 }
 //---------------------------------------------------------------------------
 // -Static
 std::wstring TStrTool::Utf8ToUnicodeStr(const std::string& str)
 {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif // #ifdef __clang__
     std::wstring_convert<std::codecvt_utf8<wchar_t> > myconv;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // #ifdef __clang__
     return myconv.from_bytes(str);
 }
 //---------------------------------------------------------------------------
@@ -129,7 +143,14 @@ std::wstring TStrTool::Utf8ToUnicodeStr(char const* utf8Bytes, size_t length)
     if (0 == length || nullptr == utf8Bytes)
         return L"";
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif // #ifdef __clang__
     std::wstring_convert<std::codecvt_utf8<wchar_t> > myconv;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // #ifdef __clang__
     //note that from_bytes does not include the character pointed to by "last", the 2nd parameter
     return myconv.from_bytes(utf8Bytes, utf8Bytes + length);
 }
@@ -138,12 +159,12 @@ std::wstring TStrTool::Utf8ToUnicodeStr(char const* utf8Bytes, size_t length)
 // -Parameter 'winLastErr' must be the value of API call GetLastError()
 std::string TStrTool::GetWindowsLastErrorCodeAsStringA(const DWORD winLastErr)
 {
-    LPSTR error = NULL;
+    LPSTR error = nullptr;
     std::string errorStr;
 
     //translate the windows error code to string
     if (::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL, winLastErr, 0, (LPSTR)&error, 0, NULL) == 0)
+        nullptr, winLastErr, 0, reinterpret_cast<LPSTR>(&error), 0, nullptr) == 0)
     {
         //if failed to get the error string, show the error hex number instead
         const size_t error2Size = 96;
@@ -151,7 +172,7 @@ std::string TStrTool::GetWindowsLastErrorCodeAsStringA(const DWORD winLastErr)
         sprintf_s(error2, error2Size, "Unknown error: %u (0x%08lx)", winLastErr, winLastErr);
         errorStr = error2;
     }
-    else if (error != NULL)
+    else if (error != nullptr)
     {
         errorStr = error;
         ::LocalFree(error);
@@ -166,12 +187,12 @@ std::string TStrTool::GetWindowsLastErrorCodeAsStringA(const DWORD winLastErr)
 // -Parameter 'winLastErr' must be the value of API call GetLastError()
 std::wstring TStrTool::GetWindowsLastErrorCodeAsStringW(const DWORD winLastErr)
 {
-    LPWSTR error = NULL;
+    LPWSTR error = nullptr;
     std::wstring errorStr;
 
     //translate the windows error code to string
     if (::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL, winLastErr, 0, (LPWSTR)&error, 0, NULL) == 0)
+        nullptr, winLastErr, 0, reinterpret_cast<LPWSTR>(&error), 0, nullptr) == 0)
     {
         //if failed to get the error string, show the error hex number instead
         const size_t error2Size = 96;
@@ -179,7 +200,7 @@ std::wstring TStrTool::GetWindowsLastErrorCodeAsStringW(const DWORD winLastErr)
         swprintf_s(error2, error2Size, L"Unknown error: %u (0x%08lx)", winLastErr, winLastErr);
         errorStr = error2;
     }
-    else if (error != NULL)
+    else if (error != nullptr)
     {
         errorStr = error;
         ::LocalFree(error);
@@ -1006,7 +1027,7 @@ std::vector<std::string> TStrTool::CombineLists_Unique(const std::vector<std::st
 {
     std::vector<std::string> dest;
 
-    for (int i = 0; i < list1.size() || i < list2.size(); i++)
+    for (size_t i = 0; i < list1.size() || i < list2.size(); i++)
     {
         const char* val1P = i < list1.size() ? list1[i].c_str() : "";
         const char* val2P = i < list2.size() ? list2[i].c_str() : "";
@@ -1024,7 +1045,7 @@ std::vector<std::string> TStrTool::CombineLists_Unique(const std::vector<std::st
         }
 
         //check new list for existing items
-        for (int j = 0; j < dest.size(); j++)
+        for (size_t j = 0; j < dest.size(); j++)
         {
             const char* destP = dest[j].c_str();
 
@@ -1060,7 +1081,7 @@ std::vector<std::wstring> TStrTool::CombineLists_Unique(const std::vector<std::w
 {
     std::vector<std::wstring> dest;
 
-    for (int i = 0; i < list1.size() || i < list2.size(); i++)
+    for (size_t i = 0; i < list1.size() || i < list2.size(); i++)
     {
         const wchar_t* val1P = i < list1.size() ? list1[i].c_str() : L"";
         const wchar_t* val2P = i < list2.size() ? list2[i].c_str() : L"";
@@ -1078,7 +1099,7 @@ std::vector<std::wstring> TStrTool::CombineLists_Unique(const std::vector<std::w
         }
 
         //check new list for existing items
-        for (int j = 0; j < dest.size(); j++)
+        for (size_t j = 0; j < dest.size(); j++)
         {
             const wchar_t* destP = dest[j].c_str();
 
@@ -1168,11 +1189,11 @@ std::wstring TStrTool::ReplaceAll(std::wstring const& str, wchar_t find, wchar_t
 bool TStrTool::HexSingleToByte(const char hexSingle, BYTE* out)
 {
     if (hexSingle <= '9' && hexSingle >= '0')
-        *out = hexSingle - '0';
+        *out = static_cast<BYTE>(hexSingle - '0');
     else if (hexSingle <= 'F' && hexSingle >= 'A')
-        *out = hexSingle - 'A' + 10;
+        *out = static_cast<BYTE>(hexSingle - 'A' + 10);
     else if (hexSingle <= 'f' && hexSingle >= 'a')
-        *out = hexSingle - 'a' + 10;
+        *out = static_cast<BYTE>(hexSingle - 'a' + 10);
     else
         return false; //invalid hex character
 
@@ -1459,7 +1480,7 @@ int64_t TStrTool::DecodeBase16HexToBytes(std::string const& inHex, BYTE* outBuff
         }
 
         //combine high and low parts into a byte value
-        *outBuffP++ = (static_cast<BYTE>(intHigh) << 4) | static_cast<BYTE>(intLow);
+        *outBuffP++ = static_cast<BYTE>((intHigh << 4) | intLow);
 
         filledCount++;
         inHexP += 2;
@@ -1578,9 +1599,11 @@ std::string TStrTool::EncodeStrToBase64Str(std::wstring const& strW, size_t leng
 //-Better optimized than other routines that use Windows function
 std::string TStrTool::EncodeToBase64Str_Native(BYTE const* bytes, size_t bytesLen, bool makeWebFriendly)
 {
-    static const char* base64_chars_std = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    static const char* base64_chars_web = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-    const char* base64_chars = makeWebFriendly ? base64_chars_web : base64_chars_std;
+    static unsigned char const* base64_chars_std =
+        reinterpret_cast<unsigned char const*>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+    static unsigned char const* base64_chars_web =
+        reinterpret_cast<unsigned char const*>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
+    unsigned char const* base64_chars = makeWebFriendly ? base64_chars_web : base64_chars_std;
     size_t i = 0, ix = 0, leng = bytesLen;
 //  std::stringstream q;
 //
@@ -1612,7 +1635,7 @@ std::string TStrTool::EncodeToBase64Str_Native(BYTE const* bytes, size_t bytesLe
 //  if (ix<leng)
 //      bufferSize+=4;
 
-    size_t bufferSize = (((4 * leng / 3) + 3) & ~3) + sizeof('\0');
+    size_t bufferSize = (((4ULL * leng / 3ULL) + 3ULL) & ~3ULL) + sizeof('\0');
     //bufferSize += sizeof('\0');
 
     //allocate exact size of buffer and populate with base 64
@@ -1711,9 +1734,9 @@ std::wstring TStrTool::DecodeBase64ToStrW(std::string const& inB64)
 // -Returns less than zero for failure.
 int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_t* destBytesSize)
 {
-#pragma warning(push , 0)
-    constexpr unsigned char n1 = static_cast<unsigned char>(-1);
-    static unsigned char const base64_reverse[] = {
+// #pragma warning(push , 0)
+    constexpr BYTE n1 = static_cast<BYTE>(-1);
+    static BYTE const base64_reverse[] = {
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
@@ -1740,7 +1763,7 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
         n1, n1, n1, n1, n1, n1 };
-#pragma warning(pop)
+// #pragma warning(pop)
     size_t srcLen = (nullptr == src ? 0 : strlen(src));
 
 //  std::stringstream q;
@@ -1822,7 +1845,7 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
     size_t maxFill = *destBytesSize < requiredSize ? *destBytesSize : requiredSize;
 
     size_t i = 0, ix = 0, leng = srcLen;
-    unsigned char* walker = destBytes;
+    BYTE* walker = destBytes;
     size_t filledCount = 0;
 
     leng = src[leng - 1] == '=' ? leng - 1 : leng;
@@ -1833,9 +1856,12 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
         //if there is room for the next triple, get at once, for speed
         if (filledCount + 3 <= maxFill)
         {
-            *walker++ = ((base64_reverse[src[i]] << 2) + ((base64_reverse[src[i + 1]] & 0x30) >> 4));
-            *walker++ = (((base64_reverse[src[i + 1]] & 0xf) << 4) + ((base64_reverse[src[i + 2]] & 0x3c) >> 2));
-            *walker++ = (((base64_reverse[src[i + 2]] & 0x3) << 6) + base64_reverse[src[i + 3]]);
+            *walker++ = static_cast<BYTE>((base64_reverse[static_cast<size_t>(src[i])] << 2) +
+                ((base64_reverse[static_cast<size_t>(src[i + 1])] & 0x30) >> 4));
+            *walker++ = static_cast<BYTE>(((base64_reverse[static_cast<size_t>(src[i + 1])] & 0xf) << 4) +
+                ((base64_reverse[static_cast<size_t>(src[i + 2])] & 0x3c) >> 2));
+            *walker++ = static_cast<BYTE>(((base64_reverse[static_cast<size_t>(src[i + 2])] & 0x3) << 6) +
+                base64_reverse[static_cast<size_t>(src[i + 3])]);
             filledCount += 3;
         }
         else
@@ -1843,13 +1869,15 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
             //destination buffer is insufficient size for a triple - top off
             if (filledCount < maxFill)
             {
-                *walker++ = ((base64_reverse[src[i]] << 2) + ((base64_reverse[src[i + 1]] & 0x30) >> 4));
+                *walker++ = static_cast<BYTE>((base64_reverse[static_cast<size_t>(src[i])] << 2) +
+                    ((base64_reverse[static_cast<size_t>(src[i + 1])] & 0x30) >> 4));
                 filledCount++;
             }
 
             if (filledCount < maxFill)
             {
-                *walker++ = (((base64_reverse[src[i + 1]] & 0xf) << 4) + ((base64_reverse[src[i + 2]] & 0x3c) >> 2));
+                *walker++ = static_cast<BYTE>(((base64_reverse[static_cast<size_t>(src[i + 1])] & 0xf) << 4) +
+                    ((base64_reverse[static_cast<size_t>(src[i + 2])] & 0x3c) >> 2));
                 filledCount++;
             }
 
@@ -1858,20 +1886,25 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
     }
 
     //get remainder, if any, and if destination buffer is big enough
-    if (ix<leng && filledCount < maxFill)
+    if (ix < leng && filledCount < maxFill)
     {
-        *walker++ = ( (base64_reverse[ src[ix] ] << 2)  + (ix + 1<leng ? (base64_reverse[ src[ix + 1] ] & 0x30) >> 4 : 0)   );
+        *walker++ = static_cast<BYTE>((base64_reverse[static_cast<size_t>(src[ix])] << 2) +
+            (ix + 1 < leng ? (base64_reverse[static_cast<size_t>(src[ix + 1])] & 0x30) >> 4 : 0));
         filledCount++;
 
         if(filledCount < maxFill)
         {
-            *walker++ = ( ix + 1<leng ? ((base64_reverse[ src[ix + 1] ] & 0xf) << 4) + (ix + 2<leng ? (base64_reverse[ src[ix + 2] ] & 0x3c) >> 2 :0 ) : '\0' );
+            *walker++ = static_cast<BYTE>(ix + 1 < leng ?
+                    ((base64_reverse[static_cast<size_t>(src[ix + 1])] & 0xf) << 4) +
+                    (ix + 2 < leng ? (base64_reverse[static_cast<size_t>(src[ix + 2])] & 0x3c) >> 2 :0 ) :
+                    '\0' );
             filledCount++;
         }
 
         if(filledCount < maxFill)
         {
-            *walker++ = ( ix + 2<leng ? (base64_reverse[ src[ix + 2] ] & 0x3) << 6  : '\0' );
+            *walker++ =
+                static_cast<BYTE>(ix + 2 < leng ? (base64_reverse[static_cast<size_t>(src[ix + 2])] & 0x3) << 6 : '\0');
             filledCount++;
         }
     }
@@ -1927,7 +1960,7 @@ bool TStrTool::URL_Split(std::string const& url, std::string* hostUtf8, std::str
         return true;
     }
 
-    size_t slashIdx = walker - urlStart;
+    size_t slashIdx = static_cast<size_t>(walker - urlStart);
 
     //slash was found - set host and path
     if (nullptr != hostUtf8)
@@ -1945,14 +1978,14 @@ std::string TStrTool::URL_EncodeUtf8(std::string const& valueUtf8, bool useUpper
     if (valueUtf8.length() == 0)
         return "";
 
-    const char* hexP = useUpperCaseHex ? HEX_UPPER : HEX_LOWER;
+    char const* hexP = useUpperCaseHex ? HEX_UPPER : HEX_LOWER;
 
     const size_t maxEncodedCharWidth = 3; //e.g. "%FF"
     const size_t buffSize = (valueUtf8.length() * maxEncodedCharWidth) + sizeof('\0');
     char* buff = new char[buffSize];
     std::unique_ptr<char[]> auto_buff(buff);
     char* buffP = buff;
-    const char* walker = valueUtf8.c_str();
+    char const* walker = valueUtf8.c_str();
 
     while (*walker)
     {
@@ -1965,7 +1998,7 @@ std::string TStrTool::URL_EncodeUtf8(std::string const& valueUtf8, bool useUpper
         {
             *buffP++ = URL_HEX_ESCAPE;
             //convert char to byte so that utf8 works correctly, then convert to hex
-            BYTE byteVal = *walker++;
+            BYTE byteVal = static_cast<BYTE>(*walker++);
             *buffP++ = hexP[((byteVal >> 4) & 0xF)];//left
             *buffP++ = hexP[(byteVal) & 0x0F];//right
         }
@@ -2012,7 +2045,7 @@ std::string TStrTool::URL_DecodeUtf8(std::string const& encodedStr, bool* invali
             }
 
             //hex singles are valid - combine into a byte
-            *buffP++ = (high << 4) | low;
+            *buffP++ = static_cast<char>((high << 4) | low);
             walker += 2;
         }
         else if (*walker == '+')
