@@ -46,39 +46,16 @@ namespace BasicINI
 //---------------------------------------------------------------------------
 TKeyVal::TKeyVal()
 {
-    Reset_Private();
 }
 //---------------------------------------------------------------------------
 TKeyVal::~TKeyVal()
 {
-    Destroy_Private();
 }
 //---------------------------------------------------------------------------
-void TKeyVal::Destroy_Private()
+void TKeyVal::Reset()
 {
-    //code specific to this level of inheritance goes here - no virtual functions can be called here
-}
-//---------------------------------------------------------------------------
-void TKeyVal::Destroy() //virtual
-{
-    Destroy_Private();
-}
-//---------------------------------------------------------------------------
-bool TKeyVal::Reset_Private()
-{
-    //code specific to this level of inheritance goes here - no virtual functions can be called here
-    Destroy_Private();
-
-    //reset class vars here
     Key = "";
     Value = "";
-
-    return true;
-}
-//---------------------------------------------------------------------------
-bool TKeyVal::Reset() //virtual
-{
-    return Reset_Private();
 }
 //---------------------------------------------------------------------------
 /*
@@ -127,45 +104,24 @@ bool TKeyVal::IsEmpty() const
 //---------------------------------------------------------------------------
 TSection::TSection()
 {
-    Reset_Private();
 }
-//---------------------------------------------------------------------------
-//TSection::TSection(const std::string& name)
-//{
-//	Reset_Private();
-//	Name = name;
-//}
 //---------------------------------------------------------------------------
 TSection::~TSection()
 {
-    Destroy_Private();
 }
 //---------------------------------------------------------------------------
-void TSection::Destroy_Private()
+TSection& TSection::operator=(TSection const& rhs)
 {
-    //code specific to this level of inheritance goes here - no virtual functions can be called here
+    Name = rhs.Name;
+    KeyVals = rhs.KeyVals;
+    return *this;
 }
 //---------------------------------------------------------------------------
-void TSection::Destroy() //virtual
+void TSection::Reset()
 {
-    Destroy_Private();
-}
-//---------------------------------------------------------------------------
-bool TSection::Reset_Private()
-{
-    //code specific to this level of inheritance goes here - no virtual functions can be called here
-    Destroy_Private();
-
     //reset class vars here
     Name = "";
     KeyVals.clear();
-
-    return true;
-}
-//---------------------------------------------------------------------------
-bool TSection::Reset() //virtual
-{
-    return Reset_Private();
 }
 //---------------------------------------------------------------------------
 bool TSection::IsGlobalSection()
@@ -229,10 +185,12 @@ bool TSection::InsertKeyVal(size_t index, const std::string& key, const std::str
 bool TSection::InsertKeyVal(size_t index, const TKeyVal& keyVal)
 {
     if (index >= KeyVals.size())
+    {
         KeyVals.push_back(keyVal);
+    }
     else
     {
-        std::vector<TKeyVal>::iterator itIdx = KeyVals.begin() + index;
+        std::vector<TKeyVal>::iterator itIdx = KeyVals.begin() + static_cast<std::ptrdiff_t>(index);
         KeyVals.insert(itIdx, keyVal);
     }
     return true;
@@ -260,21 +218,24 @@ bool TSection::DeleteKeyVal(size_t index)
     if (index >= KeyVals.size())
         return true;
 
-    std::vector<TKeyVal>::iterator itIdx = KeyVals.begin() + index;
+    std::vector<TKeyVal>::iterator itIdx = KeyVals.begin() + static_cast<std::ptrdiff_t>(index);
     KeyVals.erase(itIdx);
     return true;
 }
 //---------------------------------------------------------------------------
 int TSection::FindKey(const std::string& key, bool ignoreCase) const
 {
-    for (int i = 0; i < KeyVals.size(); i++)
+    for (size_t i = 0; i < KeyVals.size(); i++)
     {
-        const TKeyVal* keyValP = &KeyVals[i];
+        TKeyVal const* keyValP = &KeyVals[i];
 
         if ((key.length() == 0 && keyValP->Key.length() == 0) ||
             (ignoreCase && _stricmp(key.c_str(), keyValP->Key.c_str()) == 0) ||
             (!ignoreCase && strcmp(key.c_str(), keyValP->Key.c_str()) == 0))
-            return i;
+        {
+            return static_cast<int>(i);
+
+        }
     }
 
     return -1;
@@ -284,7 +245,6 @@ int TSection::FindKey(const std::string& key, bool ignoreCase) const
     TSection::FindOrCreateKey
 
     - On success, returns either the found index of existing key, or index of newly added key.
-    - On failure, returns less than zero.
 */
 int TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
 {
@@ -293,8 +253,9 @@ int TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
     if (idx < 0)
     {
         KeyVals.push_back(TKeyVal());
-        idx = static_cast<int>(KeyVals.size() - 1);
-        KeyVals[idx].Key = key;
+        size_t insertIdx = KeyVals.size() - 1;
+        KeyVals[insertIdx].Key = key;
+        idx = static_cast<int>(insertIdx);
     }
 
     return idx;
@@ -302,14 +263,16 @@ int TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
 //---------------------------------------------------------------------------
 int TSection::FindVal(const std::string& value, bool ignoreCase) const
 {
-    for (int i = 0; i < KeyVals.size(); i++)
+    for (size_t i = 0; i < KeyVals.size(); i++)
     {
         const TKeyVal* keyValP = &KeyVals[i];
 
         if ((value.length() == 0 && keyValP->Value.length() == 0) ||
             (ignoreCase && _stricmp(value.c_str(), keyValP->Value.c_str()) == 0) ||
             (!ignoreCase && strcmp(value.c_str(), keyValP->Value.c_str()) == 0))
-            return i;
+        {
+            return static_cast<int>(i);
+        }
     }
 
     return -1;
@@ -317,7 +280,7 @@ int TSection::FindVal(const std::string& value, bool ignoreCase) const
 //---------------------------------------------------------------------------
 bool TSection::HasOneOrMoreKeyValuePairs() const
 {
-    for (int i = 0; i < KeyVals.size(); i++)
+    for (size_t i = 0; i < KeyVals.size(); i++)
     {
         if (KeyVals[i].IsKeyValuePair())
             return true;
@@ -338,7 +301,7 @@ EErrINI TSection::Save(FILE* fOut, const char assignOperator, const std::string&
     if (Name.length() > 0)
         writeErr |= -1 == fprintf(fOut, "%s\n", TStrTool::Trim_Copy(Name).c_str());
 
-    for (int i = 0; i < KeyVals.size() && !writeErr; i++)
+    for (size_t i = 0; i < KeyVals.size() && !writeErr; i++)
     {
         TKeyVal* keyValP = &KeyVals[i];
         std::string key = TStrTool::Trim_Copy(keyValP->Key);
@@ -423,12 +386,15 @@ bool TBasicINI::InsertSection(size_t index)
 bool TBasicINI::InsertSection(size_t index, const TSection& section)
 {
     if (index >= Sections.size())
+    {
         Sections.push_back(section);
+    }
     else
     {
-        std::vector<TSection>::iterator itIdx = Sections.begin() + index;
+        std::vector<TSection>::iterator itIdx = Sections.begin() + static_cast<std::ptrdiff_t>(index);
         Sections.insert(itIdx, section);
     }
+
     return true;
 }
 //---------------------------------------------------------------------------
@@ -437,7 +403,7 @@ bool TBasicINI::DeleteSection(size_t index)
     if (index >= Sections.size())
         return true;
 
-    std::vector<TSection>::iterator itIdx = Sections.begin() + index;
+    std::vector<TSection>::iterator itIdx = Sections.begin() + static_cast<std::ptrdiff_t>(index);
     Sections.erase(itIdx);
     return true;
 }
@@ -479,7 +445,7 @@ bool TBasicINI::Dir_CreateDirWithSubs(std::wstring const& dir)
 #ifdef USE_ELOG
     const wchar_t codeSectionStr[] = L"TBasicINI::Dir_CreateDirWithSubs";
 #endif // #ifdef USE_ELOG
-    static const std::wstring separators(L"\\/");
+    static std::wstring const separators(L"\\/");
     DWORD lastErr;
     std::wstring directory;
 
@@ -567,6 +533,52 @@ bool TBasicINI::File_Exists_WinAPI(std::wstring const& fileName)
     return true;
 }
 //---------------------------------------------------------------------------
+bool TBasicINI::File_GetLastWriteTime(const std::string& fn, FILETIME& lastwritetime)
+{
+    HANDLE h = nullptr;
+    BY_HANDLE_FILE_INFORMATION info;
+
+    lastwritetime.dwLowDateTime   = 0;
+    lastwritetime.dwHighDateTime  = 0;
+
+    // get a file handle for fn
+    // Note: FILE_SHARE_WRITE is needed so that a shared file that is being appended to is processed correctly.
+    DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    h = ::CreateFileA(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (INVALID_HANDLE_VALUE == h)
+        return false;
+    std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
+
+    if (!::GetFileInformationByHandle(h, &info))
+        return false;
+
+    lastwritetime = info.ftLastWriteTime;
+    return true;
+}
+//---------------------------------------------------------------------------
+bool TBasicINI::File_GetLastWriteTime(const std::wstring& fn, FILETIME& lastwritetime)
+{
+    HANDLE h = nullptr;
+    BY_HANDLE_FILE_INFORMATION info;
+
+    lastwritetime.dwLowDateTime = 0;
+    lastwritetime.dwHighDateTime = 0;
+
+    // get a file handle for fn
+    // Note: FILE_SHARE_WRITE is needed so that a shared file that is being appended to is processed correctly.
+    DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    h = ::CreateFileW(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (INVALID_HANDLE_VALUE == h)
+        return false;
+    std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
+
+    if (!::GetFileInformationByHandle(h, &info))
+        return false;
+
+    lastwritetime = info.ftLastWriteTime;
+    return true;
+}
+//---------------------------------------------------------------------------
 bool TBasicINI::File_Open(std::string const& fileName, FILE*& filePointer, char const* fileType, unsigned char openMode)
 {
     return File_Open(
@@ -579,19 +591,19 @@ bool TBasicINI::File_Open(
 {
     const int openFailWaitMS = 30;
     const int openMaxTries = 30;
-    unsigned int lastErrno;
+    int lastErrno;
     unsigned int tries;
     DWORD lastError;
 
     //First, make sure that we can open the file.
-    if(filePointer != NULL)
+    if(nullptr != filePointer)
         File_Close(filePointer);
 
     //If overwriting an existing file, delete the old file first.  This helps
     //Windows figure out that it no longer has the file open.
-    if((NULL == wcschr(fileType, L'a')) &&
-       (NULL == wcschr(fileType, L'r')) &&
-       (NULL == wcschr(fileType, L'+')) &&
+    if((nullptr == wcschr(fileType, L'a')) &&
+       (nullptr == wcschr(fileType, L'r')) &&
+       (nullptr == wcschr(fileType, L'+')) &&
        File_Exists_WinAPI(fileName))
     {
         //File exists, try deleting it.
@@ -603,7 +615,7 @@ bool TBasicINI::File_Open(
     }
 
     //If the file is being opened for write, make sure that the path to the file exists.
-    if (NULL != wcschr(fileType, L'w'))
+    if (nullptr != wcschr(fileType, L'w'))
     {
         std::wstring path = TPathTool::ExtractDir(fileName);
 
@@ -611,7 +623,7 @@ bool TBasicINI::File_Open(
             Dir_CreateDirWithSubs(path);
     }
 
-    ::SetLastError((DWORD)ERROR_SUCCESS); //start with a clean slate before attempting to open
+    ::SetLastError(ERROR_SUCCESS); //start with a clean slate before attempting to open
 
     //Now we can try to open the file.
     tries = 0;
@@ -633,17 +645,17 @@ bool TBasicINI::File_Open(
     //Try opening the file again if it not open yet, or the last error is that the
     //file is open in another process (ERROR_SHARING_VIOLATION = 32), and we have
     //tried fewer than 30 times.
-    while ((NULL == filePointer) &&                          //EACCES = permission denied - value = 5
+    while ((nullptr == filePointer) &&                          //EACCES = permission denied - value = 5
            (ERROR_SHARING_VIOLATION == lastError || EACCES == lastErrno) &&
            (tries <= openMaxTries));
 
     //Restore the windows last error.
     //Note: Calling GetLastError() resets the system error to zero. This can cause problems
     //with callers of this function that are trying to find out why the function failed.
-    if (NULL == filePointer)
+    if (nullptr == filePointer)
         ::SetLastError(lastError);
 
-    return filePointer != NULL; //Return success/failure
+    return filePointer != nullptr; //Return success/failure
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -651,7 +663,7 @@ bool TBasicINI::File_Close(FILE*& file)
 {
     bool result = true;
 
-    if (NULL != file)
+    if (nullptr != file)
     {
         int flushError = fflush(file); //Note that fflush has no affect on streams opened for reading
                                        //but it does solve issues with files not being closed all
@@ -670,7 +682,7 @@ bool TBasicINI::File_Close(FILE*& file)
         }
     }
 
-    file = NULL;
+    file = nullptr;
     return result;
 }
 //---------------------------------------------------------------------------
@@ -738,14 +750,14 @@ bool TBasicINI::File_Remove(std::wstring const& fileName, DWORD maxWaitMS)
 //---------------------------------------------------------------------------
 int TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) const
 {
-    for (int i = 0; i < Sections.size(); i++)
+    for (size_t i = 0; i < Sections.size(); i++)
     {
-        const TSection* secP = &Sections[i];
+        TSection const* secP = &Sections[i];
 
         if ((sectionName.length() == 0 && secP->Name.length() == 0) ||
             (ignoreCase && _stricmp(sectionName.c_str(), secP->Name.c_str()) == 0) ||
             (!ignoreCase && strcmp(sectionName.c_str(), secP->Name.c_str()) == 0))
-            return i;
+            return static_cast<int>(i);
     }
 
     return -1;
@@ -764,8 +776,9 @@ int TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignoreCa
     if (idx < 0)
     {
         Sections.push_back(TSection());
-        idx = static_cast<int>(Sections.size() - 1);
-        Sections[idx].Name = sectionName;
+        size_t insertIdx = Sections.size() - 1;
+        Sections[insertIdx].Name = sectionName;
+        idx = static_cast<int>(insertIdx);
     }
 
     return idx;
@@ -813,7 +826,7 @@ EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
     //read in one line at a time and parse
     while (!::feof(fIn))
     {
-        if (::fgets(line, static_cast<int>(lineSize), fIn) == NULL)
+        if (::fgets(line, static_cast<int>(lineSize), fIn) == nullptr)
         {
             int fErr = ::ferror(fIn);
 
@@ -946,7 +959,7 @@ EErrINI TBasicINI::Save(FILE* fOut, const char assignOperator)
     EErrINI result = EErrINI::EI_NoError;
     bool writeErr = false;
 
-    for (int i = 0; i < Sections.size(); i++)
+    for (size_t i = 0; i < Sections.size(); i++)
     {
         TSection* secP = &Sections[i];
 
