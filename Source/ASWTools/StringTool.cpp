@@ -377,6 +377,58 @@ bool TStrTool::DateTime_Parse_ISO8601(std::string const& iso8601Str,
     return true;
 }
 //---------------------------------------------------------------------------
+std::wstring TStrTool::GetDateTimeStr_LocalW(bool fileNameFriendly)
+{
+    SYSTEMTIME time; //has milliseconds
+    size_t const bufferSize = 128;
+    wchar_t buffer[bufferSize];
+
+    //get current time
+    GetLocalTime(&time);
+
+    if (fileNameFriendly)
+    {
+        swprintf(buffer, bufferSize, L"%04d%02d%02d_%02d%02d%02d.%03d",
+            time.wYear, time.wMonth, time.wDay,
+            time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+    }
+    else
+    {
+        swprintf(buffer, bufferSize, L"%04d/%02d/%02d::%02d:%02d:%02d.%03d",
+            time.wYear, time.wMonth, time.wDay,
+            time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+    }
+
+    buffer[bufferSize - 1] = L'\0'; //for safety
+    return buffer;
+}
+//---------------------------------------------------------------------------
+std::string TStrTool::GetDateTimeStr_LocalA(bool fileNameFriendly)
+{
+    SYSTEMTIME time; //has milliseconds
+    size_t const bufferSize = 128;
+    char buffer[bufferSize];
+
+    //get current time
+    GetLocalTime(&time);
+
+    if (fileNameFriendly)
+    {
+        snprintf(buffer, bufferSize, "%04d%02d%02d_%02d%02d%02d.%03d",
+            time.wYear, time.wMonth, time.wDay,
+            time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+    }
+    else
+    {
+        snprintf(buffer, bufferSize, "%04d/%02d/%02d::%02d:%02d:%02d.%03d",
+            time.wYear, time.wMonth, time.wDay,
+            time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+    }
+
+    buffer[bufferSize - 1] = '\0'; //for safety
+    return buffer;
+}
+//---------------------------------------------------------------------------
 // -Static
 // -Copies what will fit from src into dest, up to first null terminator, not exceeding
 //  destSize_words, and ensures that dest is null terminated.

@@ -100,6 +100,9 @@ public:
         int* outYear, int* outMonth, int* outDay, int* outHour, int* outMin, int* outSec, int* outMS,
         int* outTZOffsetH, int* outTZOffsetM);
 
+    static std::wstring GetDateTimeStr_LocalW(bool fileNameFriendly = false);
+    static std::string GetDateTimeStr_LocalA(bool fileNameFriendly = false);
+
     static bool StrCpyW(wchar_t* dest, size_t destSize_words, wchar_t const* src);
     static bool StrCpyA(char* dest, size_t destSize_bytes, char const* src);
     static bool StrCpyT(TCHAR* dest, size_t destArrayLen, TCHAR const* src);
