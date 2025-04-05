@@ -41,13 +41,13 @@ TVersion::TVersion()
 TVersion::TVersion(TVersion const& version)
 {
     Reset();
-    ValueU64 = version.ValueU64;
+    VersionU64 = version.VersionU64;
 }
 //---------------------------------------------------------------------------
-TVersion::TVersion(unsigned long long valueU64)
+TVersion::TVersion(unsigned __int64 valueU64)
 {
     Reset();
-    ValueU64 = valueU64;
+    VersionU64 = valueU64;
 }
 //---------------------------------------------------------------------------
 TVersion::TVersion(std::string const& verStr)
@@ -68,29 +68,29 @@ TVersion::~TVersion()
 //---------------------------------------------------------------------------
 void TVersion::Reset()
 {
-    ValueU64 = 0;
+    VersionU64 = 0;
 }
 //---------------------------------------------------------------------------
 void TVersion::SetVersion(WORD major, WORD minor, WORD build, WORD revision)
 {
-    Major = major;
-    Minor = minor;
-    Build = build;
-    Revision = revision;
+    Version.Major = major;
+    Version.Minor = minor;
+    Version.Build = build;
+    Version.Revision = revision;
 }
 //---------------------------------------------------------------------------
 bool TVersion::ExtractVersionNumbersFromVersionStr(std::string const& verStr)
 {
     int major, minor, build, revision;
 
-    ValueU64 = 0;
+    VersionU64 = 0;
 
     if (ExtractVersionNumbersFromVersionStr(verStr, &major, &minor, &build, &revision))
     {
-        Major = (WORD)major;
-        Minor = (WORD)minor;
-        Build = (WORD)build;
-        Revision = (WORD)revision;
+        Version.Major = static_cast<WORD>(major);
+        Version.Minor = static_cast<WORD>(minor);
+        Version.Build = static_cast<WORD>(build);
+        Version.Revision = static_cast<WORD>(revision);
         return true;
     }
 
@@ -101,14 +101,14 @@ bool TVersion::ExtractVersionNumbersFromVersionStr(std::wstring const& verStr)
 {
     int major, minor, build, revision;
 
-    ValueU64 = 0;
+    VersionU64 = 0;
 
     if (ExtractVersionNumbersFromVersionStr(verStr, &major, &minor, &build, &revision))
     {
-        Major = (WORD)major;
-        Minor = (WORD)minor;
-        Build = (WORD)build;
-        Revision = (WORD)revision;
+        Version.Major = static_cast<WORD>(major);
+        Version.Minor = static_cast<WORD>(minor);
+        Version.Build = static_cast<WORD>(build);
+        Version.Revision = static_cast<WORD>(revision);
         return true;
     }
 
@@ -193,14 +193,14 @@ bool TVersion::ExtractVersionNumbersFromVersionStr(std::wstring const& verStr, i
 //---------------------------------------------------------------------------
 std::string TVersion::ToStrVer() const
 {
-    return std::to_string(Major) + "." + std::to_string(Minor) + "." +
-        std::to_string(Build) + "." + std::to_string(Revision);
+    return std::to_string(Version.Major) + "." + std::to_string(Version.Minor) + "." +
+        std::to_string(Version.Build) + "." + std::to_string(Version.Revision);
 }
 //---------------------------------------------------------------------------
 std::wstring TVersion::ToStrVerW() const
 {
-    return std::to_wstring(Major) + L"." + std::to_wstring(Minor) + L"." +
-        std::to_wstring(Build) + L"." + std::to_wstring(Revision);
+    return std::to_wstring(Version.Major) + L"." + std::to_wstring(Version.Minor) + L"." +
+        std::to_wstring(Version.Build) + L"." + std::to_wstring(Version.Revision);
 }
 
 //---------------------------------------------------------------------------
@@ -211,7 +211,7 @@ bool TVersion::CopyFrom(ThisType const& otherClass)
 
     Reset();
 
-    ValueU64 = otherClass.ValueU64;
+    VersionU64 = otherClass.VersionU64;
 
     return true;
 }
@@ -221,7 +221,7 @@ bool TVersion::SameAs(ThisType const& otherClass) const
     if (this == &otherClass)
         return true; //self-compare
 
-    if (ValueU64 != otherClass.ValueU64)
+    if (VersionU64 != otherClass.VersionU64)
     {
         return false;
     }
@@ -253,14 +253,14 @@ bool TVersion::operator<(ThisType const& right) const
 {
     if (this == &right)
         return false; //self-compare
-    return ValueU64 < right.ValueU64;
+    return VersionU64 < right.VersionU64;
 }
 //---------------------------------------------------------------------------
 bool TVersion::operator<=(ThisType const& right) const
 {
     if (this == &right)
         return true; //self-compare
-    return ValueU64 <= right.ValueU64;
+    return VersionU64 <= right.VersionU64;
 }
 //---------------------------------------------------------------------------
 bool TVersion::operator>(ThisType const& right) const

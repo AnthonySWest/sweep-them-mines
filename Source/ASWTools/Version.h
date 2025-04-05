@@ -28,6 +28,8 @@ limitations under the License.
 #include <windows.h>
 #include <string>
 //---------------------------------------------------------------------------
+#include "ASWTools_Common.h"
+//---------------------------------------------------------------------------
 
 namespace ASWTools
 {
@@ -43,24 +45,27 @@ private:
     typedef TVersion ThisType;
 
 public:
+    struct TVerParts
+    {
+        WORD Revision;
+        WORD Build;
+        WORD Minor;
+        WORD Major;
+    };
+
+public:
     TVersion();
     TVersion(TVersion const& version);
-    TVersion(unsigned long long valueU64);
+    TVersion(unsigned __int64 valueU64);
     TVersion(std::string const& verStr);
     TVersion(std::wstring const& verStr);
     ~TVersion();
 
-    //share memory between version elements for easy assignment working with windows version stuff
+    // Share memory between version elements for easy assignment working with windows version stuff
     union
     {
-        unsigned long long ValueU64;
-        struct
-        {
-            WORD Revision;
-            WORD Build;
-            WORD Minor;
-            WORD Major;
-        };
+        unsigned long long VersionU64;
+        TVerParts Version;
     };
 
     void Reset();
@@ -74,7 +79,7 @@ public:
     std::string ToStrVer() const;
     std::wstring ToStrVerW() const;
 
-    // operator related functions
+public: // Operator related functions
     bool CopyFrom(ThisType const& otherClass);
     bool SameAs(ThisType const& otherClass) const;
     ThisType& operator=(ThisType const& right);
