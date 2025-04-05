@@ -186,6 +186,10 @@
             <DependentOn>..\Source\ASWTools\AppTool.h</DependentOn>
             <BuildOrder>5</BuildOrder>
         </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_Common.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_Common.h</DependentOn>
+            <BuildOrder>13</BuildOrder>
+        </CppCompile>
         <CppCompile Include="..\Source\ASWTools\BasicINI.cpp">
             <DependentOn>..\Source\ASWTools\BasicINI.h</DependentOn>
             <BuildOrder>6</BuildOrder>
