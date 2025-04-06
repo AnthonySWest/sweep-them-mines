@@ -44,8 +44,8 @@ public:
 
     static const size_t MaxLen_UnicodeFileName = 32767;
 
-    static const std::string AlphaCharsA;
-    static const std::wstring AlphaCharsW;
+    static char const* const AlphaCharsA;
+    static wchar_t const* const AlphaCharsW;
 
 protected:
     ////// static variables //////
@@ -106,9 +106,9 @@ public:
     static std::wstring GetExtension(const std::wstring& path);
 
     static std::string GenerateRandomNameA(size_t len);
-    static std::string GenerateRandomName(size_t len, const std::string& charList);
+    static std::string GenerateRandomName(size_t len, std::string const& charList);
     static std::wstring GenerateRandomNameW(size_t len);
-    static std::wstring GenerateRandomName(size_t len, const std::wstring& charList);
+    static std::wstring GenerateRandomName(size_t len, std::wstring const& charList);
 };
 
 } // namespace ASWTools

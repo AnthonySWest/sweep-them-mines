@@ -46,8 +46,8 @@ namespace ASWTools
 // TPathTool
 /////////////////////////////////////////////////////////////////////////////
 
-const std::string TPathTool::AlphaCharsA  =  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-const std::wstring TPathTool::AlphaCharsW = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+char const* const TPathTool::AlphaCharsA  =  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+wchar_t const* const TPathTool::AlphaCharsW = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 //---------------------------------------------------------------------------
 TPathTool::TPathTool()
@@ -402,23 +402,22 @@ std::wstring TPathTool::GetExtension(const std::wstring& path)
 // - Generates a random name of given length, using the default charset in AlphaCharsA
 std::string TPathTool::GenerateRandomNameA(size_t len)
 {
-    return GenerateRandomName(len, "");
+    return GenerateRandomName(len, AlphaCharsA);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -If parameter charList is zero length, default AlphaCharsA is used.
-std::string TPathTool::GenerateRandomName(size_t len, const std::string& charList)
+std::string TPathTool::GenerateRandomName(size_t len, std::string const& charList)
 {
     if (0 == len)
         return "";
 
-    const std::string* charListP = charList.length() == 0 ? &AlphaCharsA : &charList;
-    int randMax = static_cast<int>(charListP->length() - 1);
+    int randMax = static_cast<int>(charList.length() - 1);
     std::string randName;
     randName.reserve(len);
 
     for (size_t i = 0; i < len; i++)
-        randName += (*charListP)[static_cast<size_t>(rand() % randMax)];
+        randName += charList[static_cast<size_t>(rand() % randMax)];
     return randName;
 }
 //---------------------------------------------------------------------------
@@ -426,23 +425,22 @@ std::string TPathTool::GenerateRandomName(size_t len, const std::string& charLis
 // - Generates a random name of given length, using the default charset in AlphaCharsW
 std::wstring TPathTool::GenerateRandomNameW(size_t len)
 {
-    return GenerateRandomName(len, L"");
+    return GenerateRandomName(len, AlphaCharsW);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -If parameter charList is zero length, default AlphaCharsW is used.
-std::wstring TPathTool::GenerateRandomName(size_t len, const std::wstring& charList)
+std::wstring TPathTool::GenerateRandomName(size_t len, std::wstring const& charList)
 {
     if (0 == len)
         return L"";
 
-    const std::wstring* charListP = charList.length() == 0 ? &AlphaCharsW : &charList;
-    int randMax = static_cast<int>(charListP->length() - 1);
+    int randMax = static_cast<int>(charList.length() - 1);
     std::wstring randName;
     randName.reserve(len);
 
     for (size_t i = 0; i < len; i++)
-        randName += (*charListP)[static_cast<size_t>(rand() % randMax)];
+        randName += charList[static_cast<size_t>(rand() % randMax)];
     return randName;
 }
 //---------------------------------------------------------------------------
