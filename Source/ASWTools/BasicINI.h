@@ -91,6 +91,7 @@ class TSection
 public: // Static variables
     static const char SectionStart = '[';
     static const char SectionEnd = ']';
+    static size_t const NotFound = static_cast<size_t>(-1);
 
 public:
     std::string Name;
@@ -113,9 +114,9 @@ public:
     bool InsertKeyVal(size_t index, const TKeyVal& keyVal);
     bool InsertComment(size_t index, const std::string& comment);
     bool DeleteKeyVal(size_t index);
-    int FindKey(const std::string& key, bool ignoreCase) const;
-    int FindOrCreateKey(const std::string& key, bool ignoreCase);
-    int FindVal(const std::string& value, bool ignoreCase) const;
+    size_t FindKey(const std::string& key, bool ignoreCase) const;
+    size_t FindOrCreateKey(const std::string& key, bool ignoreCase);
+    size_t FindVal(const std::string& value, bool ignoreCase) const;
 
     bool HasOneOrMoreKeyValuePairs() const;
 
@@ -175,8 +176,8 @@ public:
     virtual bool InsertSection(size_t index);
     virtual bool InsertSection(size_t index, const TSection& section);
     virtual bool DeleteSection(size_t index);
-    virtual int FindSection(const std::string& sectionName, bool ignoreCase) const;
-    virtual int FindOrCreateSection(const std::string& sectionName, bool ignoreCase);
+    virtual size_t FindSection(const std::string& sectionName, bool ignoreCase) const;
+    virtual size_t FindOrCreateSection(const std::string& sectionName, bool ignoreCase);
 
     virtual EErrINI Load(const std::string& fileNameINI, const char assignOperator = DefaultAssignOperator,
         size_t maxLineLen = DefaultMaxLineLength);

@@ -40,9 +40,6 @@ namespace BasicINI
 // TKeyVal
 /////////////////////////////////////////////////////////////////////////////
 
-//char TKeyVal::CommentStart1 = ';';
-//char TKeyVal::CommentStart2 = '/';
-
 //---------------------------------------------------------------------------
 TKeyVal::TKeyVal()
 {
@@ -156,7 +153,7 @@ bool TSection::AddKeyVal(const TKeyVal& keyVal)
 */
 bool TSection::AddKeyVal_IfNotExists(const std::string& key, const std::string& defaultValue, bool searchIgnoreCase)
 {
-    if (FindKey(key, searchIgnoreCase) < 0)
+    if (NotFound == FindKey(key, searchIgnoreCase))
         return AddKeyVal(key, defaultValue);
     return true;
 }
@@ -169,7 +166,7 @@ bool TSection::AddKeyVal_IfNotExists(const std::string& key, const std::string& 
 */
 bool TSection::AddKeyVal_IfNotExists(const TKeyVal& keyVal, bool searchIgnoreCase)
 {
-    if (FindKey(keyVal.Key, searchIgnoreCase) < 0)
+    if (NotFound == FindKey(keyVal.Key, searchIgnoreCase))
         return AddKeyVal(keyVal);
     return true;
 }
@@ -223,7 +220,7 @@ bool TSection::DeleteKeyVal(size_t index)
     return true;
 }
 //---------------------------------------------------------------------------
-int TSection::FindKey(const std::string& key, bool ignoreCase) const
+size_t TSection::FindKey(const std::string& key, bool ignoreCase) const
 {
     for (size_t i = 0; i < KeyVals.size(); i++)
     {
@@ -233,35 +230,29 @@ int TSection::FindKey(const std::string& key, bool ignoreCase) const
             (ignoreCase && _stricmp(key.c_str(), keyValP->Key.c_str()) == 0) ||
             (!ignoreCase && strcmp(key.c_str(), keyValP->Key.c_str()) == 0))
         {
-            return static_cast<int>(i);
-
+            return i;
         }
     }
 
-    return -1;
+    return NotFound;
 }
 //---------------------------------------------------------------------------
-/*
-    TSection::FindOrCreateKey
-
-    - On success, returns either the found index of existing key, or index of newly added key.
-*/
-int TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
+size_t TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
 {
-    int idx = FindKey(key, ignoreCase);
+    size_t idx = FindKey(key, ignoreCase);
 
-    if (idx < 0)
+    if (NotFound == idx)
     {
         KeyVals.push_back(TKeyVal());
         size_t insertIdx = KeyVals.size() - 1;
         KeyVals[insertIdx].Key = key;
-        idx = static_cast<int>(insertIdx);
+        idx = insertIdx;
     }
 
     return idx;
 }
 //---------------------------------------------------------------------------
-int TSection::FindVal(const std::string& value, bool ignoreCase) const
+size_t TSection::FindVal(const std::string& value, bool ignoreCase) const
 {
     for (size_t i = 0; i < KeyVals.size(); i++)
     {
@@ -271,11 +262,11 @@ int TSection::FindVal(const std::string& value, bool ignoreCase) const
             (ignoreCase && _stricmp(value.c_str(), keyValP->Value.c_str()) == 0) ||
             (!ignoreCase && strcmp(value.c_str(), keyValP->Value.c_str()) == 0))
         {
-            return static_cast<int>(i);
+            return i;
         }
     }
 
-    return -1;
+    return NotFound;
 }
 //---------------------------------------------------------------------------
 bool TSection::HasOneOrMoreKeyValuePairs() const
@@ -445,7 +436,7 @@ bool TBasicINI::Dir_CreateDirWithSubs(std::wstring const& dir)
 #ifdef USE_ELOG
     const wchar_t codeSectionStr[] = L"TBasicINI::Dir_CreateDirWithSubs";
 #endif // #ifdef USE_ELOG
-    static std::wstring const separators(L"\\/");
+    static wchar_t const* separators = L"\\/";
     DWORD lastErr;
     std::wstring directory;
 
@@ -748,7 +739,7 @@ bool TBasicINI::File_Remove(std::wstring const& fileName, DWORD maxWaitMS)
     return false;
 }
 //---------------------------------------------------------------------------
-int TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) const
+size_t TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) const
 {
     for (size_t i = 0; i < Sections.size(); i++)
     {
@@ -757,10 +748,10 @@ int TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) cons
         if ((sectionName.length() == 0 && secP->Name.length() == 0) ||
             (ignoreCase && _stricmp(sectionName.c_str(), secP->Name.c_str()) == 0) ||
             (!ignoreCase && strcmp(sectionName.c_str(), secP->Name.c_str()) == 0))
-            return static_cast<int>(i);
+            return i;
     }
 
-    return -1;
+    return TSection::NotFound;
 }
 //---------------------------------------------------------------------------
 /*
@@ -769,16 +760,16 @@ int TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) cons
     - On success, returns either the found index of existing section, or index of newly added section.
     - On failure, returns less than zero.
 */
-int TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignoreCase)
+size_t TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignoreCase)
 {
-    int idx = FindSection(sectionName, ignoreCase);
+    size_t idx = FindSection(sectionName, ignoreCase);
 
-    if (idx < 0)
+    if (TSection::NotFound == idx)
     {
         Sections.push_back(TSection());
         size_t insertIdx = Sections.size() - 1;
         Sections[insertIdx].Name = sectionName;
-        idx = static_cast<int>(insertIdx);
+        idx = insertIdx;
     }
 
     return idx;
