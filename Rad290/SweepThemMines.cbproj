@@ -186,6 +186,10 @@
             <BuildOrder>1</BuildOrder>
             <PCH>true</PCH>
         </PCHCompile>
+        <CppCompile Include="..\Source\AppSettings.cpp">
+            <DependentOn>..\Source\AppSettings.h</DependentOn>
+            <BuildOrder>11</BuildOrder>
+        </CppCompile>
         <CppCompile Include="..\Source\ASWTools\AppTool.cpp">
             <DependentOn>..\Source\ASWTools\AppTool.h</DependentOn>
             <BuildOrder>5</BuildOrder>
