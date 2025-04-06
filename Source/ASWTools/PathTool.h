@@ -109,6 +109,15 @@ public:
     static std::string GenerateRandomName(size_t len, std::string const& charList);
     static std::wstring GenerateRandomNameW(size_t len);
     static std::wstring GenerateRandomName(size_t len, std::wstring const& charList);
+
+    static std::string GetDocumentsDirA();
+    static std::wstring GetDocumentsDirW();
+    static std::string GetPicturesDirA();
+    static std::wstring GetPicturesDirW();
+    static std::string GetSpecialFolderDirA(int folderCSIDL);
+    static std::wstring GetSpecialFolderDirW(int folderCSIDL);
+    static std::string GetTempDirA();
+    static std::wstring GetTempDirW();
 };
 
 } // namespace ASWTools

@@ -26,6 +26,8 @@ limitations under the License.
 //---------------------------------------------------------------------------
 #include <memory>
 //---------------------------------------------------------------------------
+#include <shlobj.h>
+//---------------------------------------------------------------------------
 #include "StringTool.h"
 
 #ifdef USE_ELOG
@@ -444,7 +446,187 @@ std::wstring TPathTool::GenerateRandomName(size_t len, std::wstring const& charL
     return randName;
 }
 //---------------------------------------------------------------------------
+std::string TPathTool::GetDocumentsDirA()
+{
+    return GetSpecialFolderDirA(CSIDL_PERSONAL);
+}
+//---------------------------------------------------------------------------
+std::wstring TPathTool::GetDocumentsDirW()
+{
+    return GetSpecialFolderDirW(CSIDL_PERSONAL);
+}
+//---------------------------------------------------------------------------
+std::string TPathTool::GetPicturesDirA()
+{
+    return GetSpecialFolderDirA(CSIDL_MYPICTURES);
+}
+//---------------------------------------------------------------------------
+std::wstring TPathTool::GetPicturesDirW()
+{
+    return GetSpecialFolderDirW(CSIDL_MYPICTURES);
+}
+//---------------------------------------------------------------------------
+// -Static
+std::string TPathTool::GetSpecialFolderDirA(int folderCSIDL)
+{
+    size_t tempDirSize = MAX_PATH;
+    char* tempDir = new char[tempDirSize];
+    std::unique_ptr<char[]> auto_tempDir(tempDir);
 
+    if (!SUCCEEDED(::SHGetFolderPathA(nullptr, folderCSIDL, nullptr, SHGFP_TYPE_CURRENT, tempDir)))
+        return "";
+
+    size_t longDirSize = 1024; // resized if needed below, but should be plenty
+    char* longDir = new char[longDirSize]; // stores expanded directory path (no ~)
+    std::unique_ptr<char[]> auto_longDir(longDir);
+
+    // make sure not a DOS path
+    size_t copiedLen = ::GetLongPathNameA(tempDir, longDir, static_cast<DWORD>(longDirSize));
+    if (0 == copiedLen)
+        return "";
+
+    if (copiedLen > longDirSize)
+    {
+        longDirSize = copiedLen;
+        auto_longDir.reset(new char[longDirSize]);
+        longDir = auto_longDir.get();
+
+        copiedLen = ::GetLongPathNameA(tempDir, longDir, static_cast<DWORD>(longDirSize));
+        if (0 == copiedLen)
+            return "";
+    }
+
+    return std::string(longDir);
+}
+//---------------------------------------------------------------------------
+// -Static
+std::wstring TPathTool::GetSpecialFolderDirW(int folderCSIDL)
+{
+    size_t tempDirSize = MAX_PATH; // 32767 is max unicode path length
+    wchar_t* tempDir = new wchar_t[tempDirSize];
+    std::unique_ptr<wchar_t[]> auto_tempDir(tempDir);
+
+    if (!SUCCEEDED(::SHGetFolderPathW(nullptr, folderCSIDL, nullptr, SHGFP_TYPE_CURRENT, tempDir)))
+        return L"";
+
+    size_t longDirSize = 32767; // 32767 is max unicode path length
+    wchar_t* longDir = new wchar_t[longDirSize]; // stores expanded directory path (no ~)
+    std::unique_ptr<wchar_t[]> auto_longDir(longDir);
+
+    // make sure not a DOS path
+    size_t copiedLen = ::GetLongPathNameW(tempDir, longDir, static_cast<DWORD>(longDirSize));
+    if (0 == copiedLen)
+        return L"";
+
+    if (copiedLen > longDirSize)
+    {
+        longDirSize = copiedLen;
+        auto_longDir.reset(new wchar_t[longDirSize]);
+        longDir = auto_longDir.get();
+
+        copiedLen = ::GetLongPathNameW(tempDir, longDir, static_cast<DWORD>(longDirSize));
+        if (0 == copiedLen)
+            return L"";
+    }
+
+    return std::wstring(longDir);
+}
+//---------------------------------------------------------------------------
+// -Static
+std::string TPathTool::GetTempDirA()
+{
+    size_t tempDirLen = MAX_PATH + 1; // initial length - resized if needed
+    char* tempDir = new char[tempDirLen + sizeof('\0')];
+    std::unique_ptr<char[]> auto_tempDir(tempDir);
+
+    size_t copiedLen = ::GetTempPathA(static_cast<DWORD>(tempDirLen), tempDir);
+    if (0 == copiedLen)
+        return "";
+
+    if (copiedLen > tempDirLen)
+    {
+        // Buffer is too small - reallocate
+        tempDirLen = copiedLen + sizeof('\0');
+        auto_tempDir.reset(new char[tempDirLen + sizeof('\0')]);
+        tempDir = auto_tempDir.get();
+
+        copiedLen = ::GetTempPathA(static_cast<DWORD>(tempDirLen), tempDir);
+        if (0 == copiedLen)
+            return "";
+    }
+
+    tempDir[tempDirLen] = '\0'; // For safety
+
+    size_t longDirSize = tempDirLen + 32767 + sizeof('\0'); // 32767 is max unicode path length
+    char* longDir = new char[longDirSize]; // stores expanded directory path (no ~)
+    std::unique_ptr<char[]> auto_longDir(longDir);
+
+    // make sure not a DOS path
+    copiedLen = ::GetLongPathNameA(tempDir, longDir, static_cast<DWORD>(longDirSize));
+    if (0 == copiedLen)
+        return "";
+
+    if (copiedLen > longDirSize)
+    {
+        longDirSize = copiedLen;
+        auto_longDir.reset(new char[longDirSize]);
+        longDir = auto_longDir.get();
+
+        copiedLen = ::GetLongPathNameA(tempDir, longDir, static_cast<DWORD>(longDirSize));
+        if (0 == copiedLen)
+            return "";
+    }
+
+    return std::string(longDir);
+}
+//---------------------------------------------------------------------------
+// -Static
+std::wstring TPathTool::GetTempDirW()
+{
+    size_t tempDirLen = MAX_PATH + 1;
+    wchar_t* tempDir = new wchar_t[tempDirLen + sizeof('\0')];
+    std::unique_ptr<wchar_t[]> auto_tempDir(tempDir);
+
+    size_t copiedLen = ::GetTempPathW(static_cast<DWORD>(tempDirLen), tempDir);
+    if (0 == copiedLen)
+        return L"";
+
+    if (copiedLen > tempDirLen)
+    {
+        // Buffer is too small - reallocate
+        tempDirLen = copiedLen + sizeof('\0');
+        auto_tempDir.reset(new wchar_t[tempDirLen + sizeof('\0')]);
+        tempDir = auto_tempDir.get();
+
+        copiedLen = ::GetTempPathW(static_cast<DWORD>(tempDirLen), tempDir);
+        if (0 == copiedLen)
+            return L"";
+    }
+
+    tempDir[tempDirLen] = L'\0'; // For safety
+
+    size_t longDirSize = tempDirLen + 32767 + sizeof('\0'); // 32767 is max unicode path length
+    wchar_t* longDir = new wchar_t[longDirSize]; // stores expanded directory path (no ~)
+    std::unique_ptr<wchar_t[]> auto_longDir(longDir);
+
+    // make sure not a DOS path
+    copiedLen = ::GetLongPathNameW(tempDir, longDir, static_cast<DWORD>(longDirSize));
+    if (0 == copiedLen)
+        return L"";
+
+    if (copiedLen > longDirSize)
+    {
+        longDirSize = copiedLen;
+        auto_longDir.reset(new wchar_t[longDirSize]);
+        longDir = auto_longDir.get();
+
+        copiedLen = ::GetLongPathNameW(tempDir, longDir, static_cast<DWORD>(longDirSize));
+        if (0 == copiedLen)
+            return L"";
+    }
+
+    return std::wstring(longDir);
+}
 //---------------------------------------------------------------------------
 
 } // namespace ASWTools
