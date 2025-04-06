@@ -19,8 +19,9 @@ limitations under the License.
 ************************************************************************** */
 
 #include <vcl.h>
+#if !defined(__clang__)
 #pragma hdrstop
-#include <tchar.h>
+#endif // #if !define(__clang__)
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
 #include <Vcl.Themes.hpp>

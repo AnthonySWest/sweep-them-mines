@@ -39,7 +39,11 @@ __published: // IDE-managed Components
 private: // User declarations
 
 public:  // User declarations
+#if defined(__clang__)
+    __fastcall TFormMain(TComponent* Owner) override;
+#else
     __fastcall TFormMain(TComponent* Owner);
+#endif
 };
 
 //---------------------------------------------------------------------------
