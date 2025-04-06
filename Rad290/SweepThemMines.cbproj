@@ -127,7 +127,7 @@
         <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
         <BCC_PCHName_Clang>SweepThemMinesPCH1.h</BCC_PCHName_Clang>
         <AppDPIAwarenessMode>unaware</AppDPIAwarenessMode>
-        <BCC_UserSuppliedOptions>-Wno-c++98-compat -Wno-exit-time-destructors -Wno-padded -Wno-global-constructors -Wno-c++98-compat-pedantic -Wno-format-nonliteral -Wno-used-but-marked-unused</BCC_UserSuppliedOptions>
+        <BCC_UserSuppliedOptions>-Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-c++98-compat-pedantic -Wno-format-nonliteral -Wno-used-but-marked-unused -Wno-language-extension-token</BCC_UserSuppliedOptions>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
