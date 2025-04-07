@@ -26,6 +26,7 @@ limitations under the License.
 #define PathToolH
 //---------------------------------------------------------------------------
 #include <windows.h>
+#include <share.h>
 #include <string>
 //---------------------------------------------------------------------------
 #include "ASWTools_Common.h"
@@ -48,31 +49,12 @@ public:
     static wchar_t const* const AlphaCharsW;
 
 protected:
-    ////// static variables //////
-
-    ////// variables //////
-
-    ////// functions //////
 
 private:
-    ////// static variables //////
-
-    ////// variables //////
-
-    ////// functions //////
-    void Destroy_Private();
-    bool Reset_Private();
-
-public:
     TPathTool();
     ~TPathTool();
 
-    ////// variables //////
-
-    ////// functions //////
-    virtual void Destroy(); //calls Destroy_Private()
-    virtual bool Reset(); //calls Reset_Private() - It is good practice for a constructor to not call a virtual function
-
+public: // Misc. path related methods
     static bool IsDots(std::string str);
     static bool IsDots(std::wstring str);
 
@@ -118,6 +100,25 @@ public:
     static std::wstring GetSpecialFolderDirW(int folderCSIDL);
     static std::string GetTempDirA();
     static std::wstring GetTempDirW();
+
+public: // Methods for directory operations
+    static bool Dir_Exists_WinAPI(std::string const& dir);
+    static bool Dir_Exists_WinAPI(std::wstring const& dir);
+    static bool Dir_CreateDirWithSubs(std::string const& dir);
+    static bool Dir_CreateDirWithSubs(std::wstring const& dir);
+
+public: // Methods for file operations
+    static bool File_Exists_WinAPI(std::string const& fileName);
+    static bool File_Exists_WinAPI(std::wstring const& fileName);
+    static bool File_GetLastWriteTime(std::string const& fn, FILETIME& lastwritetime);
+    static bool File_GetLastWriteTime(std::wstring const& fn, FILETIME& lastwritetime);
+    static bool File_Open(std::string const& fileName, FILE*& filePointer, char const* fileType,
+        unsigned char openMode = SH_DENYNO); //default is share deny none
+    static bool File_Open(std::wstring const& fileName, FILE*& filePointer, wchar_t const* fileType,
+        unsigned char openMode = SH_DENYNO); //default is share deny none
+    static bool File_Close(FILE*& file);
+    static bool File_Remove(std::string const& fileName, DWORD maxWaitMS = 4000);
+    static bool File_Remove(std::wstring const& fileName, DWORD maxWaitMS = 4000);
 };
 
 } // namespace ASWTools

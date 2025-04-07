@@ -25,8 +25,6 @@ limitations under the License.
 #ifndef BasicINIH
 #define BasicINIH
 //---------------------------------------------------------------------------
-#include <windows.h>
-#include <share.h>
 #include <string>
 #include <vector>
 //---------------------------------------------------------------------------
@@ -137,25 +135,6 @@ public: // Static variables allowed in this public - see second public for regul
 private:
     void Destroy_Private();
     bool Reset_Private();
-
-public:
-    static bool Dir_Exists_WinAPI(std::string const& dir);
-    static bool Dir_Exists_WinAPI(std::wstring const& dir);
-    static bool Dir_CreateDirWithSubs(std::string const& dir);
-    static bool Dir_CreateDirWithSubs(std::wstring const& dir);
-
-public:
-    static bool File_Exists_WinAPI(std::string const& fileName);
-    static bool File_Exists_WinAPI(std::wstring const& fileName);
-    static bool File_GetLastWriteTime(std::string const& fn, FILETIME& lastwritetime);
-    static bool File_GetLastWriteTime(std::wstring const& fn, FILETIME& lastwritetime);
-    static bool File_Open(std::string const& fileName, FILE*& filePointer, char const* fileType,
-        unsigned char openMode = SH_DENYNO); //default is share deny none
-    static bool File_Open(std::wstring const& fileName, FILE*& filePointer, wchar_t const* fileType,
-        unsigned char openMode = SH_DENYNO); //default is share deny none
-    static bool File_Close(FILE*& file);
-    static bool File_Remove(std::string const& fileName, DWORD maxWaitMS = 4000);
-    static bool File_Remove(std::wstring const& fileName, DWORD maxWaitMS = 4000);
 
 public:
     TBasicINI();

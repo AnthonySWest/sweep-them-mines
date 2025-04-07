@@ -325,7 +325,7 @@ void TApp::Initialize(bool singleInstanceApp, std::string const& appSubDirPath)
         return;
     }
 
-    if (Settings.Gen_ImagesPath.length() > 0 && BasicINI::TBasicINI::Dir_Exists_WinAPI(DirImages))
+    if (Settings.Gen_ImagesPath.length() > 0 && TPathTool::Dir_Exists_WinAPI(DirImages))
         DirImages = Settings.Gen_ImagesPath;
 
     // init the logger
@@ -404,7 +404,7 @@ bool TApp::InitLogger()
     // std::cout << "Creating log dir and initialzing log..." << std::endl;
 
     // create log directory and initialize the logger
-    if (BasicINI::TBasicINI::Dir_CreateDirWithSubs(DirLogs))
+    if (TPathTool::Dir_CreateDirWithSubs(DirLogs))
     {
 #if defined(USE_ELOG)
         ELog.Initialize(FileLog.c_str(), LogTitle.c_str(), Settings.Gen_LogLevel);
@@ -478,7 +478,7 @@ bool TApp::LoadAppSettings()
     char assignOperator = BasicINI::TBasicINI::DefaultAssignOperator;
     bool createINI = false;
 
-    if (!BasicINI::TBasicINI::File_Exists_WinAPI(FileAppSettings))
+    if (!TPathTool::File_Exists_WinAPI(FileAppSettings))
     {
 #if defined(USE_ELOG)
         ELog.fprintf(ELogMsgLevel::LML_Light,
@@ -723,7 +723,7 @@ bool TApp::RemoveAllFilesOlderThanNDays(std::string const& dir, DWORD numDaysToR
 
             fileName = dirPath + findFileData.cFileName;
 
-            if (!BasicINI::TBasicINI::File_GetLastWriteTime(fileName, lastWriteTime))
+            if (!TPathTool::File_GetLastWriteTime(fileName, lastWriteTime))
             {
 #if defined(USE_ELOG)
                 ELog.fprintf(ELogMsgLevel::LML_Light,
@@ -814,7 +814,7 @@ void TApp::SetInitialPaths(std::string const& appSubDirPath)
     DirAppData = TPathTool::Combine(tmpPath, appSubDirPath);
 
     // update the settings file path to be under app data if there isn't one local
-    if (!BasicINI::TBasicINI::File_Exists_WinAPI(FileAppSettings))
+    if (!TPathTool::File_Exists_WinAPI(FileAppSettings))
         FileAppSettings = TPathTool::Combine(DirAppData, FileAppSettings_NoPath);
 
     // get program data dir
