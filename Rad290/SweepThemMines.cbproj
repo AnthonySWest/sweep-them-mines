@@ -232,6 +232,10 @@
             <DependentOn>..\Source\MessageDialog.h</DependentOn>
             <BuildOrder>14</BuildOrder>
         </CppCompile>
+        <CppCompile Include="..\Source\Scores.cpp">
+            <DependentOn>..\Source\Scores.h</DependentOn>
+            <BuildOrder>15</BuildOrder>
+        </CppCompile>
         <ResourceCompile Include="..\Source\Version.rc">
             <Form>Version.res</Form>
             <BuildOrder>3</BuildOrder>
