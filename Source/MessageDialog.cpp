@@ -1,5 +1,5 @@
 /* **************************************************************************
-MainForm.h
+MessageDialog.cpp
 Author: Anthony S. West - ASW Software
 
 Copyright 2025 Anthony S. West
@@ -18,36 +18,50 @@ limitations under the License.
 
 ************************************************************************** */
 
-#ifndef MainFormH
-#define MainFormH
+#include <vcl.h>
+#if !defined(__clang__)
+#pragma hdrstop
+#endif // #if !defined(__clang__)
+
 //---------------------------------------------------------------------------
-#include <System.Classes.hpp>
-#include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
-#include <Vcl.Forms.hpp>
+// Module header
+#include "MessageDialog.h"
+#pragma package(smart_init)
 //---------------------------------------------------------------------------
-// END OF IDE INCLUDES
+using namespace System;
 //---------------------------------------------------------------------------
 
-// //////////////////////////////////////////////////////////////////////////
-// TFormMain class
-// //////////////////////////////////////////////////////////////////////////
-class TFormMain : public TForm
+namespace SweepThemMines
 {
-__published: // IDE-managed Components
-    void __fastcall FormDestroy(TObject* Sender);
-private: // User declarations
 
-public:  // User declarations
-#if defined(__clang__)
-    __fastcall TFormMain(TComponent* Owner) override;
-#else
-    __fastcall TFormMain(TComponent* Owner);
-#endif
-};
+/*
+    MsgDlg
 
+    A messagebox wrapper
+*/
+int MsgDlg(String const& msg, String const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons)
+{
+    TForm* msgDlg = CreateMessageDialog(msg, dlgType, buttons);
+    std::unique_ptr<TForm> auto_msgDlg(msgDlg);
+    TModalResult mRes;
+
+    msgDlg->Color = clWindow;
+
+    if (title.Length() > 0)
+        msgDlg->Caption = title;
+    else
+        msgDlg->Caption = Application->Title;
+
+//    msgDlg->GlassFrame->Bottom = 40;
+//    msgDlg->GlassFrame->Enabled = true;
+//    msgDlg->Font->Name = "Verdana";
+//    msgDlg->Font->Size = 10;
+//    msgDlg->Canvas->Font = msgDlg->Font;
+//    msgDlg->Scaled = false;
+
+    mRes = msgDlg->ShowModal();
+    return mRes;
+}
 //---------------------------------------------------------------------------
-extern PACKAGE TFormMain* FormMain;
-//---------------------------------------------------------------------------
 
-#endif // #ifndef MainFormH
+} // namespace SweepThemMines

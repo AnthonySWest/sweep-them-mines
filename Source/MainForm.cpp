@@ -30,38 +30,10 @@ limitations under the License.
 #pragma resource "*.dfm"
 //---------------------------------------------------------------------------
 #include "App.h"
+#include "MessageDialog.h"
 //---------------------------------------------------------------------------
 using namespace SweepThemMines;
 using namespace System;
-//---------------------------------------------------------------------------
-
-// //////////////////////////////////////////////////////////////////////////
-// MsgDlg
-// A messagebox wrapper
-// //////////////////////////////////////////////////////////////////////////
-int MsgDlg(UnicodeString const& msg, UnicodeString const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons)
-{
-    TForm* msgDlg = CreateMessageDialog(msg, dlgType, buttons);
-    TModalResult mRes;
-
-    msgDlg->Color = clWindow;
-
-    if (title.Length() > 0)
-        msgDlg->Caption = title;
-    else
-        msgDlg->Caption = Application->Title;
-
-//    msgDlg->GlassFrame->Bottom = 40;
-//    msgDlg->GlassFrame->Enabled = true;
-//    msgDlg->Font->Name = "Verdana";
-//    msgDlg->Font->Size = 10;
-//    msgDlg->Canvas->Font = msgDlg->Font;
-//    msgDlg->Scaled = false;
-
-    mRes = msgDlg->ShowModal();
-    delete msgDlg;
-    return mRes;
-}
 //---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////////////////////////////////
@@ -76,7 +48,7 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 {
     TApp* app = &TApp::GetInstance();
 
-#ifdef _DEBUG
+#if defined(_DEBUG)
     Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str()) + " - Debug";
 #else
     Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str());
