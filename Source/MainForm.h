@@ -25,8 +25,11 @@ limitations under the License.
 #include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Forms.hpp>
+#include <Vcl.Menus.hpp>
 //---------------------------------------------------------------------------
 // END OF IDE INCLUDES
+//---------------------------------------------------------------------------
+#include "Scores.h"
 //---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////////////////////////////////
@@ -35,8 +38,40 @@ limitations under the License.
 class TFormMain : public TForm
 {
 __published: // IDE-managed Components
+    TMainMenu* MainMenu1;
+    TMenuItem* MnuGame;
+    TMenuItem* MnuHelp;
+    TMenuItem* MnuAbout;
+    TMenuItem* MnuExit;
+    TMenuItem* MnuNewGame;
+    TMenuItem* N1;
+    TMenuItem* N2;
+    TMenuItem* MnuBeginner;
+    TMenuItem* MnuIntermediate;
+    TMenuItem* MnuExpert;
+    TMenuItem* MnuCustom;
+    TMenuItem* N3;
+    TMenuItem* MnuBestTimes;
+    TMenuItem* MnuResetBestTimes;
     void __fastcall FormDestroy(TObject* Sender);
+    void __fastcall MnuExitClick(TObject* Sender);
+    void __fastcall MnuAboutClick(TObject* Sender);
+    void __fastcall MnuBestTimesClick(TObject* Sender);
+    void __fastcall MnuNewGameClick(TObject* Sender);
+    void __fastcall MnuStandardDifficultyClick(TObject* Sender);
+    void __fastcall MnuResetBestTimesClick(TObject* Sender);
+    void __fastcall FormClose(TObject* Sender, TCloseAction& Action);
+    void __fastcall MnuGameClick(TObject* Sender);
 private: // User declarations
+    static char const* const BaseFilename_HighScores;
+
+private:
+    void AddScoresToLines(System::Classes::TStrings* lines, SweepThemMines::TScores::TScoreList const& scores);
+    System::String GetHighScoresFilename();
+    void NewGame();
+    void ResetBestTimes();
+    void ShowBestTimes();
+    void ShowCustomDifficulty();
 
 public:  // User declarations
 #if defined(__clang__)
@@ -44,6 +79,8 @@ public:  // User declarations
 #else
     __fastcall TFormMain(TComponent* Owner);
 #endif
+
+    void ExitApp();
 };
 
 //---------------------------------------------------------------------------

@@ -145,8 +145,68 @@ object FormMain: TFormMain
     0000000000000000000000000000000000000000000000000000000000000000
     0000000000000000000000000000000000000000000000000000000000000000
     000000000000000000000000000000000000000000000000000000000000}
+  Menu = MainMenu1
   Position = poScreenCenter
   Scaled = False
+  OnClose = FormClose
   OnDestroy = FormDestroy
   TextHeight = 15
+  object MainMenu1: TMainMenu
+    Left = 296
+    Top = 32
+    object MnuGame: TMenuItem
+      Caption = '&Game'
+      OnClick = MnuGameClick
+      object MnuNewGame: TMenuItem
+        Caption = '&New'
+        ShortCut = 113
+        OnClick = MnuNewGameClick
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object MnuBeginner: TMenuItem
+        Caption = '&Beginner'
+        OnClick = MnuStandardDifficultyClick
+      end
+      object MnuIntermediate: TMenuItem
+        Caption = '&Intermediate'
+        Checked = True
+        OnClick = MnuStandardDifficultyClick
+      end
+      object MnuExpert: TMenuItem
+        Caption = '&Expert'
+        OnClick = MnuStandardDifficultyClick
+      end
+      object MnuCustom: TMenuItem
+        Caption = '&Custom...'
+        OnClick = MnuStandardDifficultyClick
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object MnuBestTimes: TMenuItem
+        Caption = 'Best &Times...'
+        OnClick = MnuBestTimesClick
+      end
+      object MnuResetBestTimes: TMenuItem
+        Caption = '&Reset Best Times...'
+        OnClick = MnuResetBestTimesClick
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object MnuExit: TMenuItem
+        Caption = 'E&xit'
+        OnClick = MnuExitClick
+      end
+    end
+    object MnuHelp: TMenuItem
+      Caption = '&Help'
+      object MnuAbout: TMenuItem
+        Caption = '&About'
+        OnClick = MnuAboutClick
+      end
+    end
+  end
 end

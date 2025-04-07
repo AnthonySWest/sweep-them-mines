@@ -29,9 +29,12 @@ limitations under the License.
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 //---------------------------------------------------------------------------
+#include "PathTool.h"
+//---------------------------------------------------------------------------
 #include "App.h"
 #include "MessageDialog.h"
 //---------------------------------------------------------------------------
+using namespace ASWTools;
 using namespace SweepThemMines;
 using namespace System;
 //---------------------------------------------------------------------------
@@ -39,6 +42,8 @@ using namespace System;
 // //////////////////////////////////////////////////////////////////////////
 // TFormMain class
 // //////////////////////////////////////////////////////////////////////////
+
+char const* const TFormMain::BaseFilename_HighScores = "HS.dat";
 
 TFormMain* FormMain;
 
@@ -58,5 +63,155 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 void __fastcall TFormMain::FormDestroy(TObject* /*Sender*/)
 {
     // Clean up
+}
+//---------------------------------------------------------------------------
+void TFormMain::AddScoresToLines(TStrings* lines, TScores::TScoreList const& scores)
+{
+    if (0 == scores.size())
+    {
+        lines->Add("999 seconds\t Anonymous");
+        return;
+    }
+
+    for (TScores::TScoreList::const_iterator it = scores.begin(); it != scores.end(); it++)
+    {
+        TScore const& item = *it;
+        lines->Add(IntToStr(item.Seconds) + " seconds\t " + item.Name.c_str());
+    }
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormClose(TObject* /*sender*/, TCloseAction& /*Action*/)
+{
+    ExitApp();
+}
+//---------------------------------------------------------------------------
+void TFormMain::ExitApp()
+{
+    TApp::GetInstance().TerminateApp();
+    Application->Terminate();
+}
+//---------------------------------------------------------------------------
+String TFormMain::GetHighScoresFilename()
+{
+    TApp* app = &TApp::GetInstance();
+    return TPathTool::Combine(app->DirAppData, BaseFilename_HighScores).c_str();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuAboutClick(TObject* /*sender*/)
+{
+    TApp* app = &TApp::GetInstance();
+    String msg = "Sweep Them Mines - A nod to Win98 Minesweeper\n\n" +
+        String("Version: ") + String(app->GetAppVer()->ToStrVer().c_str());
+#if defined(_DEBUG)
+    msg += " - Debug";
+#endif
+    msg += "\n\nCopyright (c) 2025 Anthony S. West\n\n";
+    msg += "Source: https://github.com/AnthonySWest/sweep-them-mines";
+    MsgDlg(msg, "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuBestTimesClick(TObject* /*sender*/)
+{
+    ShowBestTimes();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuExitClick(TObject* /*sender*/)
+{
+    ExitApp();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuGameClick(TObject* /*sender*/)
+{
+    MnuResetBestTimes->Enabled = FileExists(GetHighScoresFilename());
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuNewGameClick(TObject* /*sender*/)
+{
+    NewGame();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuResetBestTimesClick(TObject* /*sender*/)
+{
+    ResetBestTimes();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuStandardDifficultyClick(TObject* sender)
+{
+    MnuBeginner->Checked = false;
+    MnuIntermediate->Checked = false;
+    MnuExpert->Checked = false;
+    MnuCustom->Checked = false;
+
+    // Check the selected item
+    TMenuItem* item = dynamic_cast<TMenuItem*>(sender);
+    if (nullptr != item)
+    {
+        item->Checked = true;
+
+        if ("MnuCustom" == item->Name)
+            ShowCustomDifficulty();
+    }
+}
+//---------------------------------------------------------------------------
+void TFormMain::NewGame()
+{
+    MsgDlg("To do", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ResetBestTimes()
+{
+    String filename =  GetHighScoresFilename();
+    if (!FileExists(filename))
+    {
+        MsgDlg("Best scores are the defaults.", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+        return;
+    }
+
+    TModalResult mRes = MsgDlg("Reset best scores?", "Best Scores Reset", TMsgDlgType::mtConfirmation,
+        TMsgDlgButtons() << TMsgDlgBtn::mbYes << TMsgDlgBtn::mbNo);
+    if (mrYes != mRes)
+        return;
+
+    DeleteFile(filename);
+
+    MsgDlg("Best scores were reset to defaults.", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ShowBestTimes()
+{
+    AnsiString filename =  GetHighScoresFilename();
+    TScores scores;
+
+    try
+    {
+        if (FileExists(filename))
+            scores.Load(filename.c_str());
+    }
+    catch (const std::runtime_error& error)
+    {
+        String msg = String("Failed to load scores: ") + error.what();
+        MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    }
+
+    TStringList* dlgLines = new TStringList();
+    std::unique_ptr<TStringList> auto_dlgLines(dlgLines);
+
+    dlgLines->Add("Fastest Mine Sweepers:");
+
+    dlgLines->Add("\n----- Beginner mode -----\n");
+    AddScoresToLines(dlgLines, scores.Beginner);
+
+    dlgLines->Add("\n----- Intermediate mode -----\n");
+    AddScoresToLines(dlgLines, scores.Intermediate);
+
+    dlgLines->Add("\n----- Expert mode -----\n");
+    AddScoresToLines(dlgLines, scores.Expert);
+
+    MsgDlg(dlgLines->Text, "Best Times", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ShowCustomDifficulty()
+{
+    MsgDlg("To do", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
 }
 //---------------------------------------------------------------------------
