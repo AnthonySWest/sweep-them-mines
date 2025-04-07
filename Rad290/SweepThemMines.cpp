@@ -27,10 +27,22 @@ limitations under the License.
 #include <Vcl.Themes.hpp>
 USEFORM("..\Source\MainForm.cpp", FormMain);
 //---------------------------------------------------------------------------
+#include <tchar.h>
+//---------------------------------------------------------------------------
+#include "App.h"
+//---------------------------------------------------------------------------
+using namespace SweepThemMines;
+//---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
     try
     {
+        _TCHAR** argvP = __targv;
+        TApp* app = &TApp::GetInstance();
+        app->Initialize(false, "ASWSoftware\\SweepThemMines\\", __argc, argvP);
+        if (TApp::IsAppTerminating())
+            return static_cast<int>(TApp::ExitCode);
+
         Application->Initialize();
         Application->MainFormOnTaskBar = true;
         TStyleManager::TrySetStyle("Cobalt XEMedia");
@@ -41,9 +53,11 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
     catch (Exception& exception)
     {
         Application->ShowException(&exception);
+        TApp::ExitCode = TApp::EExitCode::Err_Exception;
     }
     catch (...)
     {
+        TApp::ExitCode = TApp::EExitCode::Err_Exception;
         try
         {
             throw Exception("");
@@ -53,6 +67,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
             Application->ShowException(&exception);
         }
     }
-    return 0;
+
+    return static_cast<int>(TApp::ExitCode);
 }
 //---------------------------------------------------------------------------

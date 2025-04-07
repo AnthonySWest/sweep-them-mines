@@ -29,6 +29,11 @@ limitations under the License.
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 //---------------------------------------------------------------------------
+#include "App.h"
+//---------------------------------------------------------------------------
+using namespace SweepThemMines;
+using namespace System;
+//---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////////////////////////////////
 // MsgDlg
@@ -69,6 +74,13 @@ TFormMain* FormMain;
 __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner)
 {
+    TApp* app = &TApp::GetInstance();
+
+#ifdef _DEBUG
+    Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str()) + " - Debug";
+#else
+    Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str());
+#endif
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormDestroy(TObject* /*Sender*/)
