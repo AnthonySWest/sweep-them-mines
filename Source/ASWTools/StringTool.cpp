@@ -29,7 +29,9 @@ limitations under the License.
 //#include <cstdarg> //va_start
 //#include <cctype>
 //#include <iomanip>
+#include <limits>
 #include <sstream>
+#include <stdexcept>
 //---------------------------------------------------------------------------
 
 #ifndef strcmpI
@@ -858,6 +860,158 @@ int TStrTool::CompareIC(std::wstring const& s1, std::wstring const& s2)
     } while (c1 && c1 == c2);
 
     return static_cast<int> (c1) - static_cast<int> (c2);
+}
+//---------------------------------------------------------------------------}
+int32_t TStrTool::StrToInt32(std::string const& str)
+{
+    try
+    {
+        long val = std::stol(str);
+#if LONG_MAX > INT32_MAX
+        if (val > std::numeric_limits<int32_t>::max())
+            throw std::out_of_range("Value exceeds int32_t range");
+#endif
+        return static_cast<int32_t>(val);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("String is not a signed 32-bit int: " + std::string(e.what()));
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------}
+int64_t TStrTool::StrToInt64(std::string const& str)
+{
+    try
+    {
+        long long val = std::stoll(str);
+#if LONGLONG_MAX > INT64_MAX
+        if (val > std::numeric_limits<int64_t>::max())
+            throw std::out_of_range("Value exceeds int64_t range");
+#endif
+        return static_cast<int64_t>(val);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("String is not a signed 64-bit int: " + std::string(e.what()));
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------}
+uint32_t TStrTool::StrToUInt32(std::string const& str)
+{
+    try
+    {
+        unsigned long val = std::stoul(str);
+#if ULONG_MAX > UINT32_MAX
+        if (val > std::numeric_limits<uint32_t>::max())
+        {   // should not happen on Windows (unsigned long == uint32_t)
+            throw std::out_of_range("Value exceeds uint32_t range");
+        }
+#endif
+        return static_cast<uint32_t>(val);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("String is not an unsigned 32-bit int: " + std::string(e.what()));
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------}
+uint64_t TStrTool::StrToUInt64(std::string const& str)
+{
+    try
+    {
+        unsigned long long val = std::stoull(str);
+#if ULONGLONG_MAX > UINT64_MAX
+        if (val > std::numeric_limits<uint64_t>::max())
+        {   // should not happen on Windows (unsigned long == uint32_t)
+            throw std::out_of_range("Value exceeds uint64_t range");
+        }
+#endif
+        return static_cast<uint64_t>(val);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("String is not an unsigned 64-bit int: " + std::string(e.what()));
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToInt32(std::string const& str, int32_t* outVal)
+{
+    try
+    {
+        int32_t val = StrToInt32(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToInt64(std::string const& str, int64_t* outVal)
+{
+    try
+    {
+        int64_t val = StrToInt64(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToUInt32(std::string const& str, uint32_t* outVal)
+{
+    try
+    {
+        uint32_t val = StrToUInt32(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToUInt64(std::string const& str, uint64_t* outVal)
+{
+    try
+    {
+        uint64_t val = StrToUInt64(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 //---------------------------------------------------------------------------
 // -Static

@@ -28,6 +28,7 @@ limitations under the License.
 #include <windows.h>
 #include <cstdint> //int64_t
 #include <iomanip>  //for GUID stuff
+#include <stdint.h>
 #include <string>
 #include <vector>
 //---------------------------------------------------------------------------
@@ -141,6 +142,16 @@ public:
     static int Compare(std::wstring const& s1, std::wstring const& s2);
     static int CompareIC(std::string const& s1, std::string const& s2);
     static int CompareIC(std::wstring const& s1, std::wstring const& s2);
+
+    static int32_t StrToInt32(std::string const& str);
+    static int64_t StrToInt64(std::string const& str);
+    static uint32_t StrToUInt32(std::string const& str);
+    static uint64_t StrToUInt64(std::string const& str);
+
+    static bool TryStrToInt32(std::string const& str, int32_t* outVal);
+    static bool TryStrToInt64(std::string const& str, int64_t* outVal);
+    static bool TryStrToUInt32(std::string const& str, uint32_t* outVal);
+    static bool TryStrToUInt64(std::string const& str, uint64_t* outVal);
 
     static bool IsSpace(int c);
 
