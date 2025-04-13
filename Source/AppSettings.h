@@ -20,15 +20,6 @@ limitations under the License.
 
 ************************************************************************** */
 
-//---------------------------------------------------------------------------
-// AppSettings.h
-// Author: Anthony S. West - ASW Software (c) 2023/05/14
-//
-// Contains routines for saving and loading app settings.
-//
-// Every attempt should be made to keep this module at least Windows portable.
-//---------------------------------------------------------------------------
-
 #ifndef AppSettingsH
 #define AppSettingsH
 //---------------------------------------------------------------------------

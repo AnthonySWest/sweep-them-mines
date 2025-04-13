@@ -25,7 +25,7 @@ limitations under the License.
 #include "StringTool.h"
 //---------------------------------------------------------------------------
 using namespace ASWTools;
-using namespace BasicINI;
+using namespace ASWTools::BasicINI;
 //---------------------------------------------------------------------------
 
 namespace SweepThemMines
