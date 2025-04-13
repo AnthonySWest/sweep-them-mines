@@ -92,8 +92,8 @@
         <UWP_CppLogo44>..\Resource\land-mine_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>..\Resource\land-mine_150.png</UWP_CppLogo150>
         <SanitizedProjectName>SweepThemMines</SanitizedProjectName>
-        <IncludePath>..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
+        <ILINK_LibraryPath>..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
         <BCC_OutputDir>..\Obj\$(Platform)\$(Config)</BCC_OutputDir>
@@ -209,6 +209,10 @@
         <CppCompile Include="..\Source\ASWTools\ConsoleHelper.cpp">
             <DependentOn>..\Source\ASWTools\ConsoleHelper.h</DependentOn>
             <BuildOrder>10</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\Crypt\ASWTools_Adler.cpp">
+            <DependentOn>..\Source\ASWTools\Crypt\ASWTools_Adler.h</DependentOn>
+            <BuildOrder>16</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\Source\ASWTools\PathTool.cpp">
             <DependentOn>..\Source\ASWTools\PathTool.h</DependentOn>
