@@ -97,6 +97,39 @@ String TFormMain::GetHighScoresFilename()
     return TPathTool::Combine(app->DirAppData, BaseFilename_HighScores).c_str();
 }
 //---------------------------------------------------------------------------
+bool TFormMain::LoadHighScores(TScores* scores)
+{
+    try
+    {
+        AnsiString filename = GetHighScoresFilename();
+        if (!FileExists(filename))
+            return true;
+
+        scores->Load(filename.c_str());
+
+        if (!scores->ValidateCheck())
+        {
+            String msg = "Error: Best Times data has been modified outisde of " + Application->Title + ".";
+            MsgDlg(msg, "Monkey Business", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+            return false;
+        }
+
+        return true;
+    }
+    catch (const std::runtime_error& error)
+    {
+        String msg = String("Failed to load scores: ") + error.what();
+        MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    }
+    catch (...)
+    {
+        String msg = String("Failed to load scores: Unknown exception.");
+        MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    }
+
+    return false;
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::MnuAboutClick(TObject* /*sender*/)
 {
     TApp* app = &TApp::GetInstance();
@@ -177,21 +210,63 @@ void TFormMain::ResetBestTimes()
     MsgDlg("Best scores were reset to defaults.", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
 }
 //---------------------------------------------------------------------------
-void TFormMain::ShowBestTimes()
+void TFormMain::SaveBestScores(TScores& scores)
 {
-    AnsiString filename =  GetHighScoresFilename();
-    TScores scores;
-
     try
     {
-        if (FileExists(filename))
-            scores.Load(filename.c_str());
+        AnsiString filename = GetHighScoresFilename();
+        scores.TrimScores(); // Only keep the top N scores
+        scores.Save(filename.c_str(), true);
     }
     catch (const std::runtime_error& error)
     {
-        String msg = String("Failed to load scores: ") + error.what();
+        String msg = String("Failed to save the best times: ") + error.what();
         MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
     }
+    catch (Exception const& ex)
+    {
+        String msg = String("Failed to save the best times: ") + ex.Message;
+        MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    }
+    catch (...)
+    {
+        String msg = String("Failed to save the best times: Unknown exception.");
+        MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    }
+}
+//---------------------------------------------------------------------------
+void TFormMain::SaveBestTime_Beginner(int seconds, AnsiString const& name)
+{
+    TScores scores;
+    if (!LoadHighScores(&scores))
+        return;
+    scores.AddScore(scores.Beginner, seconds, name.c_str());
+    SaveBestScores(scores);
+}
+//---------------------------------------------------------------------------
+void TFormMain::SaveBestTime_Expert(int seconds, AnsiString const& name)
+{
+    TScores scores;
+    if (!LoadHighScores(&scores))
+        return;
+    scores.AddScore(scores.Expert, seconds, name.c_str());
+    SaveBestScores(scores);
+}
+//---------------------------------------------------------------------------
+void TFormMain::SaveBestTime_Intermediate(int seconds, AnsiString const& name)
+{
+    TScores scores;
+    if (!LoadHighScores(&scores))
+        return;
+    scores.AddScore(scores.Intermediate, seconds, name.c_str());
+    SaveBestScores(scores);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ShowBestTimes()
+{
+    TScores scores;
+    if (!LoadHighScores(&scores))
+        return;
 
     TStringList* dlgLines = new TStringList();
     std::unique_ptr<TStringList> auto_dlgLines(dlgLines);

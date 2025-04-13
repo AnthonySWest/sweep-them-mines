@@ -21,7 +21,10 @@ limitations under the License.
 #ifndef ScoresH
 #define ScoresH
 //---------------------------------------------------------------------------
+#include <stdint.h>
 #include <vector>
+//---------------------------------------------------------------------------
+#include "BasicINI.h"
 //---------------------------------------------------------------------------
 
 namespace SweepThemMines
@@ -34,15 +37,34 @@ struct TScore
 {
     int Seconds;
     std::string Name;
+    std::string TimeUtcStr;
 
     TScore()
         : Seconds(0)
     {
     }
-    TScore(std::string const& name, int seconds)
+    TScore(int seconds, std::string const& name, std::string const& timeUtc)
         : Seconds(seconds),
-          Name(name)
+          Name(name),
+          TimeUtcStr(timeUtc)
     {
+    }
+
+    void Reset()
+    {
+        Seconds = 0;
+        Name = "";
+        TimeUtcStr = "";
+    }
+
+    static bool CompareAsc(TScore const& a, TScore const& b)
+    {
+        if (a.Seconds != b.Seconds)
+            return a.Seconds < b.Seconds; // Sort by Score ascending
+        else if (a.Name != b.Name)
+            return a.Name < b.Name; // Sort by Name alphabetically
+        else
+            return a.TimeUtcStr < b.TimeUtcStr; // Keep oldest time first
     }
 };
 
@@ -50,26 +72,73 @@ struct TScore
 /////////////////////////////////////////////////////////////////////////////
 // TScores
 /////////////////////////////////////////////////////////////////////////////
-class TScores
+class TScores : public ASWTools::BasicINI::TBasicINI
 {
+private:
+    typedef ASWTools::BasicINI::TBasicINI Inherited;
+
 public:
     typedef std::vector<TScore> TScoreList;
+
+public: // Static variables
+    static char const ScoreSplitChar = '|';
+    static unsigned int const Check_NotSetVal = static_cast<unsigned int>(-1);
+    static size_t const Default_MaxScoresToKeep = 5;
+
+    // Section names
+    static char const* SectionName_General;
+    static char const* SectionName_Scores;
+
+    // Key names - General
+    static char const* KeyName_Gen_Check;
+
+    // Key names - Scores
+    static char const* KeyName_Scores_Beginner;
+    static char const* KeyName_Scores_Intermediate;
+    static char const* KeyName_Scores_Expert;
+
+private:
+    uint32_t m_Check;
 
 public:
     TScoreList Beginner;
     TScoreList Intermediate;
     TScoreList Expert;
 
+private:
+    bool ParseSection_General();
+    bool ParseSection_Scores();
+
+    bool ApplyChanges_General();
+    bool ApplyChanges_Scores();
+
+private:
+    std::string EncodeScoreToB64(TScore const& score) const;
+    bool DecodeScoreFromB64(std::string b64, TScore* score) const;
+    uint32_t GetAdler32(TScoreList const& scores);
+    uint32_t CalcCheckHash();
+
 public:
     TScores();
     ~TScores();
 
-    void Reset();
+    bool Reset() override;
 
-    void Load(std::string filename);
-    void Save(std::string filename);
+    ASWTools::BasicINI::EErrINI Load(const std::string& fileNameINI, const char assignOperator = DefaultAssignOperator,
+        size_t maxLineLen = DefaultMaxLineLength) override;
+    ASWTools::BasicINI::EErrINI Save(
+        const std::string& fileNameINI, bool overWrite, const char assignOperator = DefaultAssignOperator) override;
+
+    void SortScores();
+    void TrimScores(size_t maxScoresToKeepPerCategory = Default_MaxScoresToKeep);
+    bool ValidateCheck();
+
+public:
+    static void AddScore(TScoreList& list, TScore const& score);
+    static void AddScore(TScoreList& list, int seconds, std::string const& name);
 };
 
 } // namespace SweepThemMines
 
+//---------------------------------------------------------------------------
 #endif // #ifndef ScoresH
