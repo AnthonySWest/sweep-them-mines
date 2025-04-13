@@ -24,7 +24,7 @@ limitations under the License.
 #include <stdint.h>
 #include <vector>
 //---------------------------------------------------------------------------
-#include "BasicINI.h"
+#include "ASWTools_BasicINI.h"
 //---------------------------------------------------------------------------
 
 namespace SweepThemMines

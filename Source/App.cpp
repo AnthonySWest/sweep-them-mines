@@ -26,11 +26,11 @@ limitations under the License.
 #include <shlobj.h> //for CSIDL_LOCAL_APPDATA and the like
 #include <windows.h>
 //---------------------------------------------------------------------------
-#include "AppTool.h"
+#include "ASWTools_App.h"
 #include "ASWTools_Common.h"
-#include "ConsoleHelper.h"
-#include "PathTool.h"
-#include "StringTool.h"
+#include "ASWTools_Console.h"
+#include "ASWTools_Path.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 using namespace ASWTools;
 //---------------------------------------------------------------------------

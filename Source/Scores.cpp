@@ -32,8 +32,8 @@ limitations under the License.
 #include <string>
 //---------------------------------------------------------------------------
 #include "ASWTools_Adler.h"
-#include "PathTool.h"
-#include "StringTool.h"
+#include "ASWTools_Path.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 using namespace ASWTools;
 using namespace ASWTools::BasicINI;

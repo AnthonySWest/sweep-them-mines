@@ -1,5 +1,5 @@
 /* **************************************************************************
-BasicINI.cpp
+ASWTools_BasicINI.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -22,12 +22,12 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 // Module header
-#include "BasicINI.h"
+#include "ASWTools_BasicINI.h"
 //---------------------------------------------------------------------------
 #include <memory>
 //---------------------------------------------------------------------------
-#include "PathTool.h"
-#include "StringTool.h"
+#include "ASWTools_Path.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 
 namespace ASWTools
@@ -126,7 +126,7 @@ bool TSection::IsGlobalSection()
     return Name.length() == 0;
 }
 //---------------------------------------------------------------------------
-bool TSection::AddKeyVal(const std::string& key, const std::string& value)
+bool TSection::AddKeyVal(std::string const& key, std::string const& value)
 {
     TKeyVal keyVal;
     keyVal.Key = key;
@@ -134,7 +134,7 @@ bool TSection::AddKeyVal(const std::string& key, const std::string& value)
     return AddKeyVal(keyVal);
 }
 //---------------------------------------------------------------------------
-bool TSection::AddKeyVal(const TKeyVal& keyVal)
+bool TSection::AddKeyVal(TKeyVal const& keyVal)
 {
     //don't allow a key to begin with a section start
     //on second thought, it will still probably work, so, let the caller be the boss
@@ -151,7 +151,7 @@ bool TSection::AddKeyVal(const TKeyVal& keyVal)
     - If the key does not exist, a new key will be added with the value of defaultValue.
     - If the key does exist, nothing is done.
 */
-bool TSection::AddKeyVal_IfNotExists(const std::string& key, const std::string& defaultValue, bool searchIgnoreCase)
+bool TSection::AddKeyVal_IfNotExists(std::string const& key, std::string const& defaultValue, bool searchIgnoreCase)
 {
     if (NotFound == FindKey(key, searchIgnoreCase))
         return AddKeyVal(key, defaultValue);
@@ -164,14 +164,14 @@ bool TSection::AddKeyVal_IfNotExists(const std::string& key, const std::string& 
     - If the key does not exist, a new key will be added with the value of defaultValue.
     - If the key does exist, nothing is done.
 */
-bool TSection::AddKeyVal_IfNotExists(const TKeyVal& keyVal, bool searchIgnoreCase)
+bool TSection::AddKeyVal_IfNotExists(TKeyVal const& keyVal, bool searchIgnoreCase)
 {
     if (NotFound == FindKey(keyVal.Key, searchIgnoreCase))
         return AddKeyVal(keyVal);
     return true;
 }
 //---------------------------------------------------------------------------
-bool TSection::InsertKeyVal(size_t index, const std::string& key, const std::string& value)
+bool TSection::InsertKeyVal(size_t index, std::string const& key, std::string const& value)
 {
     TKeyVal keyVal;
     keyVal.Key = key;
@@ -179,7 +179,7 @@ bool TSection::InsertKeyVal(size_t index, const std::string& key, const std::str
     return InsertKeyVal(index, keyVal);
 }
 //---------------------------------------------------------------------------
-bool TSection::InsertKeyVal(size_t index, const TKeyVal& keyVal)
+bool TSection::InsertKeyVal(size_t index, TKeyVal const& keyVal)
 {
     if (index >= KeyVals.size())
     {
@@ -198,7 +198,7 @@ bool TSection::InsertKeyVal(size_t index, const TKeyVal& keyVal)
 
     Inserts comment as value with blank key
 */
-bool TSection::InsertComment(size_t index, const std::string& comment)
+bool TSection::InsertComment(size_t index, std::string const& comment)
 {
     //if comment is blank, insert a comment marker
     if (comment.length() == 0)
@@ -220,7 +220,7 @@ bool TSection::DeleteKeyVal(size_t index)
     return true;
 }
 //---------------------------------------------------------------------------
-size_t TSection::FindKey(const std::string& key, bool ignoreCase) const
+size_t TSection::FindKey(std::string const& key, bool ignoreCase) const
 {
     for (size_t i = 0; i < KeyVals.size(); i++)
     {
@@ -237,7 +237,7 @@ size_t TSection::FindKey(const std::string& key, bool ignoreCase) const
     return NotFound;
 }
 //---------------------------------------------------------------------------
-size_t TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
+size_t TSection::FindOrCreateKey(std::string const& key, bool ignoreCase)
 {
     size_t idx = FindKey(key, ignoreCase);
 
@@ -252,11 +252,11 @@ size_t TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
     return idx;
 }
 //---------------------------------------------------------------------------
-size_t TSection::FindVal(const std::string& value, bool ignoreCase) const
+size_t TSection::FindVal(std::string const& value, bool ignoreCase) const
 {
     for (size_t i = 0; i < KeyVals.size(); i++)
     {
-        const TKeyVal* keyValP = &KeyVals[i];
+        TKeyVal const* keyValP = &KeyVals[i];
 
         if ((value.length() == 0 && keyValP->Value.length() == 0) ||
             (ignoreCase && _stricmp(value.c_str(), keyValP->Value.c_str()) == 0) ||
@@ -279,7 +279,7 @@ bool TSection::HasOneOrMoreKeyValuePairs() const
     return false;
 }
 //---------------------------------------------------------------------------
-EErrINI TSection::Save(FILE* fOut, const char assignOperator, const std::string& paddingAfterOperator)
+EErrINI TSection::Save(FILE* fOut, char const assignOperator, std::string const& paddingAfterOperator)
 {
     if (nullptr == fOut)
     {
@@ -363,7 +363,7 @@ bool TBasicINI::AddSection()
     return true;
 }
 //---------------------------------------------------------------------------
-bool TBasicINI::AddSection(const TSection& section)
+bool TBasicINI::AddSection(TSection const& section)
 {
     Sections.push_back(section);
     return true;
@@ -374,7 +374,7 @@ bool TBasicINI::InsertSection(size_t index)
     return InsertSection(index, TSection());
 }
 //---------------------------------------------------------------------------
-bool TBasicINI::InsertSection(size_t index, const TSection& section)
+bool TBasicINI::InsertSection(size_t index, TSection const& section)
 {
     if (index >= Sections.size())
     {
@@ -420,7 +420,7 @@ size_t TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) c
     - On success, returns either the found index of existing section, or index of newly added section.
     - On failure, returns less than zero.
 */
-size_t TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignoreCase)
+size_t TBasicINI::FindOrCreateSection(std::string const& sectionName, bool ignoreCase)
 {
     size_t idx = FindSection(sectionName, ignoreCase);
 
@@ -435,7 +435,7 @@ size_t TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignor
     return idx;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Load(const std::string& fileNameINI, const char assignOperator, size_t maxLineLen)
+EErrINI TBasicINI::Load(std::string const& fileNameINI, char const assignOperator, size_t maxLineLen)
 {
     Reset();
 
@@ -462,7 +462,7 @@ EErrINI TBasicINI::Load(const std::string& fileNameINI, const char assignOperato
     return result;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
+EErrINI TBasicINI::Load(FILE* fIn, char const assignOperator, size_t maxLineLen)
 {
     if (nullptr == fIn)
     {
@@ -470,7 +470,7 @@ EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
     }
 
     EErrINI result = EErrINI::EI_NoError;
-    const size_t lineSize = maxLineLen + sizeof('\0') + sizeof('\r') + sizeof('\n');
+    size_t const lineSize = maxLineLen + sizeof('\0') + sizeof('\r') + sizeof('\n');
     char* line = new char[lineSize];
     std::unique_ptr<char[]> auto_line(line);
 
@@ -575,7 +575,7 @@ EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
     return result;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Save(const std::string& fileNameINI, bool overWrite, const char assignOperator)
+EErrINI TBasicINI::Save(std::string const& fileNameINI, bool overWrite, char const assignOperator)
 {
     if (TStrTool::IsEmptyOrWhiteSpace(fileNameINI))
     {
@@ -600,7 +600,7 @@ EErrINI TBasicINI::Save(const std::string& fileNameINI, bool overWrite, const ch
     return result;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Save(FILE* fOut, const char assignOperator)
+EErrINI TBasicINI::Save(FILE* fOut, char const assignOperator)
 {
     if (nullptr == fOut)
     {

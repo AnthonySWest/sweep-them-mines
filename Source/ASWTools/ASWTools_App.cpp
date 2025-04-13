@@ -1,5 +1,5 @@
 /* **************************************************************************
-AppTool.cpp
+ASWTools_App.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -22,10 +22,9 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 // Module header
-#include "AppTool.h"
+#include "ASWTools_App.h"
 //---------------------------------------------------------------------------
 #include <memory>
-#include <windows.h>
 #include <winver.h>
 //---------------------------------------------------------------------------
 
@@ -166,7 +165,7 @@ std::wstring TAppTool::GetAppPathW()
     return resultPath;
 }
 //---------------------------------------------------------------------------
-bool TAppTool::GetAppVersion(const char* appOrDLLPath, WORD* outMajorVer, WORD* outMinorVer, WORD* outBuild,
+bool TAppTool::GetAppVersion(char const* appOrDLLPath, WORD* outMajorVer, WORD* outMinorVer, WORD* outBuild,
     WORD* outRevision)
 {
     if (nullptr == appOrDLLPath || nullptr == outMajorVer || nullptr == outMinorVer || nullptr == outBuild ||
@@ -204,7 +203,7 @@ bool TAppTool::GetAppVersion(const char* appOrDLLPath, WORD* outMajorVer, WORD* 
     return result;
 }
 //---------------------------------------------------------------------------
-bool TAppTool::GetAppVersion(const wchar_t* appOrDLLPath, WORD* outMajorVer, WORD* outMinorVer, WORD* outBuild,
+bool TAppTool::GetAppVersion(wchar_t const* appOrDLLPath, WORD* outMajorVer, WORD* outMinorVer, WORD* outBuild,
     WORD* outRevision)
 {
     if (nullptr == appOrDLLPath || nullptr == outMajorVer || nullptr == outMinorVer || nullptr == outBuild ||

@@ -1,12 +1,12 @@
 /* **************************************************************************
-ConsoleHelper.h
+ASWTools_App.h
 Author: Anthony S. West - ASW Software
 
-Contains functions for creating a console window from a WinMain app.
+Contains routines for working with apps.
 
 Every attempt should be made to keep this module at least Windows portable.
 
-Copyright 2022 Anthony S. West
+Copyright 2023 Anthony S. West
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,50 +22,49 @@ limitations under the License.
 
 ************************************************************************** */
 
+#ifndef ASWTools_AppH
+#define ASWTools_AppH
 //---------------------------------------------------------------------------
-#pragma once
-//---------------------------------------------------------------------------
-#ifndef ConsoleHelperH
-#define ConsoleHelperH
+#include <string>
+#include <windows.h>
 //---------------------------------------------------------------------------
 #include "ASWTools_Common.h"
+#include "ASWTools_Version.h"
 //---------------------------------------------------------------------------
 
 namespace ASWTools
 {
 
 /////////////////////////////////////////////////////////////////////////////
-// TConsole
+// TAppTool
 /////////////////////////////////////////////////////////////////////////////
-class TConsole
+class TAppTool
 {
-public: // Static variables
-    static const int Default_MinBuffer = 8192;
+private:
+    typedef TAppTool ThisType;
 
-protected:
-    static bool RedirectConsoleIO();
+public: // const static variables
+    static size_t const MaxLen_UnicodeFileName = 32767;
 
 private:
-    TConsole();
+    void Destroy_Private();
+    bool Reset_Private();
 
 public:
-    static bool CreateNewConsole(int16_t minLength = Default_MinBuffer);
-    static bool ReleaseConsole();
+    TAppTool();
+    ~TAppTool();
 
-    // Attaches to existing console instead of creating a new console
-    static bool AttachParentConsole(int16_t minLength = Default_MinBuffer);
+    virtual void Destroy(); //calls Destroy_Private()
+    virtual bool Reset(); //calls Reset_Private() - It is good practice for a constructor to not call a virtual function
 
-    static bool IsStandardInAConsole();
-    static bool IsStandardOutAConsole();
-
-    static void AdjustConsoleBuffer(int16_t minLength);
-    static void TestConsole();
-
-public:
-    ~TConsole();
+    static std::string GetAppPathA();
+    static std::wstring GetAppPathW();
+    static bool GetAppVersion(char const* appOrDLLPath, WORD* outMajorVer, WORD* outMinorVer, WORD* outBuild,
+        WORD* outRevision);
+    static bool GetAppVersion(wchar_t const* appOrDLLPath, WORD* outMajorVer, WORD* outMinorVer, WORD* outBuild,
+        WORD* outRevision);
 };
 
 } // namespace ASWTools
 
-//---------------------------------------------------------------------------
-#endif // #ifndef ConsoleHelperH
+#endif // #ifndef ASWTools_AppH

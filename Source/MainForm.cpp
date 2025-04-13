@@ -29,7 +29,7 @@ limitations under the License.
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 //---------------------------------------------------------------------------
-#include "PathTool.h"
+#include "ASWTools_Path.h"
 //---------------------------------------------------------------------------
 #include "App.h"
 #include "MessageDialog.h"

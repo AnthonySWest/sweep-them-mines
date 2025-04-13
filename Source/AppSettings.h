@@ -26,8 +26,8 @@ limitations under the License.
 #include <windows.h>
 #include <string>
 //---------------------------------------------------------------------------
-#include "BasicINI.h"
-#include "Version.h"
+#include "ASWTools_BasicINI.h"
+#include "ASWTools_Version.h"
 //---------------------------------------------------------------------------
 
 namespace SweepThemMines

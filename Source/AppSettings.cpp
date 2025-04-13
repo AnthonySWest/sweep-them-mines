@@ -22,7 +22,7 @@ limitations under the License.
 // Module header
 #include "AppSettings.h"
 //---------------------------------------------------------------------------
-#include "StringTool.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 using namespace ASWTools;
 using namespace ASWTools::BasicINI;

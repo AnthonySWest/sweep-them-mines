@@ -1,5 +1,5 @@
 /* **************************************************************************
-ConsoleHelper.cpp
+ASWTools_Console.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -27,7 +27,7 @@ limitations under the License.
 #include <iostream>
 //---------------------------------------------------------------------------
 // Module header
-#include "ConsoleHelper.h"
+#include "ASWTools_Console.h"
 //---------------------------------------------------------------------------
 #include <conio.h>
 #include <fcntl.h> // for _O_TEXT

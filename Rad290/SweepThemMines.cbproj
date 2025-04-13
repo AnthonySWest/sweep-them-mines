@@ -194,37 +194,37 @@
             <DependentOn>..\Source\AppSettings.h</DependentOn>
             <BuildOrder>11</BuildOrder>
         </CppCompile>
-        <CppCompile Include="..\Source\ASWTools\AppTool.cpp">
-            <DependentOn>..\Source\ASWTools\AppTool.h</DependentOn>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_App.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_App.h</DependentOn>
             <BuildOrder>5</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_BasicINI.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_BasicINI.h</DependentOn>
+            <BuildOrder>6</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\Source\ASWTools\ASWTools_Common.cpp">
             <DependentOn>..\Source\ASWTools\ASWTools_Common.h</DependentOn>
             <BuildOrder>13</BuildOrder>
         </CppCompile>
-        <CppCompile Include="..\Source\ASWTools\BasicINI.cpp">
-            <DependentOn>..\Source\ASWTools\BasicINI.h</DependentOn>
-            <BuildOrder>6</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\ASWTools\ConsoleHelper.cpp">
-            <DependentOn>..\Source\ASWTools\ConsoleHelper.h</DependentOn>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_Console.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_Console.h</DependentOn>
             <BuildOrder>10</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_Path.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_Path.h</DependentOn>
+            <BuildOrder>9</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_String.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_String.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWTools\ASWTools_Version.cpp">
+            <DependentOn>..\Source\ASWTools\ASWTools_Version.h</DependentOn>
+            <BuildOrder>7</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\Source\ASWTools\Crypt\ASWTools_Adler.cpp">
             <DependentOn>..\Source\ASWTools\Crypt\ASWTools_Adler.h</DependentOn>
             <BuildOrder>16</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\ASWTools\PathTool.cpp">
-            <DependentOn>..\Source\ASWTools\PathTool.h</DependentOn>
-            <BuildOrder>9</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\ASWTools\StringTool.cpp">
-            <DependentOn>..\Source\ASWTools\StringTool.h</DependentOn>
-            <BuildOrder>8</BuildOrder>
-        </CppCompile>
-        <CppCompile Include="..\Source\ASWTools\Version.cpp">
-            <DependentOn>..\Source\ASWTools\Version.h</DependentOn>
-            <BuildOrder>7</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\Source\MainForm.cpp">
             <Form>FormMain</Form>

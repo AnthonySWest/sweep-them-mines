@@ -1,5 +1,5 @@
 /* **************************************************************************
-PathTool.h
+ASWTools_Path.h
 Author: Anthony S. West - ASW Software
 
 Contains routines for file/folder path manipulation
@@ -22,8 +22,8 @@ limitations under the License.
 
 ************************************************************************** */
 
-#ifndef PathToolH
-#define PathToolH
+#ifndef ASWTools_PathH
+#define ASWTools_PathH
 //---------------------------------------------------------------------------
 #include <windows.h>
 #include <share.h>
@@ -40,10 +40,9 @@ namespace ASWTools
 /////////////////////////////////////////////////////////////////////////////
 class TPathTool
 {
-public:
-    ////// only const static variables allowed in this public - see second public for regular stuff //////
+public: // const static variables
 
-    static const size_t MaxLen_UnicodeFileName = 32767;
+    static size_t const MaxLen_UnicodeFileName = 32767;
 
     static char const* const AlphaCharsA;
     static wchar_t const* const AlphaCharsW;
@@ -61,31 +60,31 @@ public: // Misc. path related methods
     static bool IsRelative(std::string const& path);
     static bool IsRelative(std::wstring const& path);
 
-    static bool IsEnvironment(const std::string& path);
-    static bool IsEnvironment(const std::wstring& path);
+    static bool IsEnvironment(std::string const& path);
+    static bool IsEnvironment(std::wstring const& path);
 
-    static bool IsNetwork(const std::string& path);
-    static bool IsNetwork(const std::wstring& path);
+    static bool IsNetwork(std::string const& path);
+    static bool IsNetwork(std::wstring const& path);
 
-    static std::string Combine(const std::string& path1, const std::string& path2);
-    static std::wstring Combine(const std::wstring& path1, const std::wstring& path2);
+    static std::string Combine(std::string const& path1, std::string const& path2);
+    static std::wstring Combine(std::wstring const& path1, std::wstring const& path2);
 
-    static bool ExpandEnvironmentVars(const std::string& path, std::string& dest);
-    static bool ExpandEnvironmentVars(const std::wstring& path, std::wstring& dest);
+    static bool ExpandEnvironmentVars(std::string const& path, std::string& dest);
+    static bool ExpandEnvironmentVars(std::wstring const& path, std::wstring& dest);
 
-    static std::string ExtractDir(const std::string& fileName, bool keepTrailSlash = true);
-    static std::wstring ExtractDir(const std::wstring& fileName, bool keepTrailSlash = true);
+    static std::string ExtractDir(std::string const& fileName, bool keepTrailSlash = true);
+    static std::wstring ExtractDir(std::wstring const& fileName, bool keepTrailSlash = true);
 
-    static std::string ExtractFileName(const std::string& path);
-    static std::wstring ExtractFileName(const std::wstring& path);
-    static std::string ExtractFileName(const std::string& path, bool removeExtension);
-    static std::wstring ExtractFileName(const std::wstring& path, bool removeExtension);
+    static std::string ExtractFileName(std::string const& path);
+    static std::wstring ExtractFileName(std::wstring const& path);
+    static std::string ExtractFileName(std::string const& path, bool removeExtension);
+    static std::wstring ExtractFileName(std::wstring const& path, bool removeExtension);
 
-    static std::string RemoveExtension(const std::string& path);
-    static std::wstring RemoveExtension(const std::wstring& path);
+    static std::string RemoveExtension(std::string const& path);
+    static std::wstring RemoveExtension(std::wstring const& path);
 
-    static std::string GetExtension(const std::string& path);
-    static std::wstring GetExtension(const std::wstring& path);
+    static std::string GetExtension(std::string const& path);
+    static std::wstring GetExtension(std::wstring const& path);
 
     static std::string GenerateRandomNameA(size_t len);
     static std::string GenerateRandomName(size_t len, std::string const& charList);
@@ -124,4 +123,4 @@ public: // Methods for file operations
 } // namespace ASWTools
 
 //---------------------------------------------------------------------------
-#endif // #ifndef PathToolH
+#endif // #ifndef ASWTools_PathH
