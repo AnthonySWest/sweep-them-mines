@@ -85,15 +85,15 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <AllPackageLibs>rtl.lib;vcl.lib</AllPackageLibs>
+        <AllPackageLibs>rtl.lib;vcl.lib;vclimg.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
         <Icon_MainIcon>..\Resource\land-mine_multi.ico</Icon_MainIcon>
         <UWP_CppLogo44>..\Resource\land-mine_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>..\Resource\land-mine_150.png</UWP_CppLogo150>
         <SanitizedProjectName>SweepThemMines</SanitizedProjectName>
-        <IncludePath>..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\Source\ASWMineSweeper\;..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
+        <ILINK_LibraryPath>..\Source\ASWMineSweeper\;..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <ILINK_AllWarnings>true</ILINK_AllWarnings>
         <ILINK_SelectedWarnings>false</ILINK_SelectedWarnings>
         <BCC_OutputDir>..\Obj\$(Platform)\$(Config)</BCC_OutputDir>
@@ -161,7 +161,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <LinkPackageStatics>rtl.lib;vcl.lib</LinkPackageStatics>
+        <LinkPackageStatics>rtl.lib;vcl.lib;vclimg.lib</LinkPackageStatics>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
@@ -193,6 +193,26 @@
         <CppCompile Include="..\Source\AppSettings.cpp">
             <DependentOn>..\Source\AppSettings.h</DependentOn>
             <BuildOrder>11</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWMineSweeper\ASWMS_Cell.cpp">
+            <DependentOn>..\Source\ASWMineSweeper\ASWMS_Cell.h</DependentOn>
+            <BuildOrder>17</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWMineSweeper\ASWMS_Engine.cpp">
+            <DependentOn>..\Source\ASWMineSweeper\ASWMS_Engine.h</DependentOn>
+            <BuildOrder>19</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWMineSweeper\ASWMS_Grid.cpp">
+            <DependentOn>..\Source\ASWMineSweeper\ASWMS_Grid.h</DependentOn>
+            <BuildOrder>18</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWMineSweeper\ASWMS_Sprite.cpp">
+            <DependentOn>..\Source\ASWMineSweeper\ASWMS_Sprite.h</DependentOn>
+            <BuildOrder>20</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\Source\ASWMineSweeper\ASWMS_Sprites.cpp">
+            <DependentOn>..\Source\ASWMineSweeper\ASWMS_Sprites.h</DependentOn>
+            <BuildOrder>21</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\Source\ASWTools\ASWTools_App.cpp">
             <DependentOn>..\Source\ASWTools\ASWTools_App.h</DependentOn>
