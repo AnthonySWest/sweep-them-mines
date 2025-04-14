@@ -843,6 +843,9 @@ void TApp::SetInitialPaths(std::string const& appSubDirPath)
     // get temp dir
     DirTempBase = TPathTool::GetTempDirA();
     DirTemp = TPathTool::Combine(DirTempBase, appSubDirPath);
+
+    // Set default images directory. This will be overriden if there is a path in the settings file.
+    DirImages = TPathTool::Combine(DirApp, "Images");
 }
 
 //---------------------------------------------------------------------------
