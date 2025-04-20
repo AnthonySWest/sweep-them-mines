@@ -24,13 +24,15 @@ limitations under the License.
 // Module header
 #include "ASWTools_String.h"
 //---------------------------------------------------------------------------
+#include <algorithm>
 #include <codecvt>
-#include <wctype.h>
 //#include <cstdarg> //va_start
 //#include <cctype>
 #include <limits>
+#include <locale>
 #include <sstream>
 #include <stdexcept>
+#include <wctype.h>
 //---------------------------------------------------------------------------
 
 #ifndef strcmpI
@@ -947,6 +949,46 @@ uint64_t TStrTool::StrToUInt64(std::string const& str)
     {
         throw std::out_of_range("Out of range: " + std::string(e.what()));
     }
+}
+//---------------------------------------------------------------------------
+std::string TStrTool::ToLower(std::string const& str)
+{
+    std::string result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::tolower(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+std::wstring TStrTool::ToLower(std::wstring const& str)
+{
+    std::wstring result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::towlower(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+std::string TStrTool::ToUpper(std::string const& str)
+{
+    std::string result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::toupper(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+std::wstring TStrTool::ToUpper(std::wstring const& str)
+{
+    std::wstring result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::towupper(c);
+        });
+    return result;
 }
 //---------------------------------------------------------------------------
 // On success, 'outVal', if not null, will be set to the converted value.

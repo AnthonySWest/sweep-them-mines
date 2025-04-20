@@ -96,6 +96,11 @@ public:
     static bool StrNCpy_safeA(char* dest, size_t destSize_bytes, char const* src, size_t maxCount);
     static bool StrNCpy_safeT(TCHAR* dest, size_t destArrayLen, TCHAR const* src, size_t maxCount);
 
+    static std::string ToLower(std::string const& str);
+    static std::wstring ToLower(std::wstring const& str);
+    static std::string ToUpper(std::string const& str);
+    static std::wstring ToUpper(std::wstring const& str);
+
     //For trim functions, see: https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
     static void TrimLeft(std::string& s);
     static void TrimLeft(std::string& s, unsigned char const trimChar, bool trim_isspace);
