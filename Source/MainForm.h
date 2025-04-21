@@ -23,13 +23,16 @@ limitations under the License.
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
+#include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Forms.hpp>
 #include <Vcl.Menus.hpp>
+#include <Vcl.StdCtrls.hpp>
 //---------------------------------------------------------------------------
 // END OF IDE INCLUDES
 //---------------------------------------------------------------------------
+#include "ASWMS_Engine.h"
 #include "Scores.h"
+#include <Vcl.Buttons.hpp>
 //---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////////////////////////////////
@@ -53,6 +56,9 @@ __published: // IDE-managed Components
     TMenuItem* N3;
     TMenuItem* MnuBestTimes;
     TMenuItem* MnuResetBestTimes;
+    TScrollBox* ScrollBoxMap;
+    TImage* ImageMap;
+    TBitBtn* BtnReact;
     void __fastcall FormDestroy(TObject* Sender);
     void __fastcall MnuExitClick(TObject* Sender);
     void __fastcall MnuAboutClick(TObject* Sender);
@@ -62,8 +68,17 @@ __published: // IDE-managed Components
     void __fastcall MnuResetBestTimesClick(TObject* Sender);
     void __fastcall FormClose(TObject* Sender, TCloseAction& Action);
     void __fastcall MnuGameClick(TObject* Sender);
+    void __fastcall FormShow(TObject* Sender);
+    void __fastcall ImageMapMouseMove(TObject* Sender, TShiftState Shift, int X, int Y);
+    void __fastcall FormMouseMove(TObject* Sender, TShiftState Shift, int X, int Y);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
+
+    int m_CustomCols;
+    int m_CustomRows;
+    int m_CustomMines;
+
+    ASWMS::TMSEngine m_MineSweeper;
 
 private:
     void AddScoresToLines(System::Classes::TStrings* lines, SweepThemMines::TScores::TScoreList const& scores);
@@ -76,7 +91,7 @@ private:
     void SaveBestTime_Expert(int seconds, AnsiString const& name);
     void SaveBestTime_Intermediate(int seconds, AnsiString const& name);
     void ShowBestTimes();
-    void ShowCustomDifficulty();
+    TModalResult ShowCustomDifficulty();
 
 public:  // User declarations
 #if defined(__clang__)

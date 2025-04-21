@@ -32,8 +32,10 @@ limitations under the License.
 #include "ASWTools_Path.h"
 //---------------------------------------------------------------------------
 #include "App.h"
+#include "CustomFieldForm.h"
 #include "MessageDialog.h"
 //---------------------------------------------------------------------------
+using namespace ASWMS;
 using namespace ASWTools;
 using namespace SweepThemMines;
 using namespace System;
@@ -49,7 +51,10 @@ TFormMain* FormMain;
 
 //---------------------------------------------------------------------------
 __fastcall TFormMain::TFormMain(TComponent* Owner)
-    : TForm(Owner)
+    : TForm(Owner),
+      m_CustomCols(30),
+      m_CustomRows(16),
+      m_CustomMines(99)
 {
     TApp* app = &TApp::GetInstance();
 
@@ -58,6 +63,17 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 #else
     Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str());
 #endif
+
+    AnsiString imagesDir = app->DirImages.c_str();
+
+    if (!DirectoryExists(imagesDir))
+    {
+        String msg = "Images folder not found at:\n\n" + imagesDir +
+            "\n\nPlease specifiy an images location in settings file:\n\n" + String(app->FileAppSettings.c_str());
+        MsgDlg(msg, "", TMsgDlgType::mtError, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    }
+
+    m_MineSweeper.Sprites.LoadSprites(imagesDir.c_str());
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormDestroy(TObject* /*Sender*/)
@@ -91,10 +107,25 @@ void TFormMain::ExitApp()
     Application->Terminate();
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormMain::FormMouseMove(TObject* /*Sender*/, TShiftState /*shift*/, int /*x*/, int /*y*/)
+{
+    m_MineSweeper.DrawMap(ImageMap, -1, -1);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormShow(TObject* /*Sender*/)
+{
+    NewGame();
+}
+//---------------------------------------------------------------------------
 String TFormMain::GetHighScoresFilename()
 {
     TApp* app = &TApp::GetInstance();
     return TPathTool::Combine(app->DirAppData, BaseFilename_HighScores).c_str();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::ImageMapMouseMove(TObject* /*Sender*/, TShiftState shift, int x, int y)
+{
+    m_MineSweeper.DrawMap(ImageMap, x, y);
 }
 //---------------------------------------------------------------------------
 bool TFormMain::LoadHighScores(TScores* scores)
@@ -170,25 +201,77 @@ void __fastcall TFormMain::MnuResetBestTimesClick(TObject* /*sender*/)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::MnuStandardDifficultyClick(TObject* sender)
 {
-    MnuBeginner->Checked = false;
-    MnuIntermediate->Checked = false;
-    MnuExpert->Checked = false;
-    MnuCustom->Checked = false;
-
     // Check the selected item
     TMenuItem* item = dynamic_cast<TMenuItem*>(sender);
     if (nullptr != item)
     {
+        if ("MnuCustom" == item->Name)
+        {
+            TModalResult mRes = ShowCustomDifficulty();
+            if (mrCancel == mRes)
+                return;
+        }
+
+        MnuBeginner->Checked = false;
+        MnuIntermediate->Checked = false;
+        MnuExpert->Checked = false;
+        MnuCustom->Checked = false;
+
         item->Checked = true;
 
-        if ("MnuCustom" == item->Name)
-            ShowCustomDifficulty();
+        NewGame();
     }
 }
 //---------------------------------------------------------------------------
 void TFormMain::NewGame()
 {
-    MsgDlg("To do", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    size_t nRows;
+    size_t nCols;
+    int nMines;
+
+    if (MnuBeginner->Checked)
+    {
+        nRows = TMSEngine::BeginnerRows;
+        nCols = TMSEngine::BeginnerCols;
+        nMines = TMSEngine::BeginnerMines;
+    }
+    else if (MnuIntermediate->Checked)
+    {
+        nRows = TMSEngine::IntermediateRows;
+        nCols = TMSEngine::IntermediateCols;
+        nMines = TMSEngine::IntermediateMines;
+    }
+    else if (MnuExpert->Checked)
+    {
+        nRows = TMSEngine::ExpertRows;
+        nCols = TMSEngine::ExpertCols;
+        nMines = TMSEngine::ExpertMines;
+    }
+    else
+    {
+        nRows = m_CustomRows;
+        nCols = m_CustomCols;
+        nMines = m_CustomMines;
+    }
+
+    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap);
+    m_MineSweeper.DrawMap(ImageMap, -1, -1);
+
+    ClientWidth = ImageMap->Width +
+        ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
+    ClientHeight = ImageMap->Height + ScrollBoxMap->Top + ScrollBoxMap->Left +
+        ((ImageMap->Top + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 2;
+
+    if (Width > Screen->Width)
+        Width = Screen->Width;
+
+    if (Height > Screen->Height - 100)
+        Height = Screen->Height - 100;
+
+    BtnReact->Left = (Width / 2) - (BtnReact->Width / 2);
+
+    DrawMinesLeft();
+    DrawElapsedTime();
 }
 //---------------------------------------------------------------------------
 void TFormMain::ResetBestTimes()
@@ -285,8 +368,24 @@ void TFormMain::ShowBestTimes()
     MsgDlg(dlgLines->Text, "Best Times", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
 }
 //---------------------------------------------------------------------------
-void TFormMain::ShowCustomDifficulty()
+TModalResult TFormMain::ShowCustomDifficulty()
 {
-    MsgDlg("To do", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+    TFormCustomField* form = new TFormCustomField(nullptr);
+    std::unique_ptr<TFormCustomField> auto_form(form);
+
+    form->EditWidth->Value = m_CustomCols;
+    form->EditHeight->Value = m_CustomRows;
+    form->EditMines->Value = m_CustomMines;
+
+    TModalResult mRes = form->ShowModal();
+
+    if (mrOk == mRes)
+    {
+        m_CustomCols = form->EditWidth->Value;
+        m_CustomRows = form->EditHeight->Value;
+        m_CustomMines = form->EditMines->Value;
+    }
+
+    return mRes;
 }
 //---------------------------------------------------------------------------
