@@ -139,24 +139,20 @@ void TMSEngine::DrawCell(
                 bmpFore = Sprites.Digits_Proximity[static_cast<size_t>(nMines - 1)].Bmp;
         }
     }
-    else if (cell->MarkedAsMine)
+    else
     {
-        bmpFore = Sprites.Flag.Bmp;
-    }
-    else if (cell->MarkedAsQuestion)
-    {
-        bmpFore = Sprites.Question.Bmp;
-    }
+        if (cell->MarkedAsMine)
+            bmpFore = Sprites.Flag.Bmp;
+        else if (cell->MarkedAsQuestion)
+            bmpFore = Sprites.Question.Bmp;
 
-    if (!cell->Discovered)
-    {
         // Is the mouse over the cell
         if (mouseX >= xPos && mouseX < xPos + bmpBack->Width &&
             mouseY >= yPos && mouseY < yPos + bmpBack->Height)
         {
             bmpBack = Sprites.Tiles[static_cast<size_t>(ETile::CoveredLit)].Bmp;
 
-            if (shift.Contains(ssLeft))
+            if (shift.Contains(ssLeft) && !cell->MarkedAsMine && !cell->MarkedAsQuestion)
             {
                 bmpBack = Sprites.Tiles[static_cast<size_t>(ETile::CoveredClicked)].Bmp;
             }
