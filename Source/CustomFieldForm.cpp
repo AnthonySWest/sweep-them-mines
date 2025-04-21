@@ -19,7 +19,9 @@ limitations under the License.
 ************************************************************************** */
 
 #include <vcl.h>
+#if !defined(__clang__)
 #pragma hdrstop
+#endif
 
 //---------------------------------------------------------------------------
 // Module header

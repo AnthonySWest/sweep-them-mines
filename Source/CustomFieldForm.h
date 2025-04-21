@@ -48,7 +48,11 @@ __published: // IDE-managed Components
 private: // User declarations
 
 public: // User declarations
+#if defined(__clang__)
+    __fastcall TFormCustomField(TComponent* Owner) override;
+#else
     __fastcall TFormCustomField(TComponent* Owner);
+#endif
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormCustomField* FormCustomField;
