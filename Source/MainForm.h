@@ -71,6 +71,9 @@ __published: // IDE-managed Components
     void __fastcall FormShow(TObject* Sender);
     void __fastcall ImageMapMouseMove(TObject* Sender, TShiftState Shift, int X, int Y);
     void __fastcall FormMouseMove(TObject* Sender, TShiftState Shift, int X, int Y);
+    void __fastcall ImageMapMouseDown(TObject* Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
+    void __fastcall FormResize(TObject* Sender);
+    void __fastcall ImageMapMouseUp(TObject* Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
 
@@ -85,6 +88,7 @@ private:
     System::String GetHighScoresFilename();
     bool LoadHighScores(SweepThemMines::TScores* scores);
     void NewGame();
+    void ReCenter();
     void ResetBestTimes();
     void SaveBestScores(SweepThemMines::TScores& scores);
     void SaveBestTime_Beginner(int seconds, AnsiString const& name);

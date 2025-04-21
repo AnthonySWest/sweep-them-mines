@@ -6,7 +6,7 @@ object FormMain: TFormMain
   ClientWidth = 660
   Color = clBtnFace
   Constraints.MinHeight = 250
-  Constraints.MinWidth = 250
+  Constraints.MinWidth = 296
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -12
@@ -153,6 +153,7 @@ object FormMain: TFormMain
   OnClose = FormClose
   OnDestroy = FormDestroy
   OnMouseMove = FormMouseMove
+  OnResize = FormResize
   OnShow = FormShow
   DesignSize = (
     660
@@ -179,7 +180,9 @@ object FormMain: TFormMain
       Width = 105
       Height = 105
       AutoSize = True
+      OnMouseDown = ImageMapMouseDown
       OnMouseMove = ImageMapMouseMove
+      OnMouseUp = ImageMapMouseUp
     end
   end
   object BtnReact: TBitBtn

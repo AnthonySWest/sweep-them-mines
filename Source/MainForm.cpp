@@ -74,9 +74,10 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
     }
 
     m_MineSweeper.Sprites.LoadSprites(imagesDir.c_str());
+    BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::FormDestroy(TObject* /*Sender*/)
+void __fastcall TFormMain::FormDestroy(TObject* /*sender*/)
 {
     // Clean up
 }
@@ -96,9 +97,14 @@ void TFormMain::AddScoresToLines(TStrings* lines, TScores::TScoreList const& sco
     }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::FormClose(TObject* /*sender*/, TCloseAction& /*Action*/)
+void __fastcall TFormMain::FormClose(TObject* /*sender*/, TCloseAction& /*action*/)
 {
     ExitApp();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormResize(TObject* /*sender*/)
+{
+    ReCenter();
 }
 //---------------------------------------------------------------------------
 void TFormMain::ExitApp()
@@ -107,12 +113,12 @@ void TFormMain::ExitApp()
     Application->Terminate();
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::FormMouseMove(TObject* /*Sender*/, TShiftState /*shift*/, int /*x*/, int /*y*/)
+void __fastcall TFormMain::FormMouseMove(TObject* /*sender*/, TShiftState shift, int /*x*/, int /*y*/)
 {
-    m_MineSweeper.DrawMap(ImageMap, -1, -1);
+    m_MineSweeper.DrawMap(ImageMap, shift, -1, -1);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::FormShow(TObject* /*Sender*/)
+void __fastcall TFormMain::FormShow(TObject* /*sender*/)
 {
     NewGame();
 }
@@ -123,9 +129,43 @@ String TFormMain::GetHighScoresFilename()
     return TPathTool::Combine(app->DirAppData, BaseFilename_HighScores).c_str();
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::ImageMapMouseMove(TObject* /*Sender*/, TShiftState shift, int x, int y)
+void __fastcall TFormMain::ImageMapMouseDown(
+    TObject* /*sender*/, TMouseButton /*button*/, TShiftState shift, int x, int y)
 {
-    m_MineSweeper.DrawMap(ImageMap, x, y);
+    m_MineSweeper.MouseDown(shift, x, y);
+    m_MineSweeper.DrawMap(ImageMap, shift, x, y);
+
+    EGameState state = m_MineSweeper.GetGameState();
+    if (shift.Contains(ssLeft) && EGameState::GameOver_Boom != state)
+        BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceScared.Bmp);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState shift, int x, int y)
+{
+    m_MineSweeper.DrawMap(ImageMap, shift, x, y);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::ImageMapMouseUp(
+    TObject* /*sender*/, TMouseButton button, TShiftState shift, int x, int y)
+{
+    if (mbLeft == button)
+        shift = shift << ssLeft;
+    else if (mbRight == button)
+        shift = shift << ssRight;
+
+    m_MineSweeper.MouseUp(shift, x, y);
+    m_MineSweeper.DrawMap(ImageMap, shift, x, y);
+
+    EGameState state = m_MineSweeper.GetGameState();
+    if (EGameState::GameOver_Boom == state)
+        BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceToast.Bmp);
+    else
+        BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
+
+    if (EGameState::GameOver_Win == state)
+    {
+        ShowMessage("to do - win");
+    }
 }
 //---------------------------------------------------------------------------
 bool TFormMain::LoadHighScores(TScores* scores)
@@ -249,13 +289,13 @@ void TFormMain::NewGame()
     }
     else
     {
-        nRows = m_CustomRows;
-        nCols = m_CustomCols;
+        nRows = static_cast<size_t>(m_CustomRows);
+        nCols = static_cast<size_t>(m_CustomCols);
         nMines = m_CustomMines;
     }
 
     m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap);
-    m_MineSweeper.DrawMap(ImageMap, -1, -1);
+    m_MineSweeper.DrawMap(ImageMap);
 
     ClientWidth = ImageMap->Width +
         ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
@@ -268,10 +308,17 @@ void TFormMain::NewGame()
     if (Height > Screen->Height - 100)
         Height = Screen->Height - 100;
 
-    BtnReact->Left = (Width / 2) - (BtnReact->Width / 2);
+    ReCenter();
 
-    DrawMinesLeft();
-    DrawElapsedTime();
+    BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
+
+    //DrawMinesLeft();
+    //DrawElapsedTime();
+}
+//---------------------------------------------------------------------------
+void TFormMain::ReCenter()
+{
+    BtnReact->Left = (Width / 2) - (BtnReact->Width / 2);
 }
 //---------------------------------------------------------------------------
 void TFormMain::ResetBestTimes()
