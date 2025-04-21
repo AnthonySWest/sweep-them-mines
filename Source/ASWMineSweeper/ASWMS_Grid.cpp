@@ -42,5 +42,22 @@ TGrid::~TGrid()
     delete Rows;
 }
 //---------------------------------------------------------------------------
+TCell* TGrid::GetCell(size_t row, size_t col)
+{
+    return &(*Rows)[row][col];
+}
+//---------------------------------------------------------------------------
+size_t TGrid::GetColCount()
+{
+    if (nullptr == Rows || Rows->size() == 0)
+        return 0;
+    return (*Rows)[0].size();
+}
+//---------------------------------------------------------------------------
+size_t TGrid::GetRowCount()
+{
+    return (nullptr == Rows ? 0 : Rows->size());
+}
+//---------------------------------------------------------------------------
 
 } // namespace ASWMS

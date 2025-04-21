@@ -41,6 +41,11 @@ public:
 public:
     TRows* Rows;
 
+public: // Getters/Setters
+    TCell* GetCell(size_t row, size_t col);
+    size_t GetColCount();
+    size_t GetRowCount();
+
 public:
     TGrid(size_t nRows, size_t nCols);
     ~TGrid();
