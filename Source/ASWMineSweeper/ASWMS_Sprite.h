@@ -21,6 +21,8 @@ limitations under the License.
 #ifndef ASWMS_SpriteH
 #define ASWMS_SpriteH
 //---------------------------------------------------------------------------
+#include <string>
+//---------------------------------------------------------------------------
 
 namespace ASWMS
 {
@@ -32,10 +34,10 @@ class TSprite
 {
 private:
     Graphics::TBitmap* m_Bmp;
-    System::String m_Filename;
+    std::string m_Filename;
 
     void FreeBitmap();
-    System::String GetPictureFileExtension(System::String const& filename);
+    std::string GetPictureFileExtension(std::string const& filename);
 
 public:
     TSprite();
@@ -45,15 +47,15 @@ public:
     TSprite& operator=(TSprite const& rhs);
 
     TSprite& CopyFrom(TSprite const& other);
-    void LoadFromFile(System::String const& filename);
+    void LoadFromFile(std::string const& filename);
     void Reset();
 
 public: // Getters/Setters
     Graphics::TBitmap* GetBitmap();
-    System::String GetFilename();
+    std::string GetFilename();
 
     __property Graphics::TBitmap* Bmp = { read = GetBitmap };
-    __property System::String Filename = { read = GetFilename };
+    __property std::string Filename = { read = GetFilename };
 };
 
 } // namespace ASWMS

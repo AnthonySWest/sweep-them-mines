@@ -39,10 +39,10 @@ public:
     typedef std::vector<TRow> TRows;
 
 public:
-    TRows Rows;
+    TRows* Rows;
 
 public:
-    TGrid();
+    TGrid(size_t nRows, size_t nCols);
     ~TGrid();
 };
 

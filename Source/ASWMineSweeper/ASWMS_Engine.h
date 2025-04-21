@@ -21,6 +21,8 @@ limitations under the License.
 #ifndef ASWMS_EngineH
 #define ASWMS_EngineH
 //---------------------------------------------------------------------------
+#include <Vcl.ExtCtrls.hpp>
+//---------------------------------------------------------------------------
 #include "ASWMS_Grid.h"
 #include "ASWMS_Sprites.h"
 //---------------------------------------------------------------------------
@@ -33,13 +35,38 @@ namespace ASWMS
 /////////////////////////////////////////////////////////////////////////////
 class TMSEngine
 {
+public: // Static vars
+    static size_t const BeginnerRows = 8;
+    static size_t const BeginnerCols = 8;
+    static int const BeginnerMines = 10;
+    static size_t const IntermediateRows = 16;
+    static size_t const IntermediateCols = 16;
+    static int const IntermediateMines = 40;
+    static size_t const ExpertRows = 16;
+    static size_t const ExpertCols = 30;
+    static int const ExpertMines = 99;
+
+private:
+    bool m_firstClick;
+    int m_NumMines;
+
 public:
-    TGrid Grid;
+    TGrid* Grid;
     TSprites Sprites;
+
+private:
+    void DrawCell(TImage* image, size_t row, size_t col, int xPos, int yPos, int mouseX, int mouseY);
+    int GetCellDrawHeight();
+    int GetCellDrawWidth();
+    int GetDrawHeight();
+    int GetDrawWidth();
 
 public:
     TMSEngine();
     ~TMSEngine();
+
+    void DrawMap(TImage* image, int mouseX, int mouseY);
+    void NewGame(size_t nRows, size_t nCols, int nMines, TImage* image);
 };
 
 } // namespace ASWMS

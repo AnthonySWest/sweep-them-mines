@@ -21,6 +21,7 @@ limitations under the License.
 #ifndef ASWMS_SpritesH
 #define ASWMS_SpritesH
 //---------------------------------------------------------------------------
+#include <string>
 #include <vector>
 //---------------------------------------------------------------------------
 #include "ASWMS_Sprite.h"
@@ -28,6 +29,16 @@ limitations under the License.
 
 namespace ASWMS
 {
+
+enum class ETile
+{
+    Covered,
+    CoveredClicked,
+    CoveredLit,
+    Uncovered,
+    UncoveredBoom,
+};
+
 
 /////////////////////////////////////////////////////////////////////////////
 // TSprites
@@ -38,22 +49,29 @@ public:
     typedef std::vector<TSprite> TSpriteList;
 
 private:
-    TSpriteList m_Digits;
-
-private:
-    void LoadDigits(System::String const& digitsDir);
+    void LoadDigits_Proximity(std::string const& digitsDir);
+    void LoadDigits_Score(std::string const& digitsDir);
+    void LoadGeneralSprites(std::string const& spritesDir);
+    void LoadTiles(std::string const& tilesDir);
 
 public:
     TSprites();
     ~TSprites();
 
-    void LoadSprites(System::String const& imagesDir);
+    void LoadSprites(std::string const& imagesDir);
     void Reset();
 
-public: // Getters/Setters
-    TSpriteList& GetDigits();
+public:
+    TSprite FaceHappy;
+    TSprite FaceScared;
+    TSprite FaceToast;
+    TSprite Flag;
+    TSprite Mine;
+    TSprite Question;
 
-    __property TSpriteList& Digits = { read = GetDigits };
+    TSpriteList Digits_Proximity;
+    TSpriteList Digits_Score;
+    TSpriteList Tiles;
 };
 
 } // namespace ASWMS

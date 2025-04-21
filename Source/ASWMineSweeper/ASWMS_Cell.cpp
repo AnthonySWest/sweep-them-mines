@@ -32,14 +32,16 @@ namespace ASWMS
 
 //---------------------------------------------------------------------------
 TCell::TCell()
-    : IsMine(false),
+    : Discovered(false),
+      IsMine(false),
       MarkedAsMine(false),
       MarkedAsQuestion(false)
 {
 }
 //---------------------------------------------------------------------------
-TCell::TCell(bool isMine, bool markedAsMine, bool markedAsQuestion)
-    : IsMine(isMine),
+TCell::TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion)
+    : Discovered(discovered),
+      IsMine(isMine),
       MarkedAsMine(markedAsMine),
       MarkedAsQuestion(markedAsQuestion)
 {

@@ -32,6 +32,10 @@ limitations under the License.
 #include <Vcl.Imaging.jpeg.hpp>
 #include <Vcl.Imaging.pngimage.hpp>
 //---------------------------------------------------------------------------
+#include "ASWTools_Path.h"
+#include "ASWTools_String.h"
+//---------------------------------------------------------------------------
+using namespace ASWTools;
 using namespace System;
 //---------------------------------------------------------------------------
 
@@ -89,17 +93,17 @@ Graphics::TBitmap* TSprite::GetBitmap()
     return m_Bmp;
 }
 //---------------------------------------------------------------------------
-String TSprite::GetFilename()
+std::string TSprite::GetFilename()
 {
     return m_Filename;
 }
 //---------------------------------------------------------------------------
-String TSprite::GetPictureFileExtension(String const& filename)
+std::string TSprite::GetPictureFileExtension(std::string const& filename)
 {
     // Set the starting extension
-    String ext = ExtractFileExt(filename.LowerCase());
+    std::string ext = TPathTool::GetExtension(TStrTool::ToLower(filename));
 
-    if (!FileExists(filename))
+    if (!TPathTool::File_Exists_WinAPI(filename))
         return ext;
 
     // Scan the image file to determine actual file extension
@@ -114,9 +118,9 @@ String TSprite::GetPictureFileExtension(String const& filename)
 
     try
     {
-        in.open(AnsiString(filename).c_str(), std::ios::in | std::ios::binary);
+        in.open(filename, std::ios::in | std::ios::binary);
         if (in.fail())
-            throw Exception("Failed to open file: " + filename);
+            throw Exception(("Failed to open file: " + filename).c_str());
     }
     catch (std::ifstream::failure const& ex)
     {
@@ -153,16 +157,16 @@ String TSprite::GetPictureFileExtension(String const& filename)
     return ext;
 }
 //---------------------------------------------------------------------------
-void TSprite::LoadFromFile(String const& filename)
+void TSprite::LoadFromFile(std::string const& filename)
 {
     Reset();
 
-    if (!FileExists(filename))
-        throw Exception("File does not exist: " + filename);
+    if (!TPathTool::File_Exists_WinAPI(filename))
+        throw Exception(("File does not exist: " + filename).c_str());
 
     m_Filename = filename;
 
-    String const ext = GetPictureFileExtension(filename);
+    std::string const ext = GetPictureFileExtension(filename);
 
     // load the picture
     if (ext == ".ico")
@@ -170,7 +174,7 @@ void TSprite::LoadFromFile(String const& filename)
         TIcon* icon = new TIcon();
         std::unique_ptr<TIcon> auto_icon(icon);
 
-        icon->LoadFromFile(filename);
+        icon->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf8bit;
         m_Bmp->Width = icon->Width;
         m_Bmp->Height = icon->Height;
@@ -181,7 +185,7 @@ void TSprite::LoadFromFile(String const& filename)
         TMetafile* metaFile = new TMetafile();
         std::unique_ptr<TMetafile> auto_metaFile(metaFile);
 
-        metaFile->LoadFromFile(filename);
+        metaFile->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf8bit;
         m_Bmp->Width = metaFile->Width;
         m_Bmp->Height = metaFile->Height;
@@ -192,7 +196,7 @@ void TSprite::LoadFromFile(String const& filename)
         TJPEGImage* jpeg = new TJPEGImage;
         std::unique_ptr<TJPEGImage> auto_jpeg(jpeg);
 
-        jpeg->LoadFromFile(filename);
+        jpeg->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf24bit;
         m_Bmp->Width = jpeg->Width;
         m_Bmp->Height = jpeg->Height;
@@ -203,7 +207,7 @@ void TSprite::LoadFromFile(String const& filename)
         TGIFImage* gifImage = new TGIFImage;
         std::unique_ptr<TGIFImage> auto_gifImage(gifImage);
 
-        gifImage->LoadFromFile(filename);
+        gifImage->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf8bit;
         m_Bmp->Width = gifImage->Width;
         m_Bmp->Height = gifImage->Height;
@@ -214,7 +218,7 @@ void TSprite::LoadFromFile(String const& filename)
         TPngImage* imagePng = new TPngImage();
         std::unique_ptr<TPngImage> auto_imagePNG(imagePng);
 
-        imagePng->LoadFromFile(filename);
+        imagePng->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf24bit;
         m_Bmp->Width = imagePng->Width;
         m_Bmp->Height = imagePng->Height;
@@ -225,7 +229,7 @@ void TSprite::LoadFromFile(String const& filename)
         TPicture* tmpPic = new TPicture;
         std::unique_ptr<TPicture> auto_tmpPic(tmpPic);
 
-        tmpPic->LoadFromFile(filename);
+        tmpPic->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf24bit;
         m_Bmp->Width = tmpPic->Width;
         m_Bmp->Height = tmpPic->Height;
@@ -233,14 +237,14 @@ void TSprite::LoadFromFile(String const& filename)
     }
     else if (ext == ".bmp")
     {
-        m_Bmp->LoadFromFile(filename);
+        m_Bmp->LoadFromFile(filename.c_str());
     }
     else //try to load whatever it is
     {
         TPicture* tmpPic = new TPicture;
         std::unique_ptr<TPicture> auto_tmpPic(tmpPic);
 
-        tmpPic->LoadFromFile(filename);
+        tmpPic->LoadFromFile(filename.c_str());
         m_Bmp->PixelFormat = pf24bit;
         m_Bmp->Width = tmpPic->Width;
         m_Bmp->Height = tmpPic->Height;
@@ -253,7 +257,7 @@ void TSprite::LoadFromFile(String const& filename)
 void TSprite::Reset()
 {
     FreeBitmap();
-    m_Filename = EmptyStr;
+    m_Filename = "";
     m_Bmp = new Graphics::TBitmap();
 }
 //---------------------------------------------------------------------------

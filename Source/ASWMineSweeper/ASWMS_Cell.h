@@ -31,13 +31,14 @@ namespace ASWMS
 class TCell
 {
 public:
+    bool Discovered;
     bool IsMine;
     bool MarkedAsMine;
     bool MarkedAsQuestion;
 
 public:
     TCell();
-    TCell(bool isMine, bool markedAsMine, bool markedAsQuestion);
+    TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion);
     TCell(TCell const&) = default;
     ~TCell();
 

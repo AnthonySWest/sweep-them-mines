@@ -19,8 +19,6 @@ limitations under the License.
 ************************************************************************** */
 
 //---------------------------------------------------------------------------
-#include <vcl.h>
-//---------------------------------------------------------------------------
 // Module header
 #include "ASWMS_Sprites.h"
 //---------------------------------------------------------------------------
@@ -47,47 +45,104 @@ TSprites::~TSprites()
 {
 }
 //---------------------------------------------------------------------------
-TSprites::TSpriteList& TSprites::GetDigits()
+void TSprites::LoadDigits_Proximity(std::string const& digitsDir)
 {
-    return m_Digits;
+    if (!TPathTool::Dir_Exists_WinAPI(digitsDir))
+        throw Exception(("Proximity digits directory does not exist: " + digitsDir).c_str());
+
+    std::string filename;
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        TSprite sprite;
+        Digits_Proximity.push_back(sprite);
+
+        filename = "Proximity_" + std::to_string(i + 1) + ".png";
+        filename = TPathTool::Combine(digitsDir, filename);
+        Digits_Proximity[i].LoadFromFile(filename);
+    }
 }
 //---------------------------------------------------------------------------
-void TSprites::LoadDigits(String const& digitsDir)
+void TSprites::LoadDigits_Score(std::string const& digitsDir)
 {
-    if (!DirectoryExists(digitsDir))
-        throw Exception("Digits directory does not exist: " + digitsDir);
+    if (!TPathTool::Dir_Exists_WinAPI(digitsDir))
+        throw Exception(("Digits directory does not exist: " + digitsDir).c_str());
 
-    String filename;
+    std::string filename;
 
     for (size_t i = 0; i < 10; i++)
     {
         TSprite sprite;
-        m_Digits.push_back(sprite);
+        Digits_Score.push_back(sprite);
 
-        filename = "Digit_" + String(i) + ".png";
-        filename = TPathTool::Combine(digitsDir.c_str(), filename.c_str());
-        m_Digits[i].LoadFromFile(filename);
+        filename = "Digit_" + std::to_string(i) + ".png";
+        filename = TPathTool::Combine(digitsDir, filename);
+        Digits_Score[i].LoadFromFile(filename);
     }
 
     TSprite sprite;
-    m_Digits.push_back(sprite);
-    filename = TPathTool::Combine(digitsDir.c_str(), L"Digit_Blank.png");
-    m_Digits[m_Digits.size() - 1].LoadFromFile(filename);
+    Digits_Score.push_back(sprite);
+    filename = TPathTool::Combine(digitsDir, "Digit_Blank.png");
+    Digits_Score[Digits_Score.size() - 1].LoadFromFile(filename);
 }
 //---------------------------------------------------------------------------
-void TSprites::LoadSprites(String const& imagesDir)
+void TSprites::LoadGeneralSprites(std::string const& spritesDir)
+{
+    if (!TPathTool::Dir_Exists_WinAPI(spritesDir))
+        throw Exception(("Sprites directory does not exist: " + spritesDir).c_str());
+
+    FaceHappy.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Happy.png"));
+    FaceScared.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Scared.png"));
+    FaceToast.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Toast.png"));
+    Flag.LoadFromFile(TPathTool::Combine(spritesDir, "Flag.png"));
+    Mine.LoadFromFile(TPathTool::Combine(spritesDir, "Mine.png"));
+    Question.LoadFromFile(TPathTool::Combine(spritesDir, "Question.png"));
+}
+//---------------------------------------------------------------------------
+void TSprites::LoadSprites(std::string const& imagesDir)
 {
     Reset();
 
-    if (!DirectoryExists(imagesDir))
-        throw Exception("Images directory does not exist:\n\n" + imagesDir);
+    if (!TPathTool::Dir_Exists_WinAPI(imagesDir))
+        throw Exception(("Images directory does not exist:\n\n" + imagesDir).c_str());
 
-    LoadDigits(TPathTool::Combine(AnsiString(imagesDir).c_str(), "Digits").c_str());
+    LoadGeneralSprites(TPathTool::Combine(imagesDir, "Sprites"));
+    LoadDigits_Proximity(TPathTool::Combine(imagesDir, "Sprites"));
+    LoadDigits_Score(TPathTool::Combine(imagesDir, "Digits"));
+    LoadTiles(TPathTool::Combine(imagesDir, "Tiles"));
+}
+//---------------------------------------------------------------------------
+void TSprites::LoadTiles(std::string const& tilesDir)
+{
+    if (!TPathTool::Dir_Exists_WinAPI(tilesDir))
+        throw Exception(("Tiles directory does not exist: " + tilesDir).c_str());
+
+    TSprite sprite;
+
+    sprite.LoadFromFile(TPathTool::Combine(tilesDir, "Covered.png"));
+    Tiles.push_back(sprite);
+    sprite.LoadFromFile(TPathTool::Combine(tilesDir, "Covered_Clicked.png"));
+    Tiles.push_back(sprite);
+    sprite.LoadFromFile(TPathTool::Combine(tilesDir, "Covered_Lit.png"));
+    Tiles.push_back(sprite);
+    sprite.LoadFromFile(TPathTool::Combine(tilesDir, "Uncovered.png"));
+    Tiles.push_back(sprite);
+    sprite.LoadFromFile(TPathTool::Combine(tilesDir, "Uncovered_Boom.png"));
+    Tiles.push_back(sprite);
 }
 //---------------------------------------------------------------------------
 void TSprites::Reset()
 {
-    m_Digits.clear();
+    Digits_Proximity.clear();
+    Digits_Score.clear();
+    Tiles.clear();
+
+    FaceHappy.Reset();
+    FaceScared.Reset();
+    FaceToast.Reset();
+    Flag.Reset();
+    Mine.Reset();
+    Question.Reset();
 }
 //---------------------------------------------------------------------------
 
