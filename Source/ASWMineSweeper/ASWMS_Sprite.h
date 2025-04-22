@@ -1,12 +1,8 @@
 /* **************************************************************************
-ConsoleHelper.h
+ASWMS_Sprite.h
 Author: Anthony S. West - ASW Software
 
-Contains functions for creating a console window from a WinMain app.
-
-Every attempt should be made to keep this module at least Windows portable.
-
-Copyright 2022 Anthony S. West
+Copyright 2025 Anthony S. West
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,50 +18,47 @@ limitations under the License.
 
 ************************************************************************** */
 
+#ifndef ASWMS_SpriteH
+#define ASWMS_SpriteH
 //---------------------------------------------------------------------------
-#pragma once
-//---------------------------------------------------------------------------
-#ifndef ConsoleHelperH
-#define ConsoleHelperH
-//---------------------------------------------------------------------------
-#include "ASWTools_Common.h"
+#include <string>
 //---------------------------------------------------------------------------
 
-namespace ASWTools
+namespace ASWMS
 {
 
 /////////////////////////////////////////////////////////////////////////////
-// TConsole
+// TSprite
 /////////////////////////////////////////////////////////////////////////////
-class TConsole
+class TSprite
 {
-public: // Static variables
-    static const int Default_MinBuffer = 8192;
-
-protected:
-    static bool RedirectConsoleIO();
-
 private:
-    TConsole();
+    Graphics::TBitmap* m_Bmp;
+    std::string m_Filename;
+
+    void FreeBitmap();
+    std::string GetPictureFileExtension(std::string const& filename);
 
 public:
-    static bool CreateNewConsole(int16_t minLength = Default_MinBuffer);
-    static bool ReleaseConsole();
+    TSprite();
+    TSprite(TSprite const& other);
+    ~TSprite();
 
-    // Attaches to existing console instead of creating a new console
-    static bool AttachParentConsole(int16_t minLength = Default_MinBuffer);
+    TSprite& operator=(TSprite const& rhs);
 
-    static bool IsStandardInAConsole();
-    static bool IsStandardOutAConsole();
+    TSprite& CopyFrom(TSprite const& other);
+    void LoadFromFile(std::string const& filename);
+    void Reset();
 
-    static void AdjustConsoleBuffer(int16_t minLength);
-    static void TestConsole();
+public: // Getters/Setters
+    Graphics::TBitmap* GetBitmap();
+    std::string GetFilename();
 
-public:
-    ~TConsole();
+    __property Graphics::TBitmap* Bmp = { read = GetBitmap };
+    __property std::string Filename = { read = GetFilename };
 };
 
-} // namespace ASWTools
+} // namespace ASWMS
 
 //---------------------------------------------------------------------------
-#endif // #ifndef ConsoleHelperH
+#endif // #ifndef ASWMS_SpriteH

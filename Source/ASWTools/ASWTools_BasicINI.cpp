@@ -1,5 +1,5 @@
 /* **************************************************************************
-BasicINI.cpp
+ASWTools_BasicINI.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -22,12 +22,12 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 // Module header
-#include "BasicINI.h"
+#include "ASWTools_BasicINI.h"
 //---------------------------------------------------------------------------
 #include <memory>
 //---------------------------------------------------------------------------
-#include "PathTool.h"
-#include "StringTool.h"
+#include "ASWTools_Path.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 
 namespace ASWTools
@@ -126,7 +126,7 @@ bool TSection::IsGlobalSection()
     return Name.length() == 0;
 }
 //---------------------------------------------------------------------------
-bool TSection::AddKeyVal(const std::string& key, const std::string& value)
+bool TSection::AddKeyVal(std::string const& key, std::string const& value)
 {
     TKeyVal keyVal;
     keyVal.Key = key;
@@ -134,7 +134,7 @@ bool TSection::AddKeyVal(const std::string& key, const std::string& value)
     return AddKeyVal(keyVal);
 }
 //---------------------------------------------------------------------------
-bool TSection::AddKeyVal(const TKeyVal& keyVal)
+bool TSection::AddKeyVal(TKeyVal const& keyVal)
 {
     //don't allow a key to begin with a section start
     //on second thought, it will still probably work, so, let the caller be the boss
@@ -151,7 +151,7 @@ bool TSection::AddKeyVal(const TKeyVal& keyVal)
     - If the key does not exist, a new key will be added with the value of defaultValue.
     - If the key does exist, nothing is done.
 */
-bool TSection::AddKeyVal_IfNotExists(const std::string& key, const std::string& defaultValue, bool searchIgnoreCase)
+bool TSection::AddKeyVal_IfNotExists(std::string const& key, std::string const& defaultValue, bool searchIgnoreCase)
 {
     if (NotFound == FindKey(key, searchIgnoreCase))
         return AddKeyVal(key, defaultValue);
@@ -164,14 +164,14 @@ bool TSection::AddKeyVal_IfNotExists(const std::string& key, const std::string& 
     - If the key does not exist, a new key will be added with the value of defaultValue.
     - If the key does exist, nothing is done.
 */
-bool TSection::AddKeyVal_IfNotExists(const TKeyVal& keyVal, bool searchIgnoreCase)
+bool TSection::AddKeyVal_IfNotExists(TKeyVal const& keyVal, bool searchIgnoreCase)
 {
     if (NotFound == FindKey(keyVal.Key, searchIgnoreCase))
         return AddKeyVal(keyVal);
     return true;
 }
 //---------------------------------------------------------------------------
-bool TSection::InsertKeyVal(size_t index, const std::string& key, const std::string& value)
+bool TSection::InsertKeyVal(size_t index, std::string const& key, std::string const& value)
 {
     TKeyVal keyVal;
     keyVal.Key = key;
@@ -179,7 +179,7 @@ bool TSection::InsertKeyVal(size_t index, const std::string& key, const std::str
     return InsertKeyVal(index, keyVal);
 }
 //---------------------------------------------------------------------------
-bool TSection::InsertKeyVal(size_t index, const TKeyVal& keyVal)
+bool TSection::InsertKeyVal(size_t index, TKeyVal const& keyVal)
 {
     if (index >= KeyVals.size())
     {
@@ -198,7 +198,7 @@ bool TSection::InsertKeyVal(size_t index, const TKeyVal& keyVal)
 
     Inserts comment as value with blank key
 */
-bool TSection::InsertComment(size_t index, const std::string& comment)
+bool TSection::InsertComment(size_t index, std::string const& comment)
 {
     //if comment is blank, insert a comment marker
     if (comment.length() == 0)
@@ -220,7 +220,7 @@ bool TSection::DeleteKeyVal(size_t index)
     return true;
 }
 //---------------------------------------------------------------------------
-size_t TSection::FindKey(const std::string& key, bool ignoreCase) const
+size_t TSection::FindKey(std::string const& key, bool ignoreCase) const
 {
     for (size_t i = 0; i < KeyVals.size(); i++)
     {
@@ -237,7 +237,7 @@ size_t TSection::FindKey(const std::string& key, bool ignoreCase) const
     return NotFound;
 }
 //---------------------------------------------------------------------------
-size_t TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
+size_t TSection::FindOrCreateKey(std::string const& key, bool ignoreCase)
 {
     size_t idx = FindKey(key, ignoreCase);
 
@@ -252,11 +252,11 @@ size_t TSection::FindOrCreateKey(const std::string& key, bool ignoreCase)
     return idx;
 }
 //---------------------------------------------------------------------------
-size_t TSection::FindVal(const std::string& value, bool ignoreCase) const
+size_t TSection::FindVal(std::string const& value, bool ignoreCase) const
 {
     for (size_t i = 0; i < KeyVals.size(); i++)
     {
-        const TKeyVal* keyValP = &KeyVals[i];
+        TKeyVal const* keyValP = &KeyVals[i];
 
         if ((value.length() == 0 && keyValP->Value.length() == 0) ||
             (ignoreCase && _stricmp(value.c_str(), keyValP->Value.c_str()) == 0) ||
@@ -279,7 +279,7 @@ bool TSection::HasOneOrMoreKeyValuePairs() const
     return false;
 }
 //---------------------------------------------------------------------------
-EErrINI TSection::Save(FILE* fOut, const char assignOperator, const std::string& paddingAfterOperator)
+EErrINI TSection::Save(FILE* fOut, char const assignOperator, std::string const& paddingAfterOperator)
 {
     if (nullptr == fOut)
     {
@@ -363,7 +363,7 @@ bool TBasicINI::AddSection()
     return true;
 }
 //---------------------------------------------------------------------------
-bool TBasicINI::AddSection(const TSection& section)
+bool TBasicINI::AddSection(TSection const& section)
 {
     Sections.push_back(section);
     return true;
@@ -374,7 +374,7 @@ bool TBasicINI::InsertSection(size_t index)
     return InsertSection(index, TSection());
 }
 //---------------------------------------------------------------------------
-bool TBasicINI::InsertSection(size_t index, const TSection& section)
+bool TBasicINI::InsertSection(size_t index, TSection const& section)
 {
     if (index >= Sections.size())
     {
@@ -399,346 +399,6 @@ bool TBasicINI::DeleteSection(size_t index)
     return true;
 }
 //---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::Dir_Exists_WinAPI(std::string const& dir)
-{
-    DWORD res = GetFileAttributesA(dir.c_str());
-    if (INVALID_FILE_ATTRIBUTES == res)
-        return false; //dir is invalid
-
-    if (res & FILE_ATTRIBUTE_DIRECTORY)
-        return true;
-    return false;
-}
-//---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::Dir_Exists_WinAPI(std::wstring const& dir)
-{
-    DWORD res = GetFileAttributesW(dir.c_str());
-    if (INVALID_FILE_ATTRIBUTES == res)
-        return false; //dir is invalid
-
-    if (res & FILE_ATTRIBUTE_DIRECTORY)
-        return true;
-    return false;
-}
-//---------------------------------------------------------------------------
-// -Overload
-bool TBasicINI::Dir_CreateDirWithSubs(std::string const& dir)
-{
-    return Dir_CreateDirWithSubs(TStrTool::Utf8ToUnicodeStr(dir));
-}
-//---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::Dir_CreateDirWithSubs(std::wstring const& dir)
-{
-    //see (free use - modified): http://blog.nuclex-games.com/2012/06/how-to-create-directories-recursively-with-win32/
-#ifdef USE_ELOG
-    const wchar_t codeSectionStr[] = L"TBasicINI::Dir_CreateDirWithSubs";
-#endif // #ifdef USE_ELOG
-    static wchar_t const* separators = L"\\/";
-    DWORD lastErr;
-    std::wstring directory;
-
-    // ASW - Remove ending slash
-    if (dir.length() > 0 && (dir[dir.length() - 1] == L'\\' || dir[dir.length() - 1] == L'/'))
-        directory = dir.substr(0, dir.length() - 1);
-    else
-        directory = dir;
-
-    DWORD fileAttributes = ::GetFileAttributesW(directory.c_str());
-
-    if(INVALID_FILE_ATTRIBUTES == fileAttributes)
-    {
-        // Recursively do it all again for the parent directory, if any
-        std::size_t slashIndex = directory.find_last_of(separators);
-        if(slashIndex != std::wstring::npos)
-        {
-            if (!Dir_CreateDirWithSubs(directory.substr(0, slashIndex)))
-            {
-                //don't log - recursive call already did
-                return false;
-            }
-        }
-
-        // Create the last directory on the path (the recursive calls will have taken
-        // care of the parent directories by now)
-        BOOL result = ::CreateDirectoryW(directory.c_str(), nullptr);
-        if(result == FALSE &&
-           (lastErr = ::GetLastError()) != ERROR_ALREADY_EXISTS) //this shouldn't happen, given the attributes check above, but doesn't hurt
-        {
-#ifdef USE_ELOG
-            ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: Error: Failed to create dir: \"%s\". WinLastErr: %u (0x%08lx): \"%s\".\n",
-                codeSectionStr, directory.c_str(), lastErr, lastErr, TStrTool::GetWindowsLastErrorCodeAsStringW(lastErr).c_str());
-#endif
-            //throw std::runtime_error("Could not create directory");
-            return false;
-        }
-    }
-    else
-    { // Specified directory name already exists as a file or directory
-
-        bool isDirectoryOrJunction = ((fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ||
-            ((fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0);
-
-        if(!isDirectoryOrJunction)
-        {
-#ifdef USE_ELOG
-            ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: Error: Failed to create dir: \"%s\". A file with the same name exists.\n",
-                codeSectionStr, directory.c_str());
-#endif
-            //throw std::runtime_error("Could not create directory because a file with the same name exists");
-            return false;
-        }
-
-    }
-
-    return true;
-}
-//---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::File_Exists_WinAPI(std::string const& fileName)
-{
-    DWORD attr = ::GetFileAttributesA(fileName.c_str());
-
-    if (INVALID_FILE_ATTRIBUTES == attr)
-        return false; //file does not exist
-
-    if (FILE_ATTRIBUTE_DIRECTORY & attr)
-        return false; //path is a directory
-
-    return true;
-}
-//---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::File_Exists_WinAPI(std::wstring const& fileName)
-{
-    DWORD attr = ::GetFileAttributesW(fileName.c_str());
-
-    if (INVALID_FILE_ATTRIBUTES == attr)
-        return false; //file does not exist
-
-    if (FILE_ATTRIBUTE_DIRECTORY & attr)
-        return false; //path is a directory
-
-    return true;
-}
-//---------------------------------------------------------------------------
-bool TBasicINI::File_GetLastWriteTime(const std::string& fn, FILETIME& lastwritetime)
-{
-    HANDLE h = nullptr;
-    BY_HANDLE_FILE_INFORMATION info;
-
-    lastwritetime.dwLowDateTime   = 0;
-    lastwritetime.dwHighDateTime  = 0;
-
-    // get a file handle for fn
-    // Note: FILE_SHARE_WRITE is needed so that a shared file that is being appended to is processed correctly.
-    DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-    h = ::CreateFileA(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (INVALID_HANDLE_VALUE == h)
-        return false;
-    std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
-
-    if (!::GetFileInformationByHandle(h, &info))
-        return false;
-
-    lastwritetime = info.ftLastWriteTime;
-    return true;
-}
-//---------------------------------------------------------------------------
-bool TBasicINI::File_GetLastWriteTime(const std::wstring& fn, FILETIME& lastwritetime)
-{
-    HANDLE h = nullptr;
-    BY_HANDLE_FILE_INFORMATION info;
-
-    lastwritetime.dwLowDateTime = 0;
-    lastwritetime.dwHighDateTime = 0;
-
-    // get a file handle for fn
-    // Note: FILE_SHARE_WRITE is needed so that a shared file that is being appended to is processed correctly.
-    DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-    h = ::CreateFileW(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (INVALID_HANDLE_VALUE == h)
-        return false;
-    std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
-
-    if (!::GetFileInformationByHandle(h, &info))
-        return false;
-
-    lastwritetime = info.ftLastWriteTime;
-    return true;
-}
-//---------------------------------------------------------------------------
-bool TBasicINI::File_Open(std::string const& fileName, FILE*& filePointer, char const* fileType, unsigned char openMode)
-{
-    return File_Open(
-        TStrTool::Utf8ToUnicodeStr(fileName), filePointer, TStrTool::Utf8ToUnicodeStr(fileType).c_str(), openMode);
-}
-//---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::File_Open(
-    std::wstring const& fileName, FILE*& filePointer, wchar_t const* fileType, unsigned char openMode)
-{
-    const int openFailWaitMS = 30;
-    const int openMaxTries = 30;
-    int lastErrno;
-    unsigned int tries;
-    DWORD lastError;
-
-    //First, make sure that we can open the file.
-    if(nullptr != filePointer)
-        File_Close(filePointer);
-
-    //If overwriting an existing file, delete the old file first.  This helps
-    //Windows figure out that it no longer has the file open.
-    if((nullptr == wcschr(fileType, L'a')) &&
-       (nullptr == wcschr(fileType, L'r')) &&
-       (nullptr == wcschr(fileType, L'+')) &&
-       File_Exists_WinAPI(fileName))
-    {
-        //File exists, try deleting it.
-        if (openMode == SH_DENYNO)
-        {
-            File_Remove(fileName);
-            Sleep(0); //Turn remaining time slice back to windows - give it a bit of a chance to delete.
-        }
-    }
-
-    //If the file is being opened for write, make sure that the path to the file exists.
-    if (nullptr != wcschr(fileType, L'w'))
-    {
-        std::wstring path = TPathTool::ExtractDir(fileName);
-
-        if (!Dir_Exists_WinAPI(path))
-            Dir_CreateDirWithSubs(path);
-    }
-
-    ::SetLastError(ERROR_SUCCESS); //start with a clean slate before attempting to open
-
-    //Now we can try to open the file.
-    tries = 0;
-    do
-    {
-        //clear the last windows error
-        errno = 0;
-        //Try to open/create file.  Try 30 times, with 30 milliseconds between each try.
-        filePointer = _wfsopen(fileName.c_str(), fileType, openMode);
-        lastError = ::GetLastError();
-        lastErrno = errno; //tracking alternate windows 'errno' value because GetLastError() doesn't
-                           //always return an error when there is one.
-        tries++;
-
-        if(lastError != 0 || lastErrno != 0)
-            Sleep(openFailWaitMS); //wait
-        Sleep(0); //Turn remaining time slice back to windows - give windows a chance to process closures/opens.
-    }
-    //Try opening the file again if it not open yet, or the last error is that the
-    //file is open in another process (ERROR_SHARING_VIOLATION = 32), and we have
-    //tried fewer than 30 times.
-    while ((nullptr == filePointer) &&                          //EACCES = permission denied - value = 5
-           (ERROR_SHARING_VIOLATION == lastError || EACCES == lastErrno) &&
-           (tries <= openMaxTries));
-
-    //Restore the windows last error.
-    //Note: Calling GetLastError() resets the system error to zero. This can cause problems
-    //with callers of this function that are trying to find out why the function failed.
-    if (nullptr == filePointer)
-        ::SetLastError(lastError);
-
-    return filePointer != nullptr; //Return success/failure
-}
-//---------------------------------------------------------------------------
-// -Static
-bool TBasicINI::File_Close(FILE*& file)
-{
-    bool result = true;
-
-    if (nullptr != file)
-    {
-        int flushError = fflush(file); //Note that fflush has no affect on streams opened for reading
-                                       //but it does solve issues with files not being closed all
-                                       //the way when fclose calls fflush and gets an error.
-        fclose(file);
-        Sleep(0); //Turn remaining time slice back to windows - give it a bit of a chance to close.
-
-        if (EOF == flushError)
-        {
-#ifdef USE_ELOG
-            std::wstring msg = L"File flush error. Errno: " + std::to_wstring(errno);
-            if (ELog.Initialized())
-                ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: %s\n", L"TBasicINI::File_Close", msg.c_str());
-#endif
-            result = false;
-        }
-    }
-
-    file = nullptr;
-    return result;
-}
-//---------------------------------------------------------------------------
-// -Static
-// -maxWaitMS defaults to 4000 milliseconds - 0 ms is unlimited wait
-bool TBasicINI::File_Remove(std::string const& fileName, DWORD maxWaitMS)
-{
-    std::wstring fileNameW = TStrTool::Utf8ToUnicodeStr(fileName);
-    return File_Remove(fileNameW, maxWaitMS);
-}
-//---------------------------------------------------------------------------
-// -Static
-// -maxWaitMS defaults to 4000 milliseconds - 0 ms is unlimited wait
-bool TBasicINI::File_Remove(std::wstring const& fileName, DWORD maxWaitMS)
-{
-#ifdef USE_ELOG
-    const wchar_t codeSectionStr[] = L"TBasicINI::File_Remove";
-#endif
-
-    errno = 0; //clear windows error
-
-    if (!File_Exists_WinAPI(fileName))
-        return true;
-
-    if(::DeleteFileW(fileName.c_str()))
-    {
-        //DWORD startTick = ::GetTickCount();
-        //DWORD currentTick;
-        ULONGLONG startTick = ::GetTickCount64();
-        ULONGLONG currentTick;
-
-        do
-        {
-            //currentTick = ::GetTickCount();
-            currentTick = ::GetTickCount64();
-
-            if (maxWaitMS != 0 && ((currentTick - startTick) >= maxWaitMS))
-            {
-#ifdef USE_ELOG
-                ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: Max wait reached for delete file: %s\n",
-                    codeSectionStr, fileName.c_str());
-#endif
-                return false;
-            }
-
-            ::Sleep(0); //turn remaining time slice back to windows
-        } while (File_Exists_WinAPI(fileName));
-
-        return true;
-    }
-
-    //Store the windows last error and restore it after logprintf.
-    //Note: Calling GetLastError() resets the system error to zero. This can cause problems
-    //with callers of this function that are trying to find out why the function failed.
-#ifdef USE_ELOG
-    DWORD winLastErrTmp = ::GetLastError();
-    std::wstring errStr = TStrTool::GetWindowsLastErrorCodeAsStringW(winLastErrTmp);
-    ELog.fwprintf(ELogMsgLevel::LML_Light, L"%sError: Failed to delete file: \"%s\" (0x%08lx): %s\n",
-        codeSectionStr, fileName.c_str(), winLastErrTmp, errStr.c_str());
-    ::SetLastError(winLastErrTmp); //restor last error in case caller needs to peek at it
-#endif
-
-    return false;
-}
-//---------------------------------------------------------------------------
 size_t TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) const
 {
     for (size_t i = 0; i < Sections.size(); i++)
@@ -760,7 +420,7 @@ size_t TBasicINI::FindSection(const std::string& sectionName, bool ignoreCase) c
     - On success, returns either the found index of existing section, or index of newly added section.
     - On failure, returns less than zero.
 */
-size_t TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignoreCase)
+size_t TBasicINI::FindOrCreateSection(std::string const& sectionName, bool ignoreCase)
 {
     size_t idx = FindSection(sectionName, ignoreCase);
 
@@ -775,7 +435,7 @@ size_t TBasicINI::FindOrCreateSection(const std::string& sectionName, bool ignor
     return idx;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Load(const std::string& fileNameINI, const char assignOperator, size_t maxLineLen)
+EErrINI TBasicINI::Load(std::string const& fileNameINI, char const assignOperator, size_t maxLineLen)
 {
     Reset();
 
@@ -784,25 +444,25 @@ EErrINI TBasicINI::Load(const std::string& fileNameINI, const char assignOperato
         return EErrINI::EI_BadParameter;
     }
 
-    if (!File_Exists_WinAPI(fileNameINI))
+    if (!TPathTool::File_Exists_WinAPI(fileNameINI))
     {
         return EErrINI::EI_FileNotExists;
     }
 
     FILE* fIn = nullptr;
 
-    if (!File_Open(TStrTool::Utf8ToUnicodeStr(fileNameINI), fIn, L"r", SH_DENYWR))
+    if (!TPathTool::File_Open(TStrTool::Utf8ToUnicodeStr(fileNameINI), fIn, L"r", SH_DENYWR))
     {
         return EErrINI::EI_FailOpenRead;
     }
 
     EErrINI result = Load(fIn, assignOperator, maxLineLen);
-    File_Close(fIn);
+    TPathTool::File_Close(fIn);
 
     return result;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
+EErrINI TBasicINI::Load(FILE* fIn, char const assignOperator, size_t maxLineLen)
 {
     if (nullptr == fIn)
     {
@@ -810,7 +470,7 @@ EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
     }
 
     EErrINI result = EErrINI::EI_NoError;
-    const size_t lineSize = maxLineLen + sizeof('\0') + sizeof('\r') + sizeof('\n');
+    size_t const lineSize = maxLineLen + sizeof('\0') + sizeof('\r') + sizeof('\n');
     char* line = new char[lineSize];
     std::unique_ptr<char[]> auto_line(line);
 
@@ -915,32 +575,32 @@ EErrINI TBasicINI::Load(FILE* fIn, const char assignOperator, size_t maxLineLen)
     return result;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Save(const std::string& fileNameINI, bool overWrite, const char assignOperator)
+EErrINI TBasicINI::Save(std::string const& fileNameINI, bool overWrite, char const assignOperator)
 {
     if (TStrTool::IsEmptyOrWhiteSpace(fileNameINI))
     {
         return EErrINI::EI_BadParameter;
     }
 
-    if (!overWrite && File_Exists_WinAPI(fileNameINI))
+    if (!overWrite && TPathTool::File_Exists_WinAPI(fileNameINI))
     {
         return EErrINI::EI_FileExists;
     }
 
     FILE* fOut = nullptr;
 
-    if (!File_Open(TStrTool::Utf8ToUnicodeStr(fileNameINI), fOut, L"w", SH_DENYWR))
+    if (!TPathTool::File_Open(TStrTool::Utf8ToUnicodeStr(fileNameINI), fOut, L"w", SH_DENYWR))
     {
         return EErrINI::EI_FailOpenWrite;
     }
 
     EErrINI result = Save(fOut, assignOperator);
-    File_Close(fOut);
+    TPathTool::File_Close(fOut);
 
     return result;
 }
 //---------------------------------------------------------------------------
-EErrINI TBasicINI::Save(FILE* fOut, const char assignOperator)
+EErrINI TBasicINI::Save(FILE* fOut, char const assignOperator)
 {
     if (nullptr == fOut)
     {

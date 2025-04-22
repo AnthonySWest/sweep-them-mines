@@ -1,5 +1,5 @@
 /* **************************************************************************
-Version.cpp
+ASWTools_Version.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -22,7 +22,7 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 // Module header
-#include "Version.h"
+#include "ASWTools_Version.h"
 //---------------------------------------------------------------------------
 
 namespace ASWTools

@@ -1,5 +1,5 @@
 /* **************************************************************************
-BasicINI.h
+ASWTools_BasicINI.h
 Author: Anthony S. West - ASW Software
 
 Contains routines for INI reading/writing
@@ -22,11 +22,9 @@ limitations under the License.
 
 ************************************************************************** */
 
-#ifndef BasicINIH
-#define BasicINIH
+#ifndef ASWTools_BasicINIH
+#define ASWTools_BasicINIH
 //---------------------------------------------------------------------------
-#include <windows.h>
-#include <share.h>
 #include <string>
 #include <vector>
 //---------------------------------------------------------------------------
@@ -89,8 +87,8 @@ public:
 class TSection
 {
 public: // Static variables
-    static const char SectionStart = '[';
-    static const char SectionEnd = ']';
+    static char const SectionStart = '[';
+    static char const SectionEnd = ']';
     static size_t const NotFound = static_cast<size_t>(-1);
 
 public:
@@ -106,22 +104,22 @@ public:
 
     void Reset();
 
-    bool AddKeyVal(const std::string& key, const std::string& value);
-    bool AddKeyVal(const TKeyVal& keyVal);
-    bool AddKeyVal_IfNotExists(const std::string& key, const std::string& defaultValue, bool searchIgnoreCase);
-    bool AddKeyVal_IfNotExists(const TKeyVal& keyVal, bool searchIgnoreCase);
-    bool InsertKeyVal(size_t index, const std::string& key, const std::string& value);
-    bool InsertKeyVal(size_t index, const TKeyVal& keyVal);
-    bool InsertComment(size_t index, const std::string& comment);
+    bool AddKeyVal(std::string const& key, std::string const& value);
+    bool AddKeyVal(TKeyVal const& keyVal);
+    bool AddKeyVal_IfNotExists(std::string const& key, std::string const& defaultValue, bool searchIgnoreCase);
+    bool AddKeyVal_IfNotExists(TKeyVal const& keyVal, bool searchIgnoreCase);
+    bool InsertKeyVal(size_t index, std::string const& key, std::string const& value);
+    bool InsertKeyVal(size_t index, TKeyVal const& keyVal);
+    bool InsertComment(size_t index, std::string const& comment);
     bool DeleteKeyVal(size_t index);
-    size_t FindKey(const std::string& key, bool ignoreCase) const;
-    size_t FindOrCreateKey(const std::string& key, bool ignoreCase);
-    size_t FindVal(const std::string& value, bool ignoreCase) const;
+    size_t FindKey(std::string const& key, bool ignoreCase) const;
+    size_t FindOrCreateKey(std::string const& key, bool ignoreCase);
+    size_t FindVal(std::string const& value, bool ignoreCase) const;
 
     bool HasOneOrMoreKeyValuePairs() const;
 
     bool IsGlobalSection();
-    EErrINI Save(FILE* fOut, const char assignOperator, const std::string& paddingAfterOperator = "");
+    EErrINI Save(FILE* fOut, char const assignOperator, std::string const& paddingAfterOperator = "");
 };
 
 
@@ -139,25 +137,6 @@ private:
     bool Reset_Private();
 
 public:
-    static bool Dir_Exists_WinAPI(std::string const& dir);
-    static bool Dir_Exists_WinAPI(std::wstring const& dir);
-    static bool Dir_CreateDirWithSubs(std::string const& dir);
-    static bool Dir_CreateDirWithSubs(std::wstring const& dir);
-
-public:
-    static bool File_Exists_WinAPI(std::string const& fileName);
-    static bool File_Exists_WinAPI(std::wstring const& fileName);
-    static bool File_GetLastWriteTime(std::string const& fn, FILETIME& lastwritetime);
-    static bool File_GetLastWriteTime(std::wstring const& fn, FILETIME& lastwritetime);
-    static bool File_Open(std::string const& fileName, FILE*& filePointer, char const* fileType,
-        unsigned char openMode = SH_DENYNO); //default is share deny none
-    static bool File_Open(std::wstring const& fileName, FILE*& filePointer, wchar_t const* fileType,
-        unsigned char openMode = SH_DENYNO); //default is share deny none
-    static bool File_Close(FILE*& file);
-    static bool File_Remove(std::string const& fileName, DWORD maxWaitMS = 4000);
-    static bool File_Remove(std::wstring const& fileName, DWORD maxWaitMS = 4000);
-
-public:
     TBasicINI();
     ~TBasicINI();
 
@@ -172,18 +151,18 @@ public:
     virtual bool Reset(); //calls Reset_Private() - It is good practice for the constructor to never call a virtual function
 
     virtual bool AddSection();
-    virtual bool AddSection(const TSection& section);
+    virtual bool AddSection(TSection const& section);
     virtual bool InsertSection(size_t index);
-    virtual bool InsertSection(size_t index, const TSection& section);
+    virtual bool InsertSection(size_t index, TSection const& section);
     virtual bool DeleteSection(size_t index);
-    virtual size_t FindSection(const std::string& sectionName, bool ignoreCase) const;
-    virtual size_t FindOrCreateSection(const std::string& sectionName, bool ignoreCase);
+    virtual size_t FindSection(std::string const& sectionName, bool ignoreCase) const;
+    virtual size_t FindOrCreateSection(std::string const& sectionName, bool ignoreCase);
 
-    virtual EErrINI Load(const std::string& fileNameINI, const char assignOperator = DefaultAssignOperator,
+    virtual EErrINI Load(std::string const& fileNameINI, char const assignOperator = DefaultAssignOperator,
         size_t maxLineLen = DefaultMaxLineLength);
-    virtual EErrINI Load(FILE* fIn, const char assignOperator = DefaultAssignOperator, size_t maxLineLen = DefaultMaxLineLength);
-    virtual EErrINI Save(const std::string& fileNameINI, bool overWrite, const char assignOperator = DefaultAssignOperator);
-    virtual EErrINI Save(FILE* fOut, const char assignOperator = DefaultAssignOperator);
+    virtual EErrINI Load(FILE* fIn, char const assignOperator = DefaultAssignOperator, size_t maxLineLen = DefaultMaxLineLength);
+    virtual EErrINI Save(std::string const& fileNameINI, bool overWrite, char const assignOperator = DefaultAssignOperator);
+    virtual EErrINI Save(FILE* fOut, char const assignOperator = DefaultAssignOperator);
 };
 
 } // namespace BasicINI
@@ -191,4 +170,4 @@ public:
 } // namespace ASWTools
 
 //---------------------------------------------------------------------------
-#endif // #ifndef BasicINIH
+#endif // #ifndef ASWTools_BasicINIH

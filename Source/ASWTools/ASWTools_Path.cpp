@@ -1,5 +1,5 @@
 /* **************************************************************************
-PathTool.cpp
+ASWTools_Path.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -22,13 +22,13 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 // Module header
-#include "PathTool.h"
+#include "ASWTools_Path.h"
 //---------------------------------------------------------------------------
 #include <memory>
 //---------------------------------------------------------------------------
 #include <shlobj.h>
 //---------------------------------------------------------------------------
-#include "StringTool.h"
+#include "ASWTools_String.h"
 
 #ifdef USE_ELOG
     #include "EasyLogger.h"
@@ -54,37 +54,10 @@ wchar_t const* const TPathTool::AlphaCharsW = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 //---------------------------------------------------------------------------
 TPathTool::TPathTool()
 {
-    Reset_Private();
 }
 //---------------------------------------------------------------------------
 TPathTool::~TPathTool()
 {
-    Destroy_Private();
-}
-//---------------------------------------------------------------------------
-void TPathTool::Destroy_Private()
-{
-    //code specific to this level of inheritance goes here - no virtual functions can be called here
-}
-//---------------------------------------------------------------------------
-void TPathTool::Destroy() //virtual
-{
-    Destroy_Private();
-}
-//---------------------------------------------------------------------------
-bool TPathTool::Reset_Private()
-{
-    //code specific to this level of inheritance goes here - no virtual functions can be called here
-    Destroy_Private();
-
-    //reset class vars here
-
-    return true;
-}
-//---------------------------------------------------------------------------
-bool TPathTool::Reset() //virtual
-{
-    return Reset_Private();
 }
 //---------------------------------------------------------------------------
 bool TPathTool::IsDots(std::string str)
@@ -113,35 +86,35 @@ bool TPathTool::IsRelative(std::wstring const& path)
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true if environment var symbol found in the path.
-bool TPathTool::IsEnvironment(const std::string& path)
+bool TPathTool::IsEnvironment(std::string const& path)
 {
     return (path.find("%") != std::string::npos);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true if environment var symbol found in the path.
-bool TPathTool::IsEnvironment(const std::wstring& path)
+bool TPathTool::IsEnvironment(std::wstring const& path)
 {
     return (path.find(L"%") != std::wstring::npos);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true path starts with network slashes.
-bool TPathTool::IsNetwork(const std::string& path)
+bool TPathTool::IsNetwork(std::string const& path)
 {
     return (path.find("\\\\") == 0);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Returns true path starts with network slashes.
-bool TPathTool::IsNetwork(const std::wstring& path)
+bool TPathTool::IsNetwork(std::wstring const& path)
 {
     return (path.find(L"\\\\") == 0);
 }
 //---------------------------------------------------------------------------
 // -Static
 // - Combines two paths while properly handling directory separator chars.
-std::string TPathTool::Combine(const std::string& path1, const std::string& path2)
+std::string TPathTool::Combine(std::string const& path1, std::string const& path2)
 {
     //this method doesn't seem to be available
     //std::filesystem::path full_path = path1 / path2;
@@ -175,7 +148,7 @@ std::string TPathTool::Combine(const std::string& path1, const std::string& path
 //---------------------------------------------------------------------------
 // -Static
 // - Combines two paths while properly handling directory separator chars.
-std::wstring TPathTool::Combine(const std::wstring& path1, const std::wstring& path2)
+std::wstring TPathTool::Combine(std::wstring const& path1, std::wstring const& path2)
 {
     if (path1.length() == 0)
     {
@@ -202,12 +175,107 @@ std::wstring TPathTool::Combine(const std::wstring& path1, const std::wstring& p
     return path1 + L"\\" + path2; //neither path has a slash at the join location, return combined with a slash
 }
 //---------------------------------------------------------------------------
+bool TPathTool::Dir_Exists_WinAPI(std::string const& dir)
+{
+    DWORD res = GetFileAttributesA(dir.c_str());
+    if (INVALID_FILE_ATTRIBUTES == res)
+        return false; //dir is invalid
+
+    if (res & FILE_ATTRIBUTE_DIRECTORY)
+        return true;
+    return false;
+}
+//---------------------------------------------------------------------------
+bool TPathTool::Dir_Exists_WinAPI(std::wstring const& dir)
+{
+    DWORD res = GetFileAttributesW(dir.c_str());
+    if (INVALID_FILE_ATTRIBUTES == res)
+        return false; //dir is invalid
+
+    if (res & FILE_ATTRIBUTE_DIRECTORY)
+        return true;
+    return false;
+}
+//---------------------------------------------------------------------------
+// -Overload
+bool TPathTool::Dir_CreateDirWithSubs(std::string const& dir)
+{
+    return Dir_CreateDirWithSubs(TStrTool::Utf8ToUnicodeStr(dir));
+}
+//---------------------------------------------------------------------------
+// -Static
+bool TPathTool::Dir_CreateDirWithSubs(std::wstring const& dir)
+{
+    //see (free use - modified): http://blog.nuclex-games.com/2012/06/how-to-create-directories-recursively-with-win32/
+#ifdef USE_ELOG
+    const wchar_t codeSectionStr[] = L"TPathTool::Dir_CreateDirWithSubs";
+#endif // #ifdef USE_ELOG
+    static wchar_t const* separators = L"\\/";
+    DWORD lastErr;
+    std::wstring directory;
+
+    // ASW - Remove ending slash
+    if (dir.length() > 0 && (dir[dir.length() - 1] == L'\\' || dir[dir.length() - 1] == L'/'))
+        directory = dir.substr(0, dir.length() - 1);
+    else
+        directory = dir;
+
+    DWORD fileAttributes = ::GetFileAttributesW(directory.c_str());
+
+    if(INVALID_FILE_ATTRIBUTES == fileAttributes)
+    {
+        // Recursively do it all again for the parent directory, if any
+        std::size_t slashIndex = directory.find_last_of(separators);
+        if(slashIndex != std::wstring::npos)
+        {
+            if (!Dir_CreateDirWithSubs(directory.substr(0, slashIndex)))
+            {
+                //don't log - recursive call already did
+                return false;
+            }
+        }
+
+        // Create the last directory on the path (the recursive calls will have taken
+        // care of the parent directories by now)
+        BOOL result = ::CreateDirectoryW(directory.c_str(), nullptr);
+        if(result == FALSE &&
+           (lastErr = ::GetLastError()) != ERROR_ALREADY_EXISTS) //this shouldn't happen, given the attributes check above, but doesn't hurt
+        {
+#ifdef USE_ELOG
+            ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: Error: Failed to create dir: \"%s\". WinLastErr: %u (0x%08lx): \"%s\".\n",
+                codeSectionStr, directory.c_str(), lastErr, lastErr, TStrTool::GetWindowsLastErrorCodeAsStringW(lastErr).c_str());
+#endif
+            //throw std::runtime_error("Could not create directory");
+            return false;
+        }
+    }
+    else
+    { // Specified directory name already exists as a file or directory
+
+        bool isDirectoryOrJunction = ((fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ||
+            ((fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0);
+
+        if(!isDirectoryOrJunction)
+        {
+#ifdef USE_ELOG
+            ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: Error: Failed to create dir: \"%s\". A file with the same name exists.\n",
+                codeSectionStr, directory.c_str());
+#endif
+            //throw std::runtime_error("Could not create directory because a file with the same name exists");
+            return false;
+        }
+
+    }
+
+    return true;
+}
+//---------------------------------------------------------------------------
 // -Static
 // - Expands the environment variable in the path to the actual path.
-bool TPathTool::ExpandEnvironmentVars(const std::string& path, std::string& dest)
+bool TPathTool::ExpandEnvironmentVars(std::string const& path, std::string& dest)
 {
 #ifdef USE_ELOG
-    const wchar_t codeSectionStr[] = L"TPathTool::ExpandEnvironmentVars(A)";
+    wchar_t const codeSectionStr[] = L"TPathTool::ExpandEnvironmentVars(A)";
 #endif
 
     if (path.length() == 0 || !IsEnvironment(path))
@@ -249,10 +317,10 @@ bool TPathTool::ExpandEnvironmentVars(const std::string& path, std::string& dest
 //---------------------------------------------------------------------------
 // -Static
 // - Expands the environment variable in the path to the actual path.
-bool TPathTool::ExpandEnvironmentVars(const std::wstring& path, std::wstring& dest)
+bool TPathTool::ExpandEnvironmentVars(std::wstring const& path, std::wstring& dest)
 {
 #ifdef USE_ELOG
-    const wchar_t codeSectionStr[] = L"TPathTool::ExpandEnvironmentVars(W)";
+    wchar_t const codeSectionStr[] = L"TPathTool::ExpandEnvironmentVars(W)";
 #endif
 
     if (path.length() == 0 || !IsEnvironment(path))
@@ -295,7 +363,7 @@ bool TPathTool::ExpandEnvironmentVars(const std::wstring& path, std::wstring& de
 // -Static
 // -Returns folder path with trailing backslash, if requested
 // -"keepTrailSlash" defaults to true
-std::string TPathTool::ExtractDir(const std::string& fileName, bool keepTrailSlash)
+std::string TPathTool::ExtractDir(std::string const& fileName, bool keepTrailSlash)
 {
     size_t splitIdx = fileName.find_last_of("/\\");
     if (splitIdx == std::string::npos)
@@ -306,7 +374,7 @@ std::string TPathTool::ExtractDir(const std::string& fileName, bool keepTrailSla
 // -Static
 // -Returns folder path with trailing backslash, if requested
 // -"keepTrailSlash" defaults to true
-std::wstring TPathTool::ExtractDir(const std::wstring& fileName, bool keepTrailSlash)
+std::wstring TPathTool::ExtractDir(std::wstring const& fileName, bool keepTrailSlash)
 {
     size_t splitIdx = fileName.find_last_of(L"/\\");
     if (splitIdx == std::wstring::npos)
@@ -317,7 +385,7 @@ std::wstring TPathTool::ExtractDir(const std::wstring& fileName, bool keepTrailS
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::string TPathTool::ExtractFileName(const std::string& path)
+std::string TPathTool::ExtractFileName(std::string const& path)
 {
     size_t splitIdx = path.find_last_of("/\\");
     if (splitIdx == std::string::npos)
@@ -328,7 +396,7 @@ std::string TPathTool::ExtractFileName(const std::string& path)
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::wstring TPathTool::ExtractFileName(const std::wstring& path)
+std::wstring TPathTool::ExtractFileName(std::wstring const& path)
 {
     size_t splitIdx = path.find_last_of(L"/\\");
     if (splitIdx == std::wstring::npos)
@@ -339,7 +407,7 @@ std::wstring TPathTool::ExtractFileName(const std::wstring& path)
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::string TPathTool::ExtractFileName(const std::string& path, bool removeExtension)
+std::string TPathTool::ExtractFileName(std::string const& path, bool removeExtension)
 {
     if (!removeExtension)
         return ExtractFileName(path);
@@ -349,7 +417,7 @@ std::string TPathTool::ExtractFileName(const std::string& path, bool removeExten
 // -Static
 // -Extracts file name portion from a slash delimited path. If no slashes
 //  are found, returns entire contents of path.
-std::wstring TPathTool::ExtractFileName(const std::wstring& path, bool removeExtension)
+std::wstring TPathTool::ExtractFileName(std::wstring const& path, bool removeExtension)
 {
     if (!removeExtension)
         return ExtractFileName(path);
@@ -357,9 +425,252 @@ std::wstring TPathTool::ExtractFileName(const std::wstring& path, bool removeExt
 }
 //---------------------------------------------------------------------------
 // -Static
+bool TPathTool::File_Exists_WinAPI(std::string const& fileName)
+{
+    DWORD attr = ::GetFileAttributesA(fileName.c_str());
+
+    if (INVALID_FILE_ATTRIBUTES == attr)
+        return false; //file does not exist
+
+    if (FILE_ATTRIBUTE_DIRECTORY & attr)
+        return false; //path is a directory
+
+    return true;
+}
+//---------------------------------------------------------------------------
+// -Static
+bool TPathTool::File_Exists_WinAPI(std::wstring const& fileName)
+{
+    DWORD attr = ::GetFileAttributesW(fileName.c_str());
+
+    if (INVALID_FILE_ATTRIBUTES == attr)
+        return false; //file does not exist
+
+    if (FILE_ATTRIBUTE_DIRECTORY & attr)
+        return false; //path is a directory
+
+    return true;
+}
+//---------------------------------------------------------------------------
+bool TPathTool::File_GetLastWriteTime(std::string const& fn, FILETIME& lastwritetime)
+{
+    HANDLE h = nullptr;
+    BY_HANDLE_FILE_INFORMATION info;
+
+    lastwritetime.dwLowDateTime   = 0;
+    lastwritetime.dwHighDateTime  = 0;
+
+    // get a file handle for fn
+    // Note: FILE_SHARE_WRITE is needed so that a shared file that is being appended to is processed correctly.
+    DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    h = ::CreateFileA(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (INVALID_HANDLE_VALUE == h)
+        return false;
+    std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
+
+    if (!::GetFileInformationByHandle(h, &info))
+        return false;
+
+    lastwritetime = info.ftLastWriteTime;
+    return true;
+}
+//---------------------------------------------------------------------------
+bool TPathTool::File_GetLastWriteTime(std::wstring const& fn, FILETIME& lastwritetime)
+{
+    HANDLE h = nullptr;
+    BY_HANDLE_FILE_INFORMATION info;
+
+    lastwritetime.dwLowDateTime = 0;
+    lastwritetime.dwHighDateTime = 0;
+
+    // get a file handle for fn
+    // Note: FILE_SHARE_WRITE is needed so that a shared file that is being appended to is processed correctly.
+    DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    h = ::CreateFileW(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (INVALID_HANDLE_VALUE == h)
+        return false;
+    std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
+
+    if (!::GetFileInformationByHandle(h, &info))
+        return false;
+
+    lastwritetime = info.ftLastWriteTime;
+    return true;
+}
+//---------------------------------------------------------------------------
+bool TPathTool::File_Open(std::string const& fileName, FILE*& filePointer, char const* fileType, unsigned char openMode)
+{
+    return File_Open(
+        TStrTool::Utf8ToUnicodeStr(fileName), filePointer, TStrTool::Utf8ToUnicodeStr(fileType).c_str(), openMode);
+}
+//---------------------------------------------------------------------------
+// -Static
+bool TPathTool::File_Open(
+    std::wstring const& fileName, FILE*& filePointer, wchar_t const* fileType, unsigned char openMode)
+{
+    int const openFailWaitMS = 30;
+    int const openMaxTries = 30;
+    int lastErrno;
+    unsigned int tries;
+    DWORD lastError;
+
+    //First, make sure that we can open the file.
+    if(nullptr != filePointer)
+        File_Close(filePointer);
+
+    //If overwriting an existing file, delete the old file first.  This helps
+    //Windows figure out that it no longer has the file open.
+    if((nullptr == wcschr(fileType, L'a')) &&
+       (nullptr == wcschr(fileType, L'r')) &&
+       (nullptr == wcschr(fileType, L'+')) &&
+       File_Exists_WinAPI(fileName))
+    {
+        //File exists, try deleting it.
+        if (openMode == SH_DENYNO)
+        {
+            File_Remove(fileName);
+            Sleep(0); //Turn remaining time slice back to windows - give it a bit of a chance to delete.
+        }
+    }
+
+    //If the file is being opened for write, make sure that the path to the file exists.
+    if (nullptr != wcschr(fileType, L'w'))
+    {
+        std::wstring path = TPathTool::ExtractDir(fileName);
+
+        if (!Dir_Exists_WinAPI(path))
+            Dir_CreateDirWithSubs(path);
+    }
+
+    ::SetLastError(ERROR_SUCCESS); //start with a clean slate before attempting to open
+
+    // Now we can try to open the file.
+    tries = 0;
+    do
+    {
+        //clear the last windows error
+        errno = 0;
+        //Try to open/create file.  Try 30 times, with 30 milliseconds between each try.
+        filePointer = _wfsopen(fileName.c_str(), fileType, openMode);
+        lastError = ::GetLastError();
+        lastErrno = errno; //tracking alternate windows 'errno' value because GetLastError() doesn't
+                           //always return an error when there is one.
+        tries++;
+
+        if(lastError != 0 || lastErrno != 0)
+            Sleep(openFailWaitMS); //wait
+        Sleep(0); //Turn remaining time slice back to windows - give windows a chance to process closures/opens.
+    }
+    //Try opening the file again if it not open yet, or the last error is that the
+    //file is open in another process (ERROR_SHARING_VIOLATION = 32), and we have
+    //tried fewer than 30 times.
+    while ((nullptr == filePointer) &&                          //EACCES = permission denied - value = 5
+           (ERROR_SHARING_VIOLATION == lastError || EACCES == lastErrno) &&
+           (tries <= openMaxTries));
+
+    //Restore the windows last error.
+    //Note: Calling GetLastError() resets the system error to zero. This can cause problems
+    //with callers of this function that are trying to find out why the function failed.
+    if (nullptr == filePointer)
+        ::SetLastError(lastError);
+
+    return filePointer != nullptr; //Return success/failure
+}
+//---------------------------------------------------------------------------
+// -Static
+bool TPathTool::File_Close(FILE*& file)
+{
+    bool result = true;
+
+    if (nullptr != file)
+    {
+        int flushError = fflush(file); //Note that fflush has no affect on streams opened for reading
+                                       //but it does solve issues with files not being closed all
+                                       //the way when fclose calls fflush and gets an error.
+        fclose(file);
+        Sleep(0); //Turn remaining time slice back to windows - give it a bit of a chance to close.
+
+        if (EOF == flushError)
+        {
+#ifdef USE_ELOG
+            std::wstring msg = L"File flush error. Errno: " + std::to_wstring(errno);
+            if (ELog.Initialized())
+                ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: %s\n", L"TPathTool::File_Close", msg.c_str());
+#endif
+            result = false;
+        }
+    }
+
+    file = nullptr;
+    return result;
+}
+//---------------------------------------------------------------------------
+// -Static
+// -maxWaitMS defaults to 4000 milliseconds - 0 ms is unlimited wait
+bool TPathTool::File_Remove(std::string const& fileName, DWORD maxWaitMS)
+{
+    std::wstring fileNameW = TStrTool::Utf8ToUnicodeStr(fileName);
+    return File_Remove(fileNameW, maxWaitMS);
+}
+//---------------------------------------------------------------------------
+// -Static
+// -maxWaitMS defaults to 4000 milliseconds - 0 ms is unlimited wait
+bool TPathTool::File_Remove(std::wstring const& fileName, DWORD maxWaitMS)
+{
+#ifdef USE_ELOG
+    wchar_t const codeSectionStr[] = L"TPathTool::File_Remove";
+#endif
+
+    errno = 0; //clear windows error
+
+    if (!File_Exists_WinAPI(fileName))
+        return true;
+
+    if(::DeleteFileW(fileName.c_str()))
+    {
+        //DWORD startTick = ::GetTickCount();
+        //DWORD currentTick;
+        ULONGLONG startTick = ::GetTickCount64();
+        ULONGLONG currentTick;
+
+        do
+        {
+            //currentTick = ::GetTickCount();
+            currentTick = ::GetTickCount64();
+
+            if (maxWaitMS != 0 && ((currentTick - startTick) >= maxWaitMS))
+            {
+#ifdef USE_ELOG
+                ELog.fwprintf(ELogMsgLevel::LML_Light, L"%s: Max wait reached for delete file: %s\n",
+                    codeSectionStr, fileName.c_str());
+#endif
+                return false;
+            }
+
+            ::Sleep(0); //turn remaining time slice back to windows
+        } while (File_Exists_WinAPI(fileName));
+
+        return true;
+    }
+
+    //Store the windows last error and restore it after logprintf.
+    //Note: Calling GetLastError() resets the system error to zero. This can cause problems
+    //with callers of this function that are trying to find out why the function failed.
+#ifdef USE_ELOG
+    DWORD winLastErrTmp = ::GetLastError();
+    std::wstring errStr = TStrTool::GetWindowsLastErrorCodeAsStringW(winLastErrTmp);
+    ELog.fwprintf(ELogMsgLevel::LML_Light, L"%sError: Failed to delete file: \"%s\" (0x%08lx): %s\n",
+        codeSectionStr, fileName.c_str(), winLastErrTmp, errStr.c_str());
+    ::SetLastError(winLastErrTmp); //restor last error in case caller needs to peek at it
+#endif
+
+    return false;
+}
+//---------------------------------------------------------------------------
+// -Static
 // -Removes the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns entire contents of path.
-std::string TPathTool::RemoveExtension(const std::string& path)
+std::string TPathTool::RemoveExtension(std::string const& path)
 {
     size_t splitIdx = path.find_last_of(".");
     if (splitIdx == std::string::npos)
@@ -370,7 +681,7 @@ std::string TPathTool::RemoveExtension(const std::string& path)
 // -Static
 // -Removes the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns entire contents of path.
-std::wstring TPathTool::RemoveExtension(const std::wstring& path)
+std::wstring TPathTool::RemoveExtension(std::wstring const& path)
 {
     size_t splitIdx = path.find_last_of(L".");
     if (splitIdx == std::wstring::npos)
@@ -381,7 +692,7 @@ std::wstring TPathTool::RemoveExtension(const std::wstring& path)
 // -Static
 // -Gets the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns empty string.
-std::string TPathTool::GetExtension(const std::string& path)
+std::string TPathTool::GetExtension(std::string const& path)
 {
     size_t splitIdx = path.find_last_of(".");
     if (splitIdx == std::string::npos)
@@ -392,7 +703,7 @@ std::string TPathTool::GetExtension(const std::string& path)
 // -Static
 // -Gets the last extension (e.g. ".txt") from the path. If no extension
 //  found, returns empty string.
-std::wstring TPathTool::GetExtension(const std::wstring& path)
+std::wstring TPathTool::GetExtension(std::wstring const& path)
 {
     size_t splitIdx = path.find_last_of(L".");
     if (splitIdx == std::wstring::npos)

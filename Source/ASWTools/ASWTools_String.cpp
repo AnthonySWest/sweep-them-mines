@@ -1,5 +1,5 @@
 /* **************************************************************************
-StringTool.cpp
+ASWTools_String.cpp
 Author: Anthony S. West - ASW Software
 
 See header for info.
@@ -22,14 +22,17 @@ limitations under the License.
 
 //---------------------------------------------------------------------------
 // Module header
-#include "StringTool.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
+#include <algorithm>
 #include <codecvt>
-#include <wctype.h>
 //#include <cstdarg> //va_start
 //#include <cctype>
-//#include <iomanip>
+#include <limits>
+#include <locale>
 #include <sstream>
+#include <stdexcept>
+#include <wctype.h>
 //---------------------------------------------------------------------------
 
 #ifndef strcmpI
@@ -157,7 +160,7 @@ std::wstring TStrTool::Utf8ToUnicodeStr(char const* utf8Bytes, size_t length)
 //---------------------------------------------------------------------------
 // -Static
 // -Parameter 'winLastErr' must be the value of API call GetLastError()
-std::string TStrTool::GetWindowsLastErrorCodeAsStringA(const DWORD winLastErr)
+std::string TStrTool::GetWindowsLastErrorCodeAsStringA(DWORD const winLastErr)
 {
     LPSTR error = nullptr;
     std::string errorStr;
@@ -185,7 +188,7 @@ std::string TStrTool::GetWindowsLastErrorCodeAsStringA(const DWORD winLastErr)
 //---------------------------------------------------------------------------
 // -Static
 // -Parameter 'winLastErr' must be the value of API call GetLastError()
-std::wstring TStrTool::GetWindowsLastErrorCodeAsStringW(const DWORD winLastErr)
+std::wstring TStrTool::GetWindowsLastErrorCodeAsStringW(DWORD const winLastErr)
 {
     LPWSTR error = nullptr;
     std::wstring errorStr;
@@ -195,7 +198,7 @@ std::wstring TStrTool::GetWindowsLastErrorCodeAsStringW(const DWORD winLastErr)
         nullptr, winLastErr, 0, reinterpret_cast<LPWSTR>(&error), 0, nullptr) == 0)
     {
         //if failed to get the error string, show the error hex number instead
-        const size_t error2Size = 96;
+        size_t const error2Size = 96;
         wchar_t error2[error2Size];
         swprintf_s(error2, error2Size, L"Unknown error: %u (0x%08lx)", winLastErr, winLastErr);
         errorStr = error2;
@@ -340,7 +343,7 @@ bool TStrTool::DateTime_Parse_ISO8601(std::string const& iso8601Str,
     if (iso8601Str.length() == 0)
         return true; //nothing to parse
 
-    const int nValsIfNoOffset_isUTC = 6; //y+M+d+h+m+s (e.g. "2021-08-10T15:45:36Z")
+    int const nValsIfNoOffset_isUTC = 6; //y+M+d+h+m+s (e.g. "2021-08-10T15:45:36Z")
     int y = 1, month = 1, d = 1, h = 0, min = 0, s = 0, ms = 0, tzH = 0, tzM = 0;
     float secsF = 0.0;
 
@@ -440,7 +443,7 @@ bool TStrTool::StrCpyW(wchar_t* dest, size_t destSize_words, wchar_t const* src)
         return false;
 
     wchar_t* destWalker = dest;
-    const wchar_t* srcWalker = src;
+    wchar_t const* srcWalker = src;
     size_t count = 0, maxCopy = destSize_words - sizeof('\0');
 
     while (count < maxCopy && *srcWalker)
@@ -464,7 +467,7 @@ bool TStrTool::StrCpyA(char* dest, size_t destSize_bytes, char const* src)
         return false;
 
     char* destWalker = dest;
-    const char* srcWalker = src;
+    char const* srcWalker = src;
     size_t count = 0, maxCopy = destSize_bytes - sizeof('\0');
 
     while (count < maxCopy && *srcWalker)
@@ -635,7 +638,7 @@ void TStrTool::TrimRight(std::string& s)
 // -Trims in place
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_issspace', if true, will also trim spaces.
-void TStrTool::TrimRight(std::string& s, const unsigned char trimChar, bool trim_isspace)
+void TStrTool::TrimRight(std::string& s, unsigned char const trimChar, bool trim_isspace)
 {
     //Note: Can use [trimChar, trim_isspace] in the lambda, or just [=] to get access to
     //trimChar and trim_isspace.
@@ -660,7 +663,7 @@ void TStrTool::TrimRight(std::wstring& s)
 // -Trims in place
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_iswsspace', if true, will also trim spaces.
-void TStrTool::TrimRight(std::wstring& s, const wchar_t trimChar, bool trim_iswspace)
+void TStrTool::TrimRight(std::wstring& s, wchar_t const trimChar, bool trim_iswspace)
 {
     //Note: Can use [trimChar, trim_iswspace] in the lambda, or just [=] to get access to
     //trimChar and trim_iswspace.
@@ -682,7 +685,7 @@ void TStrTool::Trim(std::string& s)
 // -Trims in place, left and right
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_issspace', if true, will also trim spaces.
-void TStrTool::Trim(std::string& s, const unsigned char trimChar, bool trim_isspace)
+void TStrTool::Trim(std::string& s, unsigned char const trimChar, bool trim_isspace)
 {
     TrimLeft(s, trimChar, trim_isspace);
     TrimRight(s, trimChar, trim_isspace);
@@ -700,7 +703,7 @@ void TStrTool::Trim(std::wstring& s)
 // -Trims in place, left and right
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_iswsspace', if true, will also trim spaces.
-void TStrTool::Trim(std::wstring& s, const wchar_t trimChar, bool trim_iswspace)
+void TStrTool::Trim(std::wstring& s, wchar_t const trimChar, bool trim_iswspace)
 {
     TrimLeft(s, trimChar, trim_iswspace);
     TrimRight(s, trimChar, trim_iswspace);
@@ -718,7 +721,7 @@ std::string TStrTool::TrimLeft_Copy(std::string s)
 // -Returns a trimmed copy, not affecting original
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_issspace', if true, will also trim spaces.
-std::string TStrTool::TrimLeft_Copy(std::string s, const unsigned char trimChar, bool trim_isspace)
+std::string TStrTool::TrimLeft_Copy(std::string s, unsigned char const trimChar, bool trim_isspace)
 {
     TrimLeft(s, trimChar, trim_isspace);
     return s;
@@ -736,7 +739,7 @@ std::wstring TStrTool::TrimLeft_Copy(std::wstring s)
 // -Returns a trimmed copy, not affecting original
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_iswsspace', if true, will also trim spaces.
-std::wstring TStrTool::TrimLeft_Copy(std::wstring s, const wchar_t trimChar, bool trim_iswspace)
+std::wstring TStrTool::TrimLeft_Copy(std::wstring s, wchar_t const trimChar, bool trim_iswspace)
 {
     TrimLeft(s, trimChar, trim_iswspace);
     return s;
@@ -754,7 +757,7 @@ std::string TStrTool::TrimRight_Copy(std::string s)
 // -Returns a trimmed copy, not affecting original
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_issspace', if true, will also trim spaces.
-std::string TStrTool::TrimRight_Copy(std::string s, const unsigned char trimChar, bool trim_isspace)
+std::string TStrTool::TrimRight_Copy(std::string s, unsigned char const trimChar, bool trim_isspace)
 {
     TrimRight(s, trimChar, trim_isspace);
     return s;
@@ -772,7 +775,7 @@ std::wstring TStrTool::TrimRight_Copy(std::wstring s)
 // -Returns a trimmed copy, not affecting original
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_iswsspace', if true, will also trim spaces.
-std::wstring TStrTool::TrimRight_Copy(std::wstring s, const wchar_t trimChar, bool trim_iswspace)
+std::wstring TStrTool::TrimRight_Copy(std::wstring s, wchar_t const trimChar, bool trim_iswspace)
 {
     TrimRight(s, trimChar, trim_iswspace);
     return s;
@@ -790,7 +793,7 @@ std::string TStrTool::Trim_Copy(std::string s)
 // -Returns a trimmed copy, not affecting original
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_issspace', if true, will also trim spaces.
-std::string TStrTool::Trim_Copy(std::string s, const unsigned char trimChar, bool trim_isspace)
+std::string TStrTool::Trim_Copy(std::string s, unsigned char const trimChar, bool trim_isspace)
 {
     Trim(s, trimChar, trim_isspace);
     return s;
@@ -808,7 +811,7 @@ std::wstring TStrTool::Trim_Copy(std::wstring s)
 // -Returns a trimmed copy, not affecting original
 // -'trimChar' is a character, other than a space, to trim.
 // -'trim_iswsspace', if true, will also trim spaces.
-std::wstring TStrTool::Trim_Copy(std::wstring s, const wchar_t trimChar, bool trim_iswspace)
+std::wstring TStrTool::Trim_Copy(std::wstring s, wchar_t const trimChar, bool trim_iswspace)
 {
     Trim(s, trimChar, trim_iswspace);
     return s;
@@ -858,6 +861,198 @@ int TStrTool::CompareIC(std::wstring const& s1, std::wstring const& s2)
     } while (c1 && c1 == c2);
 
     return static_cast<int> (c1) - static_cast<int> (c2);
+}
+//---------------------------------------------------------------------------}
+int32_t TStrTool::StrToInt32(std::string const& str)
+{
+    try
+    {
+        long val = std::stol(str);
+#if LONG_MAX > INT32_MAX
+        if (val > std::numeric_limits<int32_t>::max())
+            throw std::out_of_range("Value exceeds int32_t range");
+#endif
+        return static_cast<int32_t>(val);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("String is not a signed 32-bit int: " + std::string(e.what()));
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------}
+int64_t TStrTool::StrToInt64(std::string const& str)
+{
+    try
+    {
+        long long val = std::stoll(str);
+#if LONGLONG_MAX > INT64_MAX
+        if (val > std::numeric_limits<int64_t>::max())
+            throw std::out_of_range("Value exceeds int64_t range");
+#endif
+        return static_cast<int64_t>(val);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("String is not a signed 64-bit int: " + std::string(e.what()));
+    }
+    catch (const std::out_of_range& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------}
+uint32_t TStrTool::StrToUInt32(std::string const& str)
+{
+    try
+    {
+        unsigned long val = std::stoul(str);
+#if ULONG_MAX > UINT32_MAX
+        if (val > std::numeric_limits<uint32_t>::max())
+        {   // should not happen on Windows (unsigned long == uint32_t)
+            throw std::out_of_range("Value exceeds uint32_t range");
+        }
+#endif
+        return static_cast<uint32_t>(val);
+    }
+    catch (std::invalid_argument const& e)
+    {
+        throw std::invalid_argument("String is not an unsigned 32-bit int: " + std::string(e.what()));
+    }
+    catch (std::out_of_range const& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------}
+uint64_t TStrTool::StrToUInt64(std::string const& str)
+{
+    try
+    {
+        unsigned long long val = std::stoull(str);
+#if ULONGLONG_MAX > UINT64_MAX
+        if (val > std::numeric_limits<uint64_t>::max())
+        {   // should not happen on Windows (unsigned long == uint32_t)
+            throw std::out_of_range("Value exceeds uint64_t range");
+        }
+#endif
+        return static_cast<uint64_t>(val);
+    }
+    catch (std::invalid_argument const& e)
+    {
+        throw std::invalid_argument("String is not an unsigned 64-bit int: " + std::string(e.what()));
+    }
+    catch (std::out_of_range const& e)
+    {
+        throw std::out_of_range("Out of range: " + std::string(e.what()));
+    }
+}
+//---------------------------------------------------------------------------
+std::string TStrTool::ToLower(std::string const& str)
+{
+    std::string result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::tolower(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+std::wstring TStrTool::ToLower(std::wstring const& str)
+{
+    std::wstring result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::towlower(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+std::string TStrTool::ToUpper(std::string const& str)
+{
+    std::string result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::toupper(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+std::wstring TStrTool::ToUpper(std::wstring const& str)
+{
+    std::wstring result = str;
+    result.resize(str.size());
+    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+            return std::towupper(c);
+        });
+    return result;
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToInt32(std::string const& str, int32_t* outVal)
+{
+    try
+    {
+        int32_t val = StrToInt32(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToInt64(std::string const& str, int64_t* outVal)
+{
+    try
+    {
+        int64_t val = StrToInt64(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToUInt32(std::string const& str, uint32_t* outVal)
+{
+    try
+    {
+        uint32_t val = StrToUInt32(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+//---------------------------------------------------------------------------
+// On success, 'outVal', if not null, will be set to the converted value.
+bool TStrTool::TryStrToUInt64(std::string const& str, uint64_t* outVal)
+{
+    try
+    {
+        uint64_t val = StrToUInt64(str);
+        if (nullptr != outVal)
+            *outVal = val;
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -939,7 +1134,7 @@ std::wstring TStrTool::CombinePathAndArgs(std::wstring const& path, std::wstring
 }
 //---------------------------------------------------------------------------
 // -Static
-std::vector<std::string> TStrTool::Split(std::string const& str, const char sep)
+std::vector<std::string> TStrTool::Split(std::string const& str, char const sep)
 {
     std::string::size_type pos = 0, prevPos = 0;
     std::vector<std::string> list;
@@ -956,7 +1151,7 @@ std::vector<std::string> TStrTool::Split(std::string const& str, const char sep)
 }
 //---------------------------------------------------------------------------
 // -Static
-std::vector<std::wstring> TStrTool::Split(std::wstring const& str, const wchar_t sep)
+std::vector<std::wstring> TStrTool::Split(std::wstring const& str, wchar_t const sep)
 {
     std::wstring::size_type pos = 0, prevPos = 0;
     std::vector<std::wstring> list;
@@ -974,7 +1169,7 @@ std::vector<std::wstring> TStrTool::Split(std::wstring const& str, const wchar_t
 //---------------------------------------------------------------------------
 // -Static
 // -Inserts a delim character wherever there is a delim character found.
-std::string TStrTool::DelimStr_Escape(std::string const& strIn, const char delim)
+std::string TStrTool::DelimStr_Escape(std::string const& strIn, char const delim)
 {
     if (strIn.length() == 0)
         return "";
@@ -982,7 +1177,7 @@ std::string TStrTool::DelimStr_Escape(std::string const& strIn, const char delim
     size_t outBuffSize = (strIn.length() * 2) + sizeof('\0');
     char* outBuff = new char[outBuffSize];
     std::unique_ptr<char[]> auto_outBuff(outBuff);
-    const char* walkerIn = strIn.c_str();
+    char const* walkerIn = strIn.c_str();
     char* walkerOut = outBuff;
 
     //copy in string to out string while inserting a delim wherever a delim is found
@@ -1007,7 +1202,7 @@ std::wstring TStrTool::DelimStr_Escape(std::wstring const& strIn, wchar_t delim)
     size_t outBuffSize = (strIn.length() * 2) + sizeof('\0');
     wchar_t* outBuff = new wchar_t[outBuffSize];
     std::unique_ptr<wchar_t[]> auto_outBuff(outBuff);
-    const wchar_t* walkerIn = strIn.c_str();
+    wchar_t const* walkerIn = strIn.c_str();
     wchar_t* walkerOut = outBuff;
 
     //copy in string to out string while inserting a delim wherever a delim is found
@@ -1032,7 +1227,7 @@ std::string TStrTool::DelimStr_UnEscape(std::string const& strIn, char delim)
     size_t outBuffSize = strIn.length() + sizeof('\0');
     char* outBuff = new char[outBuffSize];
     std::unique_ptr<char[]> auto_outBuff(outBuff);
-    const char* walkerIn = strIn.c_str();
+    char const* walkerIn = strIn.c_str();
     char* walkerOut = outBuff;
 
     //copy in string to out string while skipping escaped delims wherever a delim is found
@@ -1057,7 +1252,7 @@ std::wstring TStrTool::DelimStr_UnEscape(std::wstring const& strIn, wchar_t deli
     size_t outBuffSize = strIn.length() + sizeof('\0');
     wchar_t* outBuff = new wchar_t[outBuffSize];
     std::unique_ptr<wchar_t[]> auto_outBuff(outBuff);
-    const wchar_t* walkerIn = strIn.c_str();
+    wchar_t const* walkerIn = strIn.c_str();
     wchar_t* walkerOut = outBuff;
 
     //copy in string to out string while inserting a delim wherever a delim is found
@@ -1074,15 +1269,15 @@ std::wstring TStrTool::DelimStr_UnEscape(std::wstring const& strIn, wchar_t deli
 }
 //---------------------------------------------------------------------------
 // -Static
-std::vector<std::string> TStrTool::CombineLists_Unique(const std::vector<std::string>& list1,
-    const std::vector<std::string>& list2, bool ignoreBlank, bool ignoreCase)
+std::vector<std::string> TStrTool::CombineLists_Unique(std::vector<std::string> const& list1,
+    std::vector<std::string> const& list2, bool ignoreBlank, bool ignoreCase)
 {
     std::vector<std::string> dest;
 
     for (size_t i = 0; i < list1.size() || i < list2.size(); i++)
     {
-        const char* val1P = i < list1.size() ? list1[i].c_str() : "";
-        const char* val2P = i < list2.size() ? list2[i].c_str() : "";
+        char const* val1P = i < list1.size() ? list1[i].c_str() : "";
+        char const* val2P = i < list2.size() ? list2[i].c_str() : "";
         bool addVal1 = (!ignoreBlank || *val1P != '\0') && i < list1.size();
         bool addVal2 = (!ignoreBlank || *val2P != '\0') && i < list2.size();
 
@@ -1099,7 +1294,7 @@ std::vector<std::string> TStrTool::CombineLists_Unique(const std::vector<std::st
         //check new list for existing items
         for (size_t j = 0; j < dest.size(); j++)
         {
-            const char* destP = dest[j].c_str();
+            char const* destP = dest[j].c_str();
 
             if (addVal1)
             {
@@ -1128,15 +1323,15 @@ std::vector<std::string> TStrTool::CombineLists_Unique(const std::vector<std::st
 }
 //---------------------------------------------------------------------------
 // -Static
-std::vector<std::wstring> TStrTool::CombineLists_Unique(const std::vector<std::wstring>& list1,
-    const std::vector<std::wstring>& list2, bool ignoreBlank, bool ignoreCase)
+std::vector<std::wstring> TStrTool::CombineLists_Unique(std::vector<std::wstring> const& list1,
+    std::vector<std::wstring> const& list2, bool ignoreBlank, bool ignoreCase)
 {
     std::vector<std::wstring> dest;
 
     for (size_t i = 0; i < list1.size() || i < list2.size(); i++)
     {
-        const wchar_t* val1P = i < list1.size() ? list1[i].c_str() : L"";
-        const wchar_t* val2P = i < list2.size() ? list2[i].c_str() : L"";
+        wchar_t const* val1P = i < list1.size() ? list1[i].c_str() : L"";
+        wchar_t const* val2P = i < list2.size() ? list2[i].c_str() : L"";
         bool addVal1 = (!ignoreBlank || *val1P != L'\0') && i < list1.size();
         bool addVal2 = (!ignoreBlank || *val2P != L'\0') && i < list2.size();
 
@@ -1153,7 +1348,7 @@ std::vector<std::wstring> TStrTool::CombineLists_Unique(const std::vector<std::w
         //check new list for existing items
         for (size_t j = 0; j < dest.size(); j++)
         {
-            const wchar_t* destP = dest[j].c_str();
+            wchar_t const* destP = dest[j].c_str();
 
             if (addVal1)
             {
@@ -1238,7 +1433,7 @@ std::wstring TStrTool::ReplaceAll(std::wstring const& str, wchar_t find, wchar_t
 // -Static
 // -Converts an uppercase or lowercase hex character to a byte.
 // -Caller must join the low and high of a hex pair with a bit shift. ( "b = (high << 4) | low;" )
-bool TStrTool::HexSingleToByte(const char hexSingle, BYTE* out)
+bool TStrTool::HexSingleToByte(char const hexSingle, BYTE* out)
 {
     if (hexSingle <= '9' && hexSingle >= '0')
         *out = static_cast<BYTE>(hexSingle - '0');
@@ -1256,7 +1451,7 @@ bool TStrTool::HexSingleToByte(const char hexSingle, BYTE* out)
 // -Converts an uppercase or lowercase hex character to a byte.
 // -Caller must join the low and high of a hex pair with a bit shift. ( "b = (high << 4) | low;" )
 // -Returns less than zero for invalid hex characters.
-int TStrTool::HexSingleToByte(const char hexSingle)
+int TStrTool::HexSingleToByte(char const hexSingle)
 {
     if (hexSingle <= '9' && hexSingle >= '0')
         return hexSingle - '0';
@@ -1278,7 +1473,7 @@ std::string TStrTool::EncodeStrToBase16Hex(std::string const& strUtf8, bool uppe
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase16Hex(reinterpret_cast<const BYTE*>(strUtf8.c_str()), length, upperCase);
+    return EncodeToBase16Hex(reinterpret_cast<BYTE const*>(strUtf8.c_str()), length, upperCase);
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -1292,7 +1487,7 @@ std::string TStrTool::EncodeStrToBase16Hex(std::string const& strUtf8, size_t le
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase16Hex(reinterpret_cast<const BYTE*>(strUtf8.c_str()), length, upperCase);
+    return EncodeToBase16Hex(reinterpret_cast<BYTE const*>(strUtf8.c_str()), length, upperCase);
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -1303,7 +1498,7 @@ std::string TStrTool::EncodeStrToBase16Hex(std::wstring const& strW, bool upperC
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase16Hex(reinterpret_cast<const BYTE*>(strW.c_str()), length * sizeof(wchar_t), upperCase);
+    return EncodeToBase16Hex(reinterpret_cast<BYTE const*>(strW.c_str()), length * sizeof(wchar_t), upperCase);
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -1317,12 +1512,12 @@ std::string TStrTool::EncodeStrToBase16Hex(std::wstring const& strW, size_t leng
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase16Hex(reinterpret_cast<const BYTE*>(strW.c_str()), length * sizeof(wchar_t), upperCase);
+    return EncodeToBase16Hex(reinterpret_cast<BYTE const*>(strW.c_str()), length * sizeof(wchar_t), upperCase);
 }
 //---------------------------------------------------------------------------
 // -Static
 // -Converts bytes, up to bytesLen, to a hex string.
-std::string TStrTool::EncodeToBase16Hex(const BYTE* bytes, size_t bytesLen, bool upperCase)
+std::string TStrTool::EncodeToBase16Hex(BYTE const* bytes, size_t bytesLen, bool upperCase)
 {
     static const char hexValuesUpper[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
     static const char hexValuesLower[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
@@ -1331,7 +1526,7 @@ std::string TStrTool::EncodeToBase16Hex(const BYTE* bytes, size_t bytesLen, bool
     if (nullptr == bytes || 0 == bytesLen)
         return "";
 
-    const BYTE* bytesP = bytes;
+    BYTE const* bytesP = bytes;
     char* hexBuff = new char[bytesLen * 2 + sizeof('\0')];
     std::unique_ptr<char[]> auto_hexBuff(hexBuff);
     char* hexBuffP = hexBuff;
@@ -1493,8 +1688,8 @@ int64_t TStrTool::DecodeBase16HexToBytes(std::string const& inHex, BYTE* outBuff
     size_t maxFill = buffSize;
 
     BYTE* outBuffP = outBuff;
-    const char* inHexStartP = inHex.c_str();
-    const char* inHexP = inHexStartP + hexStartOffset;
+    char const* inHexStartP = inHex.c_str();
+    char const* inHexP = inHexStartP + hexStartOffset;
     char charHigh, charLow;
     int intHigh, intLow;
     int64_t filledCount = 0;
@@ -1552,11 +1747,11 @@ int64_t TStrTool::DecodeBase16HexToBytes(std::string const& inHex, BYTE* outBuff
 }
 //---------------------------------------------------------------------------
 // - Static
-bool TStrTool::IsValidBase64(const char* str, bool isUrlSafe)
+bool TStrTool::IsValidBase64(char const* str, bool isUrlSafe)
 {
     bool foundEqual = false;
-    const char* b64Chars = isUrlSafe ? "-_" : "+/";
-    const char* walker = str;
+    char const* b64Chars = isUrlSafe ? "-_" : "+/";
+    char const* walker = str;
 
     if (nullptr == str || *str == '\0')
         return false;
@@ -1604,7 +1799,7 @@ std::string TStrTool::EncodeStrToBase64Str(std::string const& strUtf8, bool make
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase64Str_Native(reinterpret_cast<const BYTE*>(strUtf8.c_str()), length, makeWebFriendly);
+    return EncodeToBase64Str_Native(reinterpret_cast<BYTE const*>(strUtf8.c_str()), length, makeWebFriendly);
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -1618,7 +1813,7 @@ std::string TStrTool::EncodeStrToBase64Str(std::string const& strUtf8, size_t le
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase64Str_Native(reinterpret_cast<const BYTE*>(strUtf8.c_str()), length, makeWebFriendly);
+    return EncodeToBase64Str_Native(reinterpret_cast<BYTE const*>(strUtf8.c_str()), length, makeWebFriendly);
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -1629,7 +1824,7 @@ std::string TStrTool::EncodeStrToBase64Str(std::wstring const& strW, bool makeWe
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase64Str_Native(reinterpret_cast<const BYTE*>(strW.c_str()), length * sizeof(wchar_t), makeWebFriendly);
+    return EncodeToBase64Str_Native(reinterpret_cast<BYTE const*>(strW.c_str()), length * sizeof(wchar_t), makeWebFriendly);
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -1643,7 +1838,7 @@ std::string TStrTool::EncodeStrToBase64Str(std::wstring const& strW, size_t leng
     if (0 == length)
         return ""; //nothing to do
 
-    return EncodeToBase64Str_Native(reinterpret_cast<const BYTE*>(strW.c_str()), length * sizeof(wchar_t), makeWebFriendly);
+    return EncodeToBase64Str_Native(reinterpret_cast<BYTE const*>(strW.c_str()), length * sizeof(wchar_t), makeWebFriendly);
 }
 //---------------------------------------------------------------------------
 //-Static
@@ -1872,7 +2067,7 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
 
     size_t pad1 = srcLen % 4 || src[srcLen - 1] == '=';
     size_t pad2 = pad1 && (srcLen % 4 > 2 || src[srcLen - 2] != '=');
-    const size_t last = (srcLen - pad1) / 4 << 2;
+    size_t const last = (srcLen - pad1) / 4 << 2;
     size_t requiredSize = (last / 4 * 3) + pad1 + pad2;
 
 //      for(i=0,ix=leng-(leng%4); i<ix; i+=4)
@@ -1969,8 +2164,8 @@ int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_
 //  pathUtf8 will be set to "/".
 bool TStrTool::URL_Split(std::string const& url, std::string* hostUtf8, std::string* pathUtf8)
 {
-    const std::string httpPrefix = "http://";
-    const std::string httpsPrefix = "https://";
+    std::string const httpPrefix = "http://";
+    std::string const httpsPrefix = "https://";
 
     if (nullptr != hostUtf8)
         *hostUtf8 = "";
@@ -1981,8 +2176,8 @@ bool TStrTool::URL_Split(std::string const& url, std::string* hostUtf8, std::str
     if (url.length() == 0)
         return false;
 
-    const char* urlStart = url.c_str();
-    const char* walker = urlStart;
+    char const* urlStart = url.c_str();
+    char const* walker = urlStart;
 
     //skip http/s prefix, if there is one
 #if defined(_MSC_VER) || (defined(__clang__) && __clang_major__ >= 15) // Win64x
@@ -2032,8 +2227,8 @@ std::string TStrTool::URL_EncodeUtf8(std::string const& valueUtf8, bool useUpper
 
     char const* hexP = useUpperCaseHex ? HEX_UPPER : HEX_LOWER;
 
-    const size_t maxEncodedCharWidth = 3; //e.g. "%FF"
-    const size_t buffSize = (valueUtf8.length() * maxEncodedCharWidth) + sizeof('\0');
+    size_t const maxEncodedCharWidth = 3; //e.g. "%FF"
+    size_t const buffSize = (valueUtf8.length() * maxEncodedCharWidth) + sizeof('\0');
     char* buff = new char[buffSize];
     std::unique_ptr<char[]> auto_buff(buff);
     char* buffP = buff;
@@ -2072,11 +2267,11 @@ std::string TStrTool::URL_DecodeUtf8(std::string const& encodedStr, bool* invali
     if (nullptr != invalidHexEncountered)
         *invalidHexEncountered = false;
 
-    const size_t buffSize = encodedStr.length() + sizeof('\0');
+    size_t const buffSize = encodedStr.length() + sizeof('\0');
     char* buff = new char[buffSize];
     std::unique_ptr<char[]> auto_buff(buff);
     char* buffP = buff;
-    const char* walker = encodedStr.c_str();
+    char const* walker = encodedStr.c_str();
 
     while (*walker)
     {
@@ -2119,7 +2314,7 @@ std::string TStrTool::URL_DecodeUtf8(std::string const& encodedStr, bool* invali
 //---------------------------------------------------------------------------
 std::string TStrTool::Fmt_printf(char const* format, ...)
 {
-    const size_t initialBufferSize = 1024;
+    size_t const initialBufferSize = 1024;
     size_t bufferSize = initialBufferSize;
     int len;
     va_list args;
@@ -2150,7 +2345,7 @@ std::string TStrTool::Fmt_printf(char const* format, ...)
 //---------------------------------------------------------------------------
 std::wstring TStrTool::Fmt_printf(wchar_t const* format, ...)
 {
-    const size_t initialBufferSize = 1024;
+    size_t const initialBufferSize = 1024;
     size_t bufferSize = initialBufferSize;
     int len;
     va_list args;
@@ -2211,7 +2406,7 @@ bool TStrTool::StrToGUID(char const* idStr, GUID& guid)
     char* nonConstStr = new char[idStrLen + 1];
     std::unique_ptr<char[]> auto_nonConstStr(nonConstStr);
 
-    const char* srcWalker = idStr;
+    char const* srcWalker = idStr;
     char* destWalker = nonConstStr;
 
     while (*srcWalker)
@@ -2241,7 +2436,7 @@ bool TStrTool::StrToGUID(wchar_t const* idStr, GUID& guid)
     wchar_t* nonConstStr = new wchar_t[idStrLen + 1];
     std::unique_ptr<wchar_t[]> auto_nonConstStr(nonConstStr);
 
-    const wchar_t* srcWalker = idStr;
+    wchar_t const* srcWalker = idStr;
     wchar_t* destWalker = nonConstStr;
 
     while (*srcWalker)

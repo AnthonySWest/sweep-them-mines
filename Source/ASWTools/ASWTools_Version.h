@@ -1,5 +1,5 @@
 /* **************************************************************************
-Version.h
+ASWTools_Version.h
 Author: Anthony S. West - ASW Software
 
 Contains routines for working with module versions.
@@ -22,11 +22,11 @@ limitations under the License.
 
 ************************************************************************** */
 
-#ifndef VersionH
-#define VersionH
+#ifndef ASWTools_VersionH
+#define ASWTools_VersionH
 //---------------------------------------------------------------------------
-#include <windows.h>
 #include <string>
+#include <windows.h>
 //---------------------------------------------------------------------------
 #include "ASWTools_Common.h"
 //---------------------------------------------------------------------------
@@ -94,4 +94,4 @@ public: // Operator related functions
 } // namespace ASWTools
 
 //---------------------------------------------------------------------------
-#endif // #ifndef VersionH
+#endif // #ifndef ASWTools_VersionH

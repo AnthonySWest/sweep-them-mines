@@ -22,11 +22,18 @@ limitations under the License.
 #define MainFormH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
+#include <Vcl.AppEvnts.hpp>
+#include <Vcl.Buttons.hpp>
 #include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
+#include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Forms.hpp>
+#include <Vcl.Menus.hpp>
+#include <Vcl.StdCtrls.hpp>
 //---------------------------------------------------------------------------
 // END OF IDE INCLUDES
+//---------------------------------------------------------------------------
+#include "ASWMS_Engine.h"
+#include "Scores.h"
 //---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////////////////////////////////
@@ -35,8 +42,70 @@ limitations under the License.
 class TFormMain : public TForm
 {
 __published: // IDE-managed Components
+    TMainMenu* MainMenu1;
+    TMenuItem* MnuGame;
+    TMenuItem* MnuHelp;
+    TMenuItem* MnuAbout;
+    TMenuItem* MnuExit;
+    TMenuItem* MnuNewGame;
+    TMenuItem* N1;
+    TMenuItem* N2;
+    TMenuItem* MnuBeginner;
+    TMenuItem* MnuIntermediate;
+    TMenuItem* MnuExpert;
+    TMenuItem* MnuCustom;
+    TMenuItem* N3;
+    TMenuItem* MnuBestTimes;
+    TMenuItem* MnuResetBestTimes;
+    TScrollBox* ScrollBoxMap;
+    TImage* ImageMap;
+    TBitBtn* BtnReact;
+    TImage* ImageMinesRemaining;
+    TImage* ImageTime;
+    TTimer* TimerScoreboard;
+    TApplicationEvents* ApplicationEvents;
     void __fastcall FormDestroy(TObject* Sender);
+    void __fastcall MnuExitClick(TObject* Sender);
+    void __fastcall MnuAboutClick(TObject* Sender);
+    void __fastcall MnuBestTimesClick(TObject* Sender);
+    void __fastcall MnuNewGameClick(TObject* Sender);
+    void __fastcall MnuStandardDifficultyClick(TObject* Sender);
+    void __fastcall MnuResetBestTimesClick(TObject* Sender);
+    void __fastcall FormClose(TObject* Sender, TCloseAction& Action);
+    void __fastcall MnuGameClick(TObject* Sender);
+    void __fastcall FormShow(TObject* Sender);
+    void __fastcall ImageMapMouseMove(TObject* Sender, TShiftState Shift, int X, int Y);
+    void __fastcall FormMouseMove(TObject* Sender, TShiftState Shift, int X, int Y);
+    void __fastcall ImageMapMouseDown(TObject* Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
+    void __fastcall FormResize(TObject* Sender);
+    void __fastcall ImageMapMouseUp(TObject* Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
+    void __fastcall TimerScoreboardTimer(TObject* Sender);
+    void __fastcall ApplicationEventsRestore(TObject* Sender);
+    void __fastcall ApplicationEventsMinimize(TObject* Sender);
 private: // User declarations
+    static char const* const BaseFilename_HighScores;
+
+    int m_CustomCols;
+    int m_CustomRows;
+    int m_CustomMines;
+
+    ASWMS::TMSEngine m_MineSweeper;
+
+private:
+    void AddScoresToLines(System::Classes::TStrings* lines, SweepThemMines::TScores::TScoreList const& scores);
+    void DrawScoreboards();
+    TPoint GetExtendedImageMapMousePos();
+    System::String GetHighScoresFilename();
+    bool LoadHighScores(SweepThemMines::TScores* scores);
+    void NewGame();
+    void ReCenter();
+    void ResetBestTimes();
+    void SaveBestScores(SweepThemMines::TScores& scores);
+    void SaveBestTime_Beginner(int seconds, AnsiString const& name);
+    void SaveBestTime_Expert(int seconds, AnsiString const& name);
+    void SaveBestTime_Intermediate(int seconds, AnsiString const& name);
+    void ShowBestTimes();
+    TModalResult ShowCustomDifficulty();
 
 public:  // User declarations
 #if defined(__clang__)
@@ -44,12 +113,12 @@ public:  // User declarations
 #else
     __fastcall TFormMain(TComponent* Owner);
 #endif
+
+    void ExitApp();
 };
 
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain* FormMain;
-
-int MsgDlg(UnicodeString const& msg, UnicodeString const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons);
 //---------------------------------------------------------------------------
 
 #endif // #ifndef MainFormH
