@@ -65,7 +65,9 @@ public:
     TSprite FaceHappy;
     TSprite FaceScared;
     TSprite FaceToast;
+    TSprite FaceWin;
     TSprite Flag;
+    TSprite FlagX;
     TSprite Mine;
     TSprite Question;
 

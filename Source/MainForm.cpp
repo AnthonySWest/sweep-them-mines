@@ -184,6 +184,7 @@ void __fastcall TFormMain::ImageMapMouseUp(
 
     if (EGameState::GameOver_Win == state)
     {
+        BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceWin.Bmp);
         ShowMessage("to do - win");
     }
 }

@@ -94,7 +94,9 @@ void TSprites::LoadGeneralSprites(std::string const& spritesDir)
     FaceHappy.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Happy.png"));
     FaceScared.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Scared.png"));
     FaceToast.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Toast.png"));
+    FaceWin.LoadFromFile(TPathTool::Combine(spritesDir, "Face_Win.png"));
     Flag.LoadFromFile(TPathTool::Combine(spritesDir, "Flag.png"));
+    FlagX.LoadFromFile(TPathTool::Combine(spritesDir, "FlagX.png"));
     Mine.LoadFromFile(TPathTool::Combine(spritesDir, "Mine.png"));
     Question.LoadFromFile(TPathTool::Combine(spritesDir, "Question.png"));
 }
@@ -140,7 +142,9 @@ void TSprites::Reset()
     FaceHappy.Reset();
     FaceScared.Reset();
     FaceToast.Reset();
+    FaceWin.Reset();
     Flag.Reset();
+    FlagX.Reset();
     Mine.Reset();
     Question.Reset();
 }
