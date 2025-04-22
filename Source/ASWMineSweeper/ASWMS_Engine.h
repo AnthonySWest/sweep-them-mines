@@ -51,6 +51,7 @@ class TMSEngine
 {
 private: // Static vars
     static ULONGLONG const StartTick_NotSet = static_cast<ULONGLONG>(-1);
+    static size_t const GridCoord_NotSet = static_cast<size_t>(-1);
 
 public: // Static vars
     static size_t const BeginnerRows = 8;
@@ -70,6 +71,8 @@ private:
     int m_MouseDown_X;
     int m_MouseDown_Y;
     int m_NumMines;
+    size_t m_BoomRow;
+    size_t m_BoomCol;
     ULONGLONG m_StartTick;
 
 public:
@@ -77,7 +80,10 @@ public:
     TSprites Sprites;
 
 private:
-    void CheckForWin();
+    void AutoClickNeighboringCells(size_t row, size_t col);
+    void AutoDiscoverNeighboringCells(TShiftState shift, size_t row, size_t col);
+    void CheckForAndSetWin();
+    void ClickNeighboringCells(TShiftState shift, size_t row, size_t col);
     void DoClick(TShiftState shift, size_t row, size_t col);
     void DrawCell(TImage* image, size_t row, size_t col, int xPos, int yPos, TShiftState shift, int mouseX, int mouseY);
     TCell* GetCell(size_t row, size_t col);
@@ -85,6 +91,7 @@ private:
     int GetCellDrawWidth();
     int GetDrawHeight();
     int GetDrawWidth();
+    int GetNeighboringFlagCount(size_t row, size_t col) const;
     int GetNeighboringMineCount(size_t row, size_t col) const;
     void GridCoordsFromMouse(size_t* col, size_t* row, int x, int y);
     void PopulateMineField(size_t mouseRow, size_t mouseCol);
@@ -100,7 +107,7 @@ public:
 
     void DrawMap(TImage* image, TShiftState shift, int mouseX, int mouseY);
     void DrawMap(TImage* image);
-    bool IsGameOver();
+    bool IsGameOver() const;
     void MouseDown(TShiftState shift, int x, int y);
     void MouseUp(TShiftState shift, int x, int y);
     void NewGame(size_t nRows, size_t nCols, int nMines, TImage* image);

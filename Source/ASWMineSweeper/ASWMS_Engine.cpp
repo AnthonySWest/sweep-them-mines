@@ -23,6 +23,7 @@ limitations under the License.
 #include "ASWMS_Engine.h"
 //---------------------------------------------------------------------------
 #include <algorithm>
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
 //---------------------------------------------------------------------------
@@ -44,6 +45,8 @@ TMSEngine::TMSEngine()
       m_MouseDown_X(-1),
       m_MouseDown_Y(-1),
       m_NumMines(0),
+      m_BoomRow(GridCoord_NotSet),
+      m_BoomCol(GridCoord_NotSet),
       m_StartTick(StartTick_NotSet),
       Grid(nullptr)
 {
@@ -54,12 +57,33 @@ TMSEngine::~TMSEngine()
     delete Grid;
 }
 //---------------------------------------------------------------------------
-bool TMSEngine::IsGameOver()
+// If flagged count is the same as mine count in neighboring cells, unflagged cells will be auto clicked. If the player
+// incorrectly marked a cell, the game is lost if a mine is clicked.
+void TMSEngine::AutoClickNeighboringCells(size_t row, size_t col)
 {
-    return EGameState::GameOver_Win == m_GameState || EGameState::GameOver_Boom == m_GameState;
+    int nMines = GetNeighboringMineCount(row, col);
+    if (0 == nMines)
+        return; // Can't auto click if this cell has no neighboring mines
+
+    int nFlags = GetNeighboringFlagCount(row, col);
+    if (nFlags != nMines)
+        return; // Flag count must match mine count
+
+    TShiftState shift = TShiftState() << ssLeft;
+    ClickNeighboringCells(shift, row, col);
 }
 //---------------------------------------------------------------------------
-void TMSEngine::CheckForWin()
+// If the current cell has zero mines surrounding it, then neigboring cells are automatically marked as discovered.
+void TMSEngine::AutoDiscoverNeighboringCells(TShiftState shift, size_t row, size_t col)
+{
+    int nMines = GetNeighboringMineCount(row, col);
+    if (0 != nMines)
+        return;
+
+    ClickNeighboringCells(shift, row, col);
+}
+//---------------------------------------------------------------------------
+void TMSEngine::CheckForAndSetWin()
 {
     if (IsGameOver())
         return; // Don't check for a win if the game is already done
@@ -77,8 +101,24 @@ void TMSEngine::CheckForWin()
     m_GameState = EGameState::GameOver_Win;
 }
 //---------------------------------------------------------------------------
+void TMSEngine::ClickNeighboringCells(TShiftState shift, size_t row, size_t col)
+{
+    // Start top left then go clockwise around this cell
+    DoClick(shift, row - 1, col - 1);
+    DoClick(shift, row - 1, col);
+    DoClick(shift, row - 1, col + 1);
+    DoClick(shift, row, col - 1);
+    DoClick(shift, row, col + 1);
+    DoClick(shift, row + 1, col - 1);
+    DoClick(shift, row + 1, col);
+    DoClick(shift, row + 1, col + 1);
+}
+//---------------------------------------------------------------------------
 void TMSEngine::DoClick(TShiftState shift, size_t row, size_t col)
 {
+    if (IsGameOver())
+        return;
+
     size_t nCols = Grid->GetColCount();
     size_t nRows = Grid->GetRowCount();
 
@@ -87,45 +127,52 @@ void TMSEngine::DoClick(TShiftState shift, size_t row, size_t col)
 
     TCell* cell = Grid->GetCell(row, col);
 
-    if (shift.Contains(ssLeft) && shift.Contains(ssRight))
+    if ((shift.Contains(ssLeft) && shift.Contains(ssRight)) ||
+        (m_MouseDown_Shift.Contains(ssLeft) && m_MouseDown_Shift.Contains(ssRight)))
     {
+        // Both mouse buttons were held down - perform auto click
 
-    }
-    else if (shift.Contains(ssLeft))
-    {
-        if (cell->MarkedAsQuestion || cell->MarkedAsMine)
+        if (cell->Discovered)
         {
-            // Do nothing - don't allow a click to reveal a cell when the user has a marked it sus
+            TShiftState oldDownShift = m_MouseDown_Shift;
+            m_MouseDown_Shift.Clear();
+
+            AutoClickNeighboringCells(row, col);
+
+            m_MouseDown_Shift = oldDownShift;
+        }
+    }
+    else if (shift.Contains(ssLeft) && !m_MouseDown_Shift.Contains(ssRight))
+    {
+        if (cell->MarkedAsMine)
+        {
+            // Do nothing - don't allow a click to reveal a cell when the user has a flagged it.
+            // Note: Question marks can still be clicked (in Win98 Minesweeper)
         }
         else if (cell->IsMine)
         {
             m_GameState = EGameState::GameOver_Boom;
+            m_BoomRow = row;
+            m_BoomCol = col;
+            cell->Discovered = true;
+            cell->MarkedAsQuestion = false;
             RevealAll();
         }
         else if (!cell->Discovered)
         {
             cell->Discovered = true;
+            cell->MarkedAsMine = false;
+            cell->MarkedAsQuestion = false;
 
-            CheckForWin();
+            CheckForAndSetWin();
             if (EGameState::GameOver_Win == m_GameState)
                 return;
 
-            int nMines = GetNeighboringMineCount(row, col);
-            if (0 == nMines)
-            {
-                // Start top left then go clockwise around this cell
-                DoClick(shift, row - 1, col - 1);
-                DoClick(shift, row - 1, col);
-                DoClick(shift, row - 1, col + 1);
-                DoClick(shift, row, col - 1);
-                DoClick(shift, row, col + 1);
-                DoClick(shift, row + 1, col - 1);
-                DoClick(shift, row + 1, col);
-                DoClick(shift, row + 1, col + 1);
-            }
+            // Recursively discover neighboring cells, if applicable
+            AutoDiscoverNeighboringCells(shift, row, col);
         }
     }
-    else if (shift.Contains(ssRight))
+    else if (shift.Contains(ssRight) && !m_MouseDown_Shift.Contains(ssLeft) && !cell->Discovered)
     {
         if (cell->MarkedAsMine)
         {
@@ -149,53 +196,105 @@ void TMSEngine::DrawCell(
     TCell const* cell = Grid->GetCell(row, col);
     Graphics::TBitmap* bmp = image->Picture->Bitmap;
     TCanvas* canvas = bmp->Canvas;
-    Graphics::TBitmap* bmpBack = Sprites.Tiles[static_cast<size_t>(ETile::Covered)].Bmp;
-    Graphics::TBitmap* bmpFore = nullptr;
+    Graphics::TBitmap* bmpTile = nullptr;
+    Graphics::TBitmap* bmpMine = nullptr;
+    Graphics::TBitmap* bmpProx = nullptr;
+    Graphics::TBitmap* bmpFlag = nullptr;
+    Graphics::TBitmap* bmpFlagX = nullptr;
 
     if (cell->Discovered)
     {
-        bmpBack = Sprites.Tiles[static_cast<size_t>(ETile::Uncovered)].Bmp;
+        bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::Uncovered)].Bmp;
 
         if (cell->IsMine)
         {
-            bmpFore = Sprites.Mine.Bmp;
+            bmpMine = Sprites.Mine.Bmp;
+
+            if (row == m_BoomRow && col == m_BoomCol)
+                bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::UncoveredBoom)].Bmp;
         }
         else
         {
             int nMines = GetNeighboringMineCount(row, col);
             if (nMines > 0)
-                bmpFore = Sprites.Digits_Proximity[static_cast<size_t>(nMines - 1)].Bmp;
+                bmpProx = Sprites.Digits_Proximity[static_cast<size_t>(nMines - 1)].Bmp;
+
+            // Incorrectly marked as a mine - this condition occurs after game is over
+            if (cell->MarkedAsMine)
+                bmpFlagX = Sprites.FlagX.Bmp;
         }
     }
     else
     {
-        if (cell->MarkedAsMine)
-            bmpFore = Sprites.Flag.Bmp;
-        else if (cell->MarkedAsQuestion)
-            bmpFore = Sprites.Question.Bmp;
+        bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::Covered)].Bmp;
+
+        size_t mouseRow;
+        size_t mouseCol;
+        GridCoordsFromMouse(&mouseCol, &mouseRow, mouseX, mouseY);
+        TCell const* mouseCell = Grid->GetCell(mouseRow, mouseCol);
 
         // Is the mouse over the cell
-        if (mouseX >= xPos && mouseX < xPos + bmpBack->Width &&
-            mouseY >= yPos && mouseY < yPos + bmpBack->Height)
+        if (mouseRow == row && mouseCol == col)
         {
-            bmpBack = Sprites.Tiles[static_cast<size_t>(ETile::CoveredLit)].Bmp;
+            bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::CoveredLit)].Bmp;
 
-            if (shift.Contains(ssLeft) && !cell->MarkedAsMine && !cell->MarkedAsQuestion)
+            // Note: Allow question marks to be shown as clicking
+            if (shift.Contains(ssLeft) && !cell->MarkedAsMine)
             {
-                bmpBack = Sprites.Tiles[static_cast<size_t>(ETile::CoveredClicked)].Bmp;
+                bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::CoveredClicked)].Bmp;
             }
+        }
+
+        // Player may be attempting an auto-click for multiple cells - if so, highlight cell, if neighbor
+        if (GridCoord_NotSet != mouseRow && GridCoord_NotSet != mouseCol &&
+            !cell->MarkedAsMine &&
+            mouseCell->Discovered && shift.Contains(ssLeft) && shift.Contains(ssRight))
+        {
+            int diffCol = std::abs(static_cast<int>(mouseCol) - static_cast<int>(col));
+            int diffRow = std::abs(static_cast<int>(mouseRow) - static_cast<int>(row));
+
+            if (diffCol <= 1  && diffRow <= 1)
+                bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::CoveredLit)].Bmp;
         }
     }
 
-    canvas->Draw(xPos, yPos, bmpBack);
+    if (cell->MarkedAsMine)
+        bmpFlag = Sprites.Flag.Bmp;
+    else if (cell->MarkedAsQuestion)
+        bmpFlag = Sprites.Question.Bmp;
 
-    if (nullptr != bmpFore)
+    // Draw tile first (Layer 1)
+    if (nullptr != bmpTile)
+        canvas->Draw(xPos, yPos, bmpTile);
+
+    // Draw mine or proximity digit (layer 2)
+    if (nullptr != bmpMine)
     {
-        bmpFore->Transparent = true;
-        canvas->Draw(xPos, yPos, bmpFore);
+        bmpMine->Transparent = true;
+        canvas->Draw(xPos, yPos, bmpMine);
+    }
+    else if (nullptr != bmpProx)
+    {
+        bmpProx->Transparent = true;
+        canvas->Draw(xPos, yPos, bmpProx);
     }
 
-    TRect rect(xPos, yPos, xPos + bmpBack->Width - 1, yPos + bmpBack->Height - 1);
+    // Draw flag/marker (Layer 3)
+    if (nullptr != bmpFlag)
+    {
+        bmpFlag->Transparent = true;
+        canvas->Draw(xPos, yPos, bmpFlag);
+    }
+
+    // Draw incorrect flag/marker (Layer 4)
+    if (nullptr != bmpFlagX)
+    {
+        bmpFlagX->Transparent = true;
+        canvas->Draw(xPos, yPos, bmpFlagX);
+    }
+
+    // Draw border (Layer 5)
+    TRect rect(xPos, yPos, xPos + bmpTile->Width - 1, yPos + bmpTile->Height - 1);
     canvas->Brush->Color = TColor(0xFF1C69B3);
     canvas->FrameRect(rect);
 }
@@ -254,6 +353,42 @@ EGameState TMSEngine::GetGameState()
     return m_GameState;
 }
 //---------------------------------------------------------------------------
+int TMSEngine::GetNeighboringFlagCount(size_t row, size_t col) const
+{
+    int count = 0;
+    size_t nCols = Grid->GetColCount();
+    size_t nRows = Grid->GetRowCount();
+
+    // Top row
+    if (row > 0 && col > 0 && Grid->GetCell(row - 1, col - 1)->MarkedAsMine)
+        count++;
+
+    if (row > 0 && Grid->GetCell(row - 1, col)->MarkedAsMine)
+        count++;
+
+    if (row > 0 && col + 1 < nCols && Grid->GetCell(row - 1, col + 1)->MarkedAsMine)
+        count++;
+
+    // Left and right
+    if (col > 0 && Grid->GetCell(row, col - 1)->MarkedAsMine)
+        count++;
+
+    if (col + 1 < nCols && Grid->GetCell(row, col + 1)->MarkedAsMine)
+        count++;
+
+    // bottom row
+    if (row + 1 < nRows && col > 0 && Grid->GetCell(row + 1, col - 1)->MarkedAsMine)
+        count++;
+
+    if (row + 1 < nRows && Grid->GetCell(row + 1, col)->MarkedAsMine)
+        count++;
+
+    if (row + 1 < nRows && col + 1 < nCols && Grid->GetCell(row + 1, col + 1)->MarkedAsMine)
+        count++;
+
+    return count;
+}
+//---------------------------------------------------------------------------
 int TMSEngine::GetNeighboringMineCount(size_t row, size_t col) const
 {
     int count = 0;
@@ -298,10 +433,37 @@ ULONGLONG TMSEngine::GetStartedTick64() const
 void TMSEngine::GridCoordsFromMouse(size_t* col, size_t* row, int x, int y)
 {
     if (nullptr != col)
-        *col = static_cast<size_t>(x / GetCellDrawWidth());
+    {
+        if (x < 0)
+        {
+            *col = GridCoord_NotSet;
+        }
+        else
+        {
+            *col = static_cast<size_t>(x / GetCellDrawWidth());
+            if (*col > Grid->GetColCount())
+                *col = GridCoord_NotSet;
+        }
+    }
 
     if (nullptr != row)
-        *row = static_cast<size_t>(y / GetCellDrawHeight());
+    {
+        if (y < 0)
+        {
+            *row = GridCoord_NotSet;
+        }
+        else
+        {
+            *row = static_cast<size_t>(y / GetCellDrawHeight());
+            if (*row > Grid->GetRowCount())
+                *row = GridCoord_NotSet;
+        }
+    }
+}
+//---------------------------------------------------------------------------
+bool TMSEngine::IsGameOver() const
+{
+    return EGameState::GameOver_Win == m_GameState || EGameState::GameOver_Boom == m_GameState;
 }
 //---------------------------------------------------------------------------
 void TMSEngine::MouseDown(TShiftState shift, int x, int y)
@@ -314,6 +476,9 @@ void TMSEngine::MouseDown(TShiftState shift, int x, int y)
 void TMSEngine::MouseUp(TShiftState shift, int x, int y)
 {
     if (m_firstClick && !shift.Contains(ssLeft))
+        return;
+
+    if (m_firstClick && m_MouseDown_Shift.Contains(ssLeft) && m_MouseDown_Shift.Contains(ssRight))
         return;
 
     size_t row;
@@ -339,6 +504,9 @@ void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* image)
     m_StartTick = StartTick_NotSet;
     m_GameState = EGameState::NewGame;
     m_NumMines = std::min(static_cast<int>(nRows * nCols) - 1, nMines);
+
+    m_BoomRow = GridCoord_NotSet;
+    m_BoomCol = GridCoord_NotSet;
 
     Graphics::TBitmap* bmp = image->Picture->Bitmap;
     TCanvas* canvas = bmp->Canvas;
