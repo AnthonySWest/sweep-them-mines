@@ -9,7 +9,7 @@ object FormMain: TFormMain
   Constraints.MinWidth = 296
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
+  Font.Height = -15
   Font.Name = 'Segoe UI'
   Font.Style = []
   Icon.Data = {
@@ -158,7 +158,31 @@ object FormMain: TFormMain
   DesignSize = (
     660
     669)
-  TextHeight = 15
+  TextHeight = 20
+  object ImageMinesRemaining: TImage
+    Left = 10
+    Top = 5
+    Width = 80
+    Height = 30
+    Hint = 'Mines remaining'
+    AutoSize = True
+    ParentShowHint = False
+    ShowHint = True
+    OnMouseDown = ImageMapMouseDown
+    OnMouseMove = ImageMapMouseMove
+    OnMouseUp = ImageMapMouseUp
+  end
+  object ImageTime: TImage
+    Left = 568
+    Top = 5
+    Width = 80
+    Height = 30
+    Anchors = [akTop, akRight]
+    AutoSize = True
+    OnMouseDown = ImageMapMouseDown
+    OnMouseMove = ImageMapMouseMove
+    OnMouseUp = ImageMapMouseUp
+  end
   object ScrollBoxMap: TScrollBox
     Left = 8
     Top = 46
@@ -294,7 +318,7 @@ object FormMain: TFormMain
     OnClick = MnuNewGameClick
   end
   object MainMenu1: TMainMenu
-    Left = 520
+    Left = 192
     object MnuGame: TMenuItem
       Caption = '&Game'
       OnClick = MnuGameClick
@@ -349,5 +373,17 @@ object FormMain: TFormMain
         OnClick = MnuAboutClick
       end
     end
+  end
+  object TimerScoreboard: TTimer
+    Enabled = False
+    OnTimer = TimerScoreboardTimer
+    Left = 384
+    Top = 8
+  end
+  object ApplicationEvents: TApplicationEvents
+    OnMinimize = ApplicationEventsMinimize
+    OnRestore = ApplicationEventsRestore
+    Left = 480
+    Top = 8
   end
 end

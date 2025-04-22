@@ -45,6 +45,9 @@ enum class ETile
 /////////////////////////////////////////////////////////////////////////////
 class TSprites
 {
+public: // Static vars
+    static size_t const BlankScoreDigitIndex = 10;
+
 public:
     typedef std::vector<TSprite> TSpriteList;
 

@@ -29,6 +29,8 @@ limitations under the License.
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 //---------------------------------------------------------------------------
+#include <Vcl.Dialogs.hpp>
+//---------------------------------------------------------------------------
 #include "ASWTools_Path.h"
 //---------------------------------------------------------------------------
 #include "App.h"
@@ -97,6 +99,27 @@ void TFormMain::AddScoresToLines(TStrings* lines, TScores::TScoreList const& sco
     }
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormMain::ApplicationEventsMinimize(TObject* /*sender*/)
+{
+    if (m_MineSweeper.IsGameRunning())
+        m_MineSweeper.PauseTime();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::ApplicationEventsRestore(TObject* /*sender*/)
+{
+    if (m_MineSweeper.IsGameRunning())
+    {
+        m_MineSweeper.ResumeTime();
+        DrawScoreboards();
+    }
+}
+//---------------------------------------------------------------------------
+void TFormMain::DrawScoreboards()
+{
+    m_MineSweeper.DrawTime(ImageTime);
+    m_MineSweeper.DrawMinesRemaining(ImageMinesRemaining);
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::FormClose(TObject* /*sender*/, TCloseAction& /*action*/)
 {
     ExitApp();
@@ -146,6 +169,9 @@ String TFormMain::GetHighScoresFilename()
 void __fastcall TFormMain::ImageMapMouseDown(
     TObject* /*sender*/, TMouseButton /*button*/, TShiftState shift, int /*x*/, int /*y*/)
 {
+    if (m_MineSweeper.IsGameOver())
+        return;
+
     TPoint pos = GetExtendedImageMapMousePos();
 
     m_MineSweeper.MouseDown(shift, pos.x, pos.y);
@@ -158,14 +184,19 @@ void __fastcall TFormMain::ImageMapMouseDown(
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState shift, int /*x*/, int /*y*/)
 {
-    TPoint pos = GetExtendedImageMapMousePos();
+    if (m_MineSweeper.IsGameOver())
+        return;
 
+    TPoint pos = GetExtendedImageMapMousePos();
     m_MineSweeper.DrawMap(ImageMap, shift, pos.x, pos.y);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::ImageMapMouseUp(
     TObject* /*sender*/, TMouseButton button, TShiftState shift, int /*x*/, int /*y*/)
 {
+    if (m_MineSweeper.IsGameOver())
+        return;
+
     if (mbLeft == button)
         shift = shift << ssLeft;
     else if (mbRight == button)
@@ -182,10 +213,55 @@ void __fastcall TFormMain::ImageMapMouseUp(
     else
         BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
 
+    int seconds = m_MineSweeper.GetEllapsedTimeMilliSecs() / 1000;
+
+    if (m_MineSweeper.IsGameOver())
+        TimerScoreboard->Enabled = false;
+
+    DrawScoreboards();
+
     if (EGameState::GameOver_Win == state)
     {
         BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceWin.Bmp);
-        ShowMessage("to do - win");
+
+        if (MnuBeginner->Checked || MnuIntermediate->Checked || MnuExpert->Checked)
+        {
+            TScores scores;
+            LoadHighScores(&scores);
+            bool addScore = false;
+
+            if (MnuBeginner->Checked)
+            {
+                addScore = (scores.Beginner.size() < TScores::Default_MaxScoresToKeep ||
+                    scores.Beginner[scores.Beginner.size() - 1].Seconds > seconds);
+            }
+            else if (MnuIntermediate->Checked)
+            {
+                addScore = (scores.Intermediate.size() < TScores::Default_MaxScoresToKeep ||
+                    scores.Intermediate[scores.Intermediate.size() - 1].Seconds > seconds);
+            }
+            else
+            {
+                addScore = (scores.Expert.size() < TScores::Default_MaxScoresToKeep ||
+                    scores.Expert[scores.Expert.size() - 1].Seconds > seconds);
+            }
+
+            UnicodeString playerName;
+            if (addScore && InputQuery("You Won!", "Please enter your name for the scoreboard: ", playerName))
+            {
+                if (MnuBeginner->Checked)
+                    SaveBestTime_Beginner(seconds, playerName);
+                else if (MnuIntermediate->Checked)
+                    SaveBestTime_Intermediate(seconds, playerName);
+                else
+                    SaveBestTime_Expert(seconds, playerName);
+            }
+        }
+        else
+        {
+            // Thinking about this - show message if won custom?
+            //MsgDlg("You won!", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+        }
     }
 }
 //---------------------------------------------------------------------------
@@ -315,8 +391,9 @@ void TFormMain::NewGame()
         nMines = m_CustomMines;
     }
 
-    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap);
+    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap, ImageTime, ImageMinesRemaining);
     m_MineSweeper.DrawMap(ImageMap);
+    DrawScoreboards();
 
     ClientWidth = ImageMap->Width +
         ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
@@ -333,8 +410,7 @@ void TFormMain::NewGame()
 
     BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
 
-    //DrawMinesLeft();
-    //DrawElapsedTime();
+    TimerScoreboard->Enabled = true;
 }
 //---------------------------------------------------------------------------
 void TFormMain::ReCenter()
@@ -455,5 +531,10 @@ TModalResult TFormMain::ShowCustomDifficulty()
     }
 
     return mRes;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::TimerScoreboardTimer(TObject* /*sender*/)
+{
+    DrawScoreboards();
 }
 //---------------------------------------------------------------------------

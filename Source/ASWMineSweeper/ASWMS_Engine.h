@@ -50,8 +50,11 @@ enum class EGameState
 class TMSEngine
 {
 private: // Static vars
-    static ULONGLONG const StartTick_NotSet = static_cast<ULONGLONG>(-1);
+    static uint32_t const FrameColor = 0xFF1C69B3;
+    static int const NumDigits_MinesRemaining = 4;
+    static int const NumDigits_Time = 4;
     static size_t const GridCoord_NotSet = static_cast<size_t>(-1);
+    static ULONGLONG const Tick_NotSet = 0;
 
 public: // Static vars
     static size_t const BeginnerRows = 8;
@@ -71,9 +74,11 @@ private:
     int m_MouseDown_X;
     int m_MouseDown_Y;
     int m_NumMines;
+    int m_NumFlaggedMines;
     size_t m_BoomRow;
     size_t m_BoomCol;
     ULONGLONG m_StartTick;
+    ULONGLONG m_PauseTick;
 
 public:
     TGrid* Grid;
@@ -86,11 +91,15 @@ private:
     void ClickNeighboringCells(TShiftState shift, size_t row, size_t col);
     void DoClick(TShiftState shift, size_t row, size_t col);
     void DrawCell(TImage* image, size_t row, size_t col, int xPos, int yPos, TShiftState shift, int mouseX, int mouseY);
-    TCell* GetCell(size_t row, size_t col);
+    void DrawDigits(TImage* image, int value, size_t maxDigits);
     int GetCellDrawHeight();
     int GetCellDrawWidth();
     int GetDrawHeight();
+    int GetDrawHeight_MinesRemaining();
+    int GetDrawHeight_Time();
     int GetDrawWidth();
+    int GetDrawWidth_MinesRemaining();
+    int GetDrawWidth_Time();
     int GetNeighboringFlagCount(size_t row, size_t col) const;
     int GetNeighboringMineCount(size_t row, size_t col) const;
     void GridCoordsFromMouse(size_t* col, size_t* row, int x, int y);
@@ -98,6 +107,10 @@ private:
     void RevealAll();
 
 public:
+    static std::vector<int> ExtractDigits(int value, bool reverseOrder);
+
+public:
+    int GetEllapsedTimeMilliSecs();
     EGameState GetGameState();
     ULONGLONG GetStartedTick64() const;
 
@@ -107,10 +120,15 @@ public:
 
     void DrawMap(TImage* image, TShiftState shift, int mouseX, int mouseY);
     void DrawMap(TImage* image);
+    void DrawMinesRemaining(TImage* image);
+    void DrawTime(TImage* image);
     bool IsGameOver() const;
+    bool IsGameRunning() const;
     void MouseDown(TShiftState shift, int x, int y);
     void MouseUp(TShiftState shift, int x, int y);
-    void NewGame(size_t nRows, size_t nCols, int nMines, TImage* image);
+    void NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime, TImage* imgMinesRemaining);
+    void PauseTime();
+    void ResumeTime();
 };
 
 } // namespace ASWMS

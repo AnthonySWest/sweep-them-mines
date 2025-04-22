@@ -22,6 +22,8 @@ limitations under the License.
 #define MainFormH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
+#include <Vcl.AppEvnts.hpp>
+#include <Vcl.Buttons.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.Forms.hpp>
@@ -32,7 +34,6 @@ limitations under the License.
 //---------------------------------------------------------------------------
 #include "ASWMS_Engine.h"
 #include "Scores.h"
-#include <Vcl.Buttons.hpp>
 //---------------------------------------------------------------------------
 
 // //////////////////////////////////////////////////////////////////////////
@@ -59,6 +60,10 @@ __published: // IDE-managed Components
     TScrollBox* ScrollBoxMap;
     TImage* ImageMap;
     TBitBtn* BtnReact;
+    TImage* ImageMinesRemaining;
+    TImage* ImageTime;
+    TTimer* TimerScoreboard;
+    TApplicationEvents* ApplicationEvents;
     void __fastcall FormDestroy(TObject* Sender);
     void __fastcall MnuExitClick(TObject* Sender);
     void __fastcall MnuAboutClick(TObject* Sender);
@@ -74,6 +79,9 @@ __published: // IDE-managed Components
     void __fastcall ImageMapMouseDown(TObject* Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
     void __fastcall FormResize(TObject* Sender);
     void __fastcall ImageMapMouseUp(TObject* Sender, TMouseButton Button, TShiftState Shift, int X, int Y);
+    void __fastcall TimerScoreboardTimer(TObject* Sender);
+    void __fastcall ApplicationEventsRestore(TObject* Sender);
+    void __fastcall ApplicationEventsMinimize(TObject* Sender);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
 
@@ -85,6 +93,7 @@ private: // User declarations
 
 private:
     void AddScoresToLines(System::Classes::TStrings* lines, SweepThemMines::TScores::TScoreList const& scores);
+    void DrawScoreboards();
     TPoint GetExtendedImageMapMousePos();
     System::String GetHighScoresFilename();
     bool LoadHighScores(SweepThemMines::TScores* scores);

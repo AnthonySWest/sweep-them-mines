@@ -45,9 +45,11 @@ TMSEngine::TMSEngine()
       m_MouseDown_X(-1),
       m_MouseDown_Y(-1),
       m_NumMines(0),
+      m_NumFlaggedMines(0),
       m_BoomRow(GridCoord_NotSet),
       m_BoomCol(GridCoord_NotSet),
-      m_StartTick(StartTick_NotSet),
+      m_StartTick(Tick_NotSet),
+      m_PauseTick(Tick_NotSet),
       Grid(nullptr)
 {
 }
@@ -259,9 +261,14 @@ void TMSEngine::DrawCell(
     }
 
     if (cell->MarkedAsMine)
+    {
         bmpFlag = Sprites.Flag.Bmp;
+        m_NumFlaggedMines++;
+    }
     else if (cell->MarkedAsQuestion)
+    {
         bmpFlag = Sprites.Question.Bmp;
+    }
 
     // Draw tile first (Layer 1)
     if (nullptr != bmpTile)
@@ -295,7 +302,33 @@ void TMSEngine::DrawCell(
 
     // Draw border (Layer 5)
     TRect rect(xPos, yPos, xPos + bmpTile->Width - 1, yPos + bmpTile->Height - 1);
-    canvas->Brush->Color = TColor(0xFF1C69B3);
+    canvas->Brush->Color = TColor(FrameColor);
+    canvas->FrameRect(rect);
+}
+//---------------------------------------------------------------------------
+void TMSEngine::DrawDigits(TImage* image, int value, size_t maxDigits)
+{
+    std::vector<int> digits = ExtractDigits(value, true);
+    if (digits.size() > maxDigits)
+        digits.resize(maxDigits);
+
+    TBitmap* bmp = image->Picture->Bitmap;
+    TCanvas* canvas = bmp->Canvas;
+
+    for (size_t i = maxDigits - 1, count = digits.size(), idx = 0; i < maxDigits; i--, idx++)
+    {
+        int digit = TSprites::BlankScoreDigitIndex;
+        if (i < count)
+            digit = digits[i];
+
+        TBitmap* bmpDigit = Sprites.Digits_Score[static_cast<size_t>(digit)].Bmp;
+        bmpDigit->Transparent = true;
+        canvas->Draw(bmpDigit->Width * static_cast<int>(idx), 0, bmpDigit);
+    }
+
+    // Draw border
+    TRect rect(0, 0, bmp->Width - 1, bmp->Height - 1);
+    canvas->Brush->Color = TColor(FrameColor);
     canvas->FrameRect(rect);
 }
 //---------------------------------------------------------------------------
@@ -303,6 +336,8 @@ void TMSEngine::DrawMap(TImage* image, TShiftState shift, int mouseX, int mouseY
 {
     int cellWidth = GetCellDrawWidth();
     int cellHeight = GetCellDrawHeight();
+
+    m_NumFlaggedMines = 0;
 
     for (size_t row = 0, nRows = Grid->GetRowCount(); row < nRows; row++)
     {
@@ -322,6 +357,48 @@ void TMSEngine::DrawMap(TImage* image)
     DrawMap(image, dummy, -1, -1);
 }
 //---------------------------------------------------------------------------
+void TMSEngine::DrawMinesRemaining(TImage* image)
+{
+    int remaining = m_NumMines - m_NumFlaggedMines;
+    if (remaining < 0)
+        remaining = 0;
+
+    size_t maxDigits = static_cast<size_t>(NumDigits_Time);
+    DrawDigits(image, remaining, maxDigits);
+}
+//---------------------------------------------------------------------------
+void TMSEngine::DrawTime(TImage* image)
+{
+    int seconds = GetEllapsedTimeMilliSecs() / 1000;
+    size_t maxDigits = static_cast<size_t>(NumDigits_Time);
+    DrawDigits(image, seconds, maxDigits);
+}
+//---------------------------------------------------------------------------
+std::vector<int> TMSEngine::ExtractDigits(int value, bool reverseOrder)
+{
+    std::vector<int> result;
+
+    if (0 == value)
+    {
+        result.push_back(0);
+        return result;
+    }
+
+    if (value < 0)
+        value = -value;
+
+    while (value > 0)
+    {
+        result.push_back(value % 10);
+        value /= 10;
+    }
+
+    // If caller wants the reverse order, leave as is
+    if (!reverseOrder)
+        std::reverse(result.begin(), result.end());
+    return result;
+}
+//---------------------------------------------------------------------------
 int TMSEngine::GetCellDrawHeight()
 {
     return Sprites.Tiles[0].Bmp->Height;
@@ -337,15 +414,36 @@ int TMSEngine::GetDrawHeight()
     return static_cast<int>(Grid->GetRowCount()) * Sprites.Tiles[0].Bmp->Height;
 }
 //---------------------------------------------------------------------------
+int TMSEngine::GetDrawHeight_MinesRemaining()
+{
+    return Sprites.Digits_Score[0].Bmp->Height;
+}
+//---------------------------------------------------------------------------
+int TMSEngine::GetDrawHeight_Time()
+{
+    return Sprites.Digits_Score[0].Bmp->Height;
+}
+//---------------------------------------------------------------------------
 int TMSEngine::GetDrawWidth()
 {
-    //if (Grid->GetRowCount() == 0 || Grid->GetColCount() == 0)
-    //    return 0;
-
-    //TGrid::TRow const* row = &(*Grid->Rows)[0];
-    //int result = static_cast<int>(row->size()) * Sprites.Tiles[0].Bmp->Width;
-    //return result;
     return static_cast<int>(Grid->GetColCount()) * Sprites.Tiles[0].Bmp->Width;
+}
+//---------------------------------------------------------------------------
+int TMSEngine::GetDrawWidth_MinesRemaining()
+{
+    return NumDigits_MinesRemaining * Sprites.Digits_Score[0].Bmp->Width;
+}
+//---------------------------------------------------------------------------
+int TMSEngine::GetDrawWidth_Time()
+{
+    return NumDigits_Time * Sprites.Digits_Score[0].Bmp->Width;
+}
+//---------------------------------------------------------------------------
+int TMSEngine::GetEllapsedTimeMilliSecs()
+{
+    if (Tick_NotSet == m_StartTick)
+        return 0;
+    return static_cast<int>(::GetTickCount64() - m_StartTick);
 }
 //---------------------------------------------------------------------------
 EGameState TMSEngine::GetGameState()
@@ -466,6 +564,11 @@ bool TMSEngine::IsGameOver() const
     return EGameState::GameOver_Win == m_GameState || EGameState::GameOver_Boom == m_GameState;
 }
 //---------------------------------------------------------------------------
+bool TMSEngine::IsGameRunning() const
+{
+    return EGameState::NewGame == m_GameState || EGameState::InProgress == m_GameState;
+}
+//---------------------------------------------------------------------------
 void TMSEngine::MouseDown(TShiftState shift, int x, int y)
 {
     m_MouseDown_Shift = shift;
@@ -489,31 +592,56 @@ void TMSEngine::MouseUp(TShiftState shift, int x, int y)
     {
         PopulateMineField(row, col);
         m_GameState = EGameState::InProgress;
+        m_StartTick = ::GetTickCount64();
     }
 
     DoClick(shift, row, col);
     m_firstClick = false;
 }
 //---------------------------------------------------------------------------
-void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* image)
+void TMSEngine::NewGame(
+    size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime, TImage* imgMinesRemaining)
 {
     delete Grid;
     Grid = new TGrid(nRows, nCols);
 
     m_firstClick = true;
-    m_StartTick = StartTick_NotSet;
+    m_StartTick = m_PauseTick = Tick_NotSet;
     m_GameState = EGameState::NewGame;
     m_NumMines = std::min(static_cast<int>(nRows * nCols) - 1, nMines);
+    m_NumFlaggedMines = 0;
 
     m_BoomRow = GridCoord_NotSet;
     m_BoomCol = GridCoord_NotSet;
 
-    Graphics::TBitmap* bmp = image->Picture->Bitmap;
+    // Prep the map image
+    Graphics::TBitmap* bmp = imgMap->Picture->Bitmap;
     TCanvas* canvas = bmp->Canvas;
-    canvas->Brush->Color = clWhite;
-    canvas->Font->Color = clWhite;
+    canvas->Brush->Color = clBlack;
+    canvas->Font->Color = clBlack;
     bmp->Width = GetDrawWidth();
     bmp->Height = GetDrawHeight();
+
+    // Prep the time image
+    bmp = imgTime->Picture->Bitmap;
+    canvas = bmp->Canvas;
+    canvas->Brush->Color = clBlack;
+    canvas->Font->Color = clBlack;
+    bmp->Width = GetDrawWidth_Time();
+    bmp->Height = GetDrawHeight_Time();
+
+    // Prep the mines remaining image
+    bmp = imgMinesRemaining->Picture->Bitmap;
+    canvas = bmp->Canvas;
+    canvas->Brush->Color = clBlack;
+    canvas->Font->Color = clBlack;
+    bmp->Width = GetDrawWidth_MinesRemaining();
+    bmp->Height = GetDrawHeight_MinesRemaining();
+}
+//---------------------------------------------------------------------------
+void TMSEngine::PauseTime()
+{
+    m_PauseTick = ::GetTickCount64();
 }
 //---------------------------------------------------------------------------
 void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
@@ -560,12 +688,15 @@ void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
                 if (row == static_cast<int>(mouseRow) && col == static_cast<int>(mouseCol))
                     continue;
 
+                TCell* cell = Grid->GetCell(static_cast<size_t>(row), static_cast<size_t>(col));
+                if (cell->IsMine)
+                    continue; // already a mine
+
                 bool setMine = ((std::rand() % 100) < chance);
                 if (!setMine && m_NumMines < totalCells - 1)
                     continue;
 
                 mineCount++;
-                TCell* cell = Grid->GetCell(static_cast<size_t>(row), static_cast<size_t>(col));
                 cell->IsMine = true;
             }
         }
@@ -579,6 +710,12 @@ void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
 
     if (mineCount < m_NumMines)
         m_NumMines = mineCount; // Unexpected unless the mine count to total cells ratio is too high (like 999/1000)
+}
+//---------------------------------------------------------------------------
+void TMSEngine::ResumeTime()
+{
+    ULONGLONG currentTick = ::GetTickCount64();
+    m_StartTick += currentTick - m_PauseTick;
 }
 //---------------------------------------------------------------------------
 void TMSEngine::RevealAll()
