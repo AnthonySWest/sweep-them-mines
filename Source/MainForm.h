@@ -85,6 +85,7 @@ private: // User declarations
 
 private:
     void AddScoresToLines(System::Classes::TStrings* lines, SweepThemMines::TScores::TScoreList const& scores);
+    TPoint GetExtendedImageMapMousePos();
     System::String GetHighScoresFilename();
     bool LoadHighScores(SweepThemMines::TScores* scores);
     void NewGame();

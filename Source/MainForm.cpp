@@ -123,6 +123,20 @@ void __fastcall TFormMain::FormShow(TObject* /*sender*/)
     NewGame();
 }
 //---------------------------------------------------------------------------
+TPoint TFormMain::GetExtendedImageMapMousePos()
+{
+    TPoint imagePoint;
+    TPoint scrollBoxPoint;
+
+    // Windows limits the position to a short int value of 32,767. Recalculate so that we have a signed int value.
+    scrollBoxPoint.x = Mouse->CursorPos.x - ScrollBoxMap->ClientOrigin.x;
+    scrollBoxPoint.y = Mouse->CursorPos.y - ScrollBoxMap->ClientOrigin.y;
+    imagePoint.x = scrollBoxPoint.x - ImageMap->Left;
+    imagePoint.y = scrollBoxPoint.y - ImageMap->Top;
+
+    return imagePoint;
+}
+//---------------------------------------------------------------------------
 String TFormMain::GetHighScoresFilename()
 {
     TApp* app = &TApp::GetInstance();
@@ -130,31 +144,37 @@ String TFormMain::GetHighScoresFilename()
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::ImageMapMouseDown(
-    TObject* /*sender*/, TMouseButton /*button*/, TShiftState shift, int x, int y)
+    TObject* /*sender*/, TMouseButton /*button*/, TShiftState shift, int /*x*/, int /*y*/)
 {
-    m_MineSweeper.MouseDown(shift, x, y);
-    m_MineSweeper.DrawMap(ImageMap, shift, x, y);
+    TPoint pos = GetExtendedImageMapMousePos();
+
+    m_MineSweeper.MouseDown(shift, pos.x, pos.y);
+    m_MineSweeper.DrawMap(ImageMap, shift, pos.x, pos.y);
 
     EGameState state = m_MineSweeper.GetGameState();
     if (shift.Contains(ssLeft) && EGameState::GameOver_Boom != state)
         BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceScared.Bmp);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState shift, int x, int y)
+void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState shift, int /*x*/, int /*y*/)
 {
-    m_MineSweeper.DrawMap(ImageMap, shift, x, y);
+    TPoint pos = GetExtendedImageMapMousePos();
+
+    m_MineSweeper.DrawMap(ImageMap, shift, pos.x, pos.y);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::ImageMapMouseUp(
-    TObject* /*sender*/, TMouseButton button, TShiftState shift, int x, int y)
+    TObject* /*sender*/, TMouseButton button, TShiftState shift, int /*x*/, int /*y*/)
 {
     if (mbLeft == button)
         shift = shift << ssLeft;
     else if (mbRight == button)
         shift = shift << ssRight;
 
-    m_MineSweeper.MouseUp(shift, x, y);
-    m_MineSweeper.DrawMap(ImageMap, shift, x, y);
+    TPoint pos = GetExtendedImageMapMousePos();
+
+    m_MineSweeper.MouseUp(shift, pos.x, pos.y);
+    m_MineSweeper.DrawMap(ImageMap, shift, pos.x, pos.y);
 
     EGameState state = m_MineSweeper.GetGameState();
     if (EGameState::GameOver_Boom == state)
