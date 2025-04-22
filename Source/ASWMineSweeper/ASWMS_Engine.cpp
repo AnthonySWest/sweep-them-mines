@@ -177,14 +177,11 @@ void TMSEngine::DrawMap(TImage* image, TShiftState shift, int mouseX, int mouseY
     int cellWidth = GetCellDrawWidth();
     int cellHeight = GetCellDrawHeight();
 
-    size_t nRows = Grid->GetRowCount();
-    size_t nCols = Grid->GetColCount();
-
-    for (size_t row = 0; row < nRows; row++)
+    for (size_t row = 0, nRows = Grid->GetRowCount(); row < nRows; row++)
     {
         int yOffset = static_cast<int>(row) * cellHeight;
 
-        for (size_t col = 0; col < nCols; col++)
+        for (size_t col = 0, nCols = Grid->GetColCount(); col < nCols; col++)
         {
             int xOffset = static_cast<int>(col) * cellWidth;
             DrawCell(image, row, col, xOffset, yOffset, shift, mouseX, mouseY);
@@ -326,12 +323,13 @@ void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* image)
 void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
 {
     static const int maxWhileLoopCounts = 100;
+    static const int minChanceAfterFirstPass = 8;
 
     int mineCount = 0;
     int mineWhileLoopCount = 0;
 
-    size_t nRows = Grid->GetRowCount();
-    size_t nCols = Grid->GetColCount();
+    int nRows = static_cast<int>(Grid->GetRowCount());
+    int nCols = static_cast<int>(Grid->GetColCount());
 
     int totalCells = static_cast<int>(nRows * nCols);
     if (0 == totalCells)
@@ -345,17 +343,25 @@ void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
 
     // Try to get the best population of mines the first time through the field
     int chance = static_cast<int>(static_cast<double>(m_NumMines) / static_cast<double>(totalCells) * 100.0);
-    if (chance < 8)
-        chance = 8;
+    if (chance < 1)
+        chance = 1;
 
     do
     {
-        for (size_t row = 0; row < nRows && mineCount < m_NumMines; row++)
+        int rowDirection = ((std::rand() % 100) < 50) ? 1 : -1;
+        int rowStart = rowDirection > 0 ? 0 : nRows - 1;
+        int rowEnd = rowDirection > 0 ? nRows : -1;
+
+        for (int row = rowStart; row != rowEnd && mineCount < m_NumMines; row += rowDirection)
         {
-            for (size_t col = 0; col < nCols && mineCount < m_NumMines; col++)
+            int colDirection = ((std::rand() % 100) < 50) ? 1 : -1;
+            int colStart = colDirection > 0 ? 0 : nCols - 1;
+            int colEnd = colDirection > 0 ? nCols : -1;
+
+            for (int col = colStart; col != colEnd && mineCount < m_NumMines; col += colDirection)
             {
                 // Don't populate a mine where the click occurred - give user a break on the first click
-                if (row == mouseRow && col == mouseCol)
+                if (row == static_cast<int>(mouseRow) && col == static_cast<int>(mouseCol))
                     continue;
 
                 bool setMine = ((std::rand() % 100) < chance);
@@ -363,10 +369,14 @@ void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
                     continue;
 
                 mineCount++;
-                TCell* cell = Grid->GetCell(row, col);
+                TCell* cell = Grid->GetCell(static_cast<size_t>(row), static_cast<size_t>(col));
                 cell->IsMine = true;
             }
         }
+
+        // Give the second pass a greater chance of using up all of the mines
+        if (mineCount < m_NumMines && chance < minChanceAfterFirstPass)
+            chance = minChanceAfterFirstPass;
 
         mineWhileLoopCount++;
     } while (mineCount < m_NumMines && mineWhileLoopCount < maxWhileLoopCounts);
@@ -377,12 +387,9 @@ void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
 //---------------------------------------------------------------------------
 void TMSEngine::RevealAll()
 {
-    size_t nRows = Grid->GetRowCount();
-    size_t nCols = Grid->GetColCount();
-
-    for (size_t row = 0; row < nRows; row++)
+    for (size_t row = 0, nRows = Grid->GetRowCount(); row < nRows; row++)
     {
-        for (size_t col = 0; col < nCols; col++)
+        for (size_t col = 0, nCols = Grid->GetColCount(); col < nCols; col++)
         {
             TCell* cell = Grid->GetCell(row, col);
             cell->Discovered = true;
