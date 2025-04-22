@@ -57,7 +57,7 @@ int MsgDlg(String const& msg, String const& title, TMsgDlgType dlgType, TMsgDlgB
 //    msgDlg->Font->Name = "Verdana";
 //    msgDlg->Font->Size = 10;
 //    msgDlg->Canvas->Font = msgDlg->Font;
-//    msgDlg->Scaled = false;
+    msgDlg->Scaled = false;
 
     mRes = msgDlg->ShowModal();
     return mRes;
