@@ -77,6 +77,7 @@ public:
     TSprites Sprites;
 
 private:
+    void CheckForWin();
     void DoClick(TShiftState shift, size_t row, size_t col);
     void DrawCell(TImage* image, size_t row, size_t col, int xPos, int yPos, TShiftState shift, int mouseX, int mouseY);
     TCell* GetCell(size_t row, size_t col);
@@ -99,6 +100,7 @@ public:
 
     void DrawMap(TImage* image, TShiftState shift, int mouseX, int mouseY);
     void DrawMap(TImage* image);
+    bool IsGameOver();
     void MouseDown(TShiftState shift, int x, int y);
     void MouseUp(TShiftState shift, int x, int y);
     void NewGame(size_t nRows, size_t nCols, int nMines, TImage* image);

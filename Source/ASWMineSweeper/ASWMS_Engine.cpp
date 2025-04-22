@@ -54,6 +54,29 @@ TMSEngine::~TMSEngine()
     delete Grid;
 }
 //---------------------------------------------------------------------------
+bool TMSEngine::IsGameOver()
+{
+    return EGameState::GameOver_Win == m_GameState || EGameState::GameOver_Boom == m_GameState;
+}
+//---------------------------------------------------------------------------
+void TMSEngine::CheckForWin()
+{
+    if (IsGameOver())
+        return; // Don't check for a win if the game is already done
+
+    for (size_t row = 0, nRows = Grid->GetRowCount(); row < nRows; row++)
+    {
+        for (size_t col = 0, nCols = Grid->GetColCount(); col < nCols; col++)
+        {
+            TCell* cell = Grid->GetCell(row, col);
+            if (!cell->IsMine && !cell->Discovered)
+                return;
+        }
+    }
+
+    m_GameState = EGameState::GameOver_Win;
+}
+//---------------------------------------------------------------------------
 void TMSEngine::DoClick(TShiftState shift, size_t row, size_t col)
 {
     size_t nCols = Grid->GetColCount();
@@ -82,6 +105,11 @@ void TMSEngine::DoClick(TShiftState shift, size_t row, size_t col)
         else if (!cell->Discovered)
         {
             cell->Discovered = true;
+
+            CheckForWin();
+            if (EGameState::GameOver_Win == m_GameState)
+                return;
+
             int nMines = GetNeighboringMineCount(row, col);
             if (0 == nMines)
             {
