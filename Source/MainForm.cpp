@@ -396,20 +396,15 @@ void TFormMain::NewGame()
         nMines = m_CustomMines;
     }
 
+    int const oldImageMapWidth = ImageMap->Width;
+    int const oldImageMapHeight = ImageMap->Height;
+
     m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap, ImageTime, ImageMinesRemaining);
     m_MineSweeper.DrawMap(ImageMap);
     DrawScoreboards();
 
-    ClientWidth = ImageMap->Width +
-        ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
-    ClientHeight = ImageMap->Height + ScrollBoxMap->Top + ScrollBoxMap->Left +
-        ((ImageMap->Top + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 2;
-
-    if (Width > Screen->Width)
-        Width = Screen->Width;
-
-    if (Height > Screen->Height - 100)
-        Height = Screen->Height - 100;
+    if (oldImageMapWidth != ImageMap->Width || oldImageMapHeight != ImageMap->Height)
+        ResizeFormToImageMap();
 
     ReCenter();
 
@@ -440,6 +435,23 @@ void TFormMain::ResetBestTimes()
     DeleteFile(filename);
 
     MsgDlg("Best scores were reset to defaults.", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ResizeFormToImageMap()
+{
+    if (wsMaximized == WindowState)
+        return;
+
+    ClientWidth = ImageMap->Width +
+        ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
+    ClientHeight = ImageMap->Height + ScrollBoxMap->Top + ScrollBoxMap->Left +
+        ((ImageMap->Top + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 2;
+
+    if (Width > Screen->Width)
+        Width = Screen->Width;
+
+    if (Height > Screen->Height - 100)
+        Height = Screen->Height - 100;
 }
 //---------------------------------------------------------------------------
 void TFormMain::SaveBestScores(TScores& scores)

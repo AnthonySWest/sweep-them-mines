@@ -100,6 +100,7 @@ private:
     void NewGame();
     void ReCenter();
     void ResetBestTimes();
+    void ResizeFormToImageMap();
     void SaveBestScores(SweepThemMines::TScores& scores);
     void SaveBestTime_Beginner(int seconds, AnsiString const& name);
     void SaveBestTime_Expert(int seconds, AnsiString const& name);
