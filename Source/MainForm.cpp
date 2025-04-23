@@ -60,10 +60,9 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 {
     TApp* app = &TApp::GetInstance();
 
+    m_BaseFormCaption = Caption;
 #if defined(_DEBUG)
-    Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str()) + " - Debug";
-#else
-    Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str());
+    Caption = Caption + " - Debug";
 #endif
 
     AnsiString imagesDir = app->DirImages.c_str();
@@ -407,10 +406,13 @@ void TFormMain::NewGame()
         ResizeFormToImageMap();
 
     ReCenter();
-
     BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
-
     TimerScoreboard->Enabled = true;
+
+    Caption = m_BaseFormCaption + " - W" + nCols + ", H" + nRows + ", M" + nMines;
+#if defined(_DEBUG)
+    Caption = Caption + " - Debug";
+#endif
 }
 //---------------------------------------------------------------------------
 void TFormMain::ReCenter()

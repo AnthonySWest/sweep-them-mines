@@ -89,6 +89,8 @@ private: // User declarations
     int m_CustomRows;
     int m_CustomMines;
 
+    System::String m_BaseFormCaption;
+
     ASWMS::TMSEngine m_MineSweeper;
 
 private:
