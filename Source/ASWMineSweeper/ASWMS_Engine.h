@@ -70,6 +70,7 @@ public: // Static vars
 private:
     bool m_firstClick;
     bool m_UseQuestionMarks;
+    bool m_Paused;
     EGameState m_GameState;
     TShiftState m_MouseDown_Shift;
     int m_MouseDown_X;

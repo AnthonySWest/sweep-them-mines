@@ -41,6 +41,7 @@ namespace ASWMS
 TMSEngine::TMSEngine()
     : m_firstClick(true),
       m_UseQuestionMarks(true),
+      m_Paused(false),
       m_GameState(EGameState::NotSet),
       m_MouseDown_Shift(0),
       m_MouseDown_X(-1),
@@ -446,7 +447,8 @@ int TMSEngine::GetEllapsedTimeMilliSecs()
 {
     if (Tick_NotSet == m_StartTick)
         return 0;
-    return static_cast<int>(::GetTickCount64() - m_StartTick);
+    ULONGLONG offset = (m_Paused ? ::GetTickCount64() - m_PauseTick : 0);
+    return static_cast<int>(::GetTickCount64() - (m_StartTick + offset));
 }
 //---------------------------------------------------------------------------
 EGameState TMSEngine::GetGameState()
@@ -574,7 +576,7 @@ bool TMSEngine::IsGameOver() const
 //---------------------------------------------------------------------------
 bool TMSEngine::IsGameRunning() const
 {
-    return EGameState::NewGame == m_GameState || EGameState::InProgress == m_GameState;
+    return EGameState::InProgress == m_GameState;
 }
 //---------------------------------------------------------------------------
 void TMSEngine::MouseDown(TShiftState shift, int x, int y)
@@ -619,6 +621,7 @@ void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, 
     m_NumMines = std::min(static_cast<int>(nRows * nCols) - 1, nMines);
     m_NumFlaggedMines = 0;
     m_UseQuestionMarks = useQuestionMarks;
+    m_Paused = false;
 
     m_BoomRow = GridCoord_NotSet;
     m_BoomCol = GridCoord_NotSet;
@@ -650,6 +653,12 @@ void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, 
 //---------------------------------------------------------------------------
 void TMSEngine::PauseTime()
 {
+    if (m_Paused)
+        return;
+
+    if (EGameState::InProgress != m_GameState)
+        return;
+    m_Paused = true;
     m_PauseTick = ::GetTickCount64();
 }
 //---------------------------------------------------------------------------
@@ -723,6 +732,12 @@ void TMSEngine::PopulateMineField(size_t mouseRow, size_t mouseCol)
 //---------------------------------------------------------------------------
 void TMSEngine::ResumeTime()
 {
+    if (!m_Paused)
+        return;
+    m_Paused = false;
+
+    if (EGameState::InProgress != m_GameState)
+        return;
     ULONGLONG currentTick = ::GetTickCount64();
     m_StartTick += currentTick - m_PauseTick;
 }
