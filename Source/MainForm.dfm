@@ -147,11 +147,13 @@ object FormMain: TFormMain
     0000000000000000000000000000000000000000000000000000000000000000
     0000000000000000000000000000000000000000000000000000000000000000
     000000000000000000000000000000000000000000000000000000000000}
+  KeyPreview = True
   Menu = MainMenu1
   Position = poScreenCenter
   Scaled = False
   OnClose = FormClose
   OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
   OnMouseMove = FormMouseMove
   OnResize = FormResize
   OnShow = FormShow
@@ -198,6 +200,7 @@ object FormMain: TFormMain
     Font.Style = []
     ParentFont = False
     TabOrder = 0
+    OnMouseMove = FormMouseMove
     object ImageMap: TImage
       Left = 2
       Top = 2
@@ -346,6 +349,14 @@ object FormMain: TFormMain
       object MnuCustom: TMenuItem
         Caption = '&Custom...'
         OnClick = MnuStandardDifficultyClick
+      end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object MnuQuestionMarks: TMenuItem
+        Caption = 'Question &Marks'
+        Checked = True
+        OnClick = MnuQuestionMarksClick
       end
       object N3: TMenuItem
         Caption = '-'

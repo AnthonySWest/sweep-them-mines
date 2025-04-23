@@ -42,33 +42,40 @@ private:
     typedef ASWTools::BasicINI::TBasicINI Inherited;
 
 public: // Static variables
-    static char const* Default_DirLogs;
-    static char const* Default_LogPrefix;
+    static char const* const Default_DirLogs;
+    static char const* const Default_LogPrefix;
 
     // Section names
     static char const* SectionName_General;
 
     // Key names - General
-    static char const* KeyName_Gen_ImagesPath;
-    static char const* KeyName_Gen_DirLogs;
-    static char const* KeyName_Gen_LogPrefix;
-    static char const* KeyName_Gen_LogLevel;
-    static char const* KeyName_Gen_NDaysRetainLogs;
+    static char const* const KeyName_Gen_ImagesPath;
+    static char const* const KeyName_Gen_EnableCheats;
+    static char const* const KeyName_Gen_UseQuestionMarksInit;
+    static char const* const KeyName_Gen_DirLogs;
+    static char const* const KeyName_Gen_LogPrefix;
+    static char const* const KeyName_Gen_LogLevel;
+    static char const* const KeyName_Gen_NDaysRetainLogs;
 
     //ini comments
-    static char const* KeyName_Gen_ImagesPath_Comment;
-    static char const* KeyName_Gen_LogLevel_Comment;
-    static char const* KeyName_Gen_NDaysRetainLogs_Comment;
+    static char const* const KeyName_Gen_ImagesPath_Comment;
+    static char const* const KeyName_Gen_LogLevel_Comment;
+    static char const* const KeyName_Gen_NDaysRetainLogs_Comment;
 
 private:
     void Destroy_Private();
     bool Reset_Private();
+
+private:
+    bool m_EnableCheatsWasPresent;
 
 public:
     bool NeedsResaved;
 
     // General section vars
     std::string Gen_ImagesPath;
+    bool Gen_EnableCheats;
+    bool Gen_UseQuestionMarksInit;
     std::string Gen_DirLogs;
     std::string Gen_LogPrefix;
 //    ELogMsgLevel Gen_LogLevel;

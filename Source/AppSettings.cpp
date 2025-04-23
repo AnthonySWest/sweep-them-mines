@@ -35,23 +35,25 @@ namespace SweepThemMines
 // TAppSettings
 /////////////////////////////////////////////////////////////////////////////
 
-char const* TAppSettings::Default_DirLogs = "%localAppData%\\ASWSoftware\\SweepThemMines\\Logs\\";
-char const* TAppSettings::Default_LogPrefix = "GeneralSTM_";
+char const* const TAppSettings::Default_DirLogs = "%localAppData%\\ASWSoftware\\SweepThemMines\\Logs\\";
+char const* const TAppSettings::Default_LogPrefix = "GeneralSTM_";
 
 char const* TAppSettings::SectionName_General = "[General]";
 
 // Key names - General
-char const* TAppSettings::KeyName_Gen_ImagesPath = "ImagesPath";
-char const* TAppSettings::KeyName_Gen_DirLogs = "DirLogs";
-char const* TAppSettings::KeyName_Gen_LogPrefix = "LogPrefix";
-char const* TAppSettings::KeyName_Gen_LogLevel = "LogLevel";
-char const* TAppSettings::KeyName_Gen_NDaysRetainLogs = "NDaysRetainLogs";
+char const* const TAppSettings::KeyName_Gen_ImagesPath = "ImagesPath";
+char const* const TAppSettings::KeyName_Gen_EnableCheats = "EnableCheats";
+char const* const TAppSettings::KeyName_Gen_UseQuestionMarksInit = "UseQuestionMarksInit";
+char const* const TAppSettings::KeyName_Gen_DirLogs = "DirLogs";
+char const* const TAppSettings::KeyName_Gen_LogPrefix = "LogPrefix";
+char const* const TAppSettings::KeyName_Gen_LogLevel = "LogLevel";
+char const* const TAppSettings::KeyName_Gen_NDaysRetainLogs = "NDaysRetainLogs";
 
 // Comments
-char const* TAppSettings::KeyName_Gen_ImagesPath_Comment = ";Leave blank for default (exe directory).";
-char const* TAppSettings::KeyName_Gen_LogLevel_Comment =
+char const* const TAppSettings::KeyName_Gen_ImagesPath_Comment = ";Leave blank for default (exe directory).";
+char const* const TAppSettings::KeyName_Gen_LogLevel_Comment =
     ";Valid range for LogLevel: 0-4. 0=System/forced logs only, 1=errors/warnings, 2=medium, 3=heavy, 4=debug/verbose";
-char const* TAppSettings::KeyName_Gen_NDaysRetainLogs_Comment =
+char const* const TAppSettings::KeyName_Gen_NDaysRetainLogs_Comment =
     ";Valid value for NDaysRetainLogs: 0 to N days. 0=retain forever.";
 
 //---------------------------------------------------------------------------
@@ -82,9 +84,12 @@ bool TAppSettings::Reset_Private()
     Destroy_Private();
 
     // Reset class vars here
+    m_EnableCheatsWasPresent = false;
     NeedsResaved = false;
 
     Gen_ImagesPath = "";
+    Gen_EnableCheats = false;
+    Gen_UseQuestionMarksInit = true;
     Gen_DirLogs = Default_DirLogs;
     Gen_LogPrefix = Default_LogPrefix;
     Gen_LogLevel = 0;//ELogMsgLevel::LML_Medium;
@@ -138,6 +143,32 @@ bool TAppSettings::ParseSection_General()
     {
         keyValP = &secP->KeyVals[idx];
         Gen_ImagesPath = TStrTool::Trim_Copy(keyValP->Value);
+    }
+
+    searchKey = KeyName_Gen_EnableCheats;
+    idx = secP->FindKey(searchKey, true);
+    if (TSection::NotFound == idx)
+    {
+        // Key is missing - use default
+    }
+    else
+    {
+        m_EnableCheatsWasPresent = true;
+        keyValP = &secP->KeyVals[idx];
+        Gen_EnableCheats = TStrTool::ToBool(keyValP->Value);
+    }
+
+    searchKey = KeyName_Gen_UseQuestionMarksInit;
+    idx = secP->FindKey(searchKey, true);
+    if (TSection::NotFound == idx)
+    {
+        // Key is missing - use default
+        NeedsResaved = true;
+    }
+    else
+    {
+        keyValP = &secP->KeyVals[idx];
+        Gen_UseQuestionMarksInit = TStrTool::ToBool(keyValP->Value);
     }
 
     searchKey = KeyName_Gen_DirLogs;
@@ -290,6 +321,35 @@ bool TAppSettings::ApplyChanges_General()
         {
             secP->InsertComment(idx, KeyName_Gen_ImagesPath_Comment);
         }
+    }
+
+    // EnableCheats - only save if it was present when loading from the ini
+    if (m_EnableCheatsWasPresent)
+    {
+        searchKey = KeyName_Gen_EnableCheats;
+        if (TSection::NotFound == (idx = secP->FindOrCreateKey(searchKey, true)))
+        {
+            result = false;
+        }
+        else
+        {
+            keyValP = &secP->KeyVals[idx];
+            keyValP->Key = searchKey;
+            keyValP->Value = (Gen_EnableCheats ? "1" : "0");
+        }
+    }
+
+    // UseQuestionMarksInit
+    searchKey = KeyName_Gen_UseQuestionMarksInit;
+    if (TSection::NotFound == (idx = secP->FindOrCreateKey(searchKey, true)))
+    {
+        result = false;
+    }
+    else
+    {
+        keyValP = &secP->KeyVals[idx];
+        keyValP->Key = searchKey;
+        keyValP->Value = (Gen_UseQuestionMarksInit ? "1" : "0");
     }
 
     //logs directory

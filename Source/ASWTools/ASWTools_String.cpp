@@ -951,6 +951,26 @@ uint64_t TStrTool::StrToUInt64(std::string const& str)
     }
 }
 //---------------------------------------------------------------------------
+bool TStrTool::ToBool(std::string const& str)
+{
+    std::string lowerStr = Trim_Copy(ToLower(str));
+
+    if (lowerStr.length() == 0 || "false" == lowerStr || "no" == lowerStr || "0" == lowerStr)
+        return false;
+
+    return true;
+}
+//---------------------------------------------------------------------------
+bool TStrTool::ToBool(std::wstring const& str)
+{
+    std::wstring lowerStr = Trim_Copy(ToLower(str));
+
+    if (lowerStr.length() == 0 || L"false" == lowerStr || L"no" == lowerStr || L"0" == lowerStr)
+        return false;
+
+    return true;
+}
+//---------------------------------------------------------------------------
 std::string TStrTool::ToLower(std::string const& str)
 {
     std::string result = str;

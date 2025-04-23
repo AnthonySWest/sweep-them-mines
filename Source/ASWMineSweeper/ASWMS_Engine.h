@@ -69,6 +69,8 @@ public: // Static vars
 
 private:
     bool m_firstClick;
+    bool m_UseQuestionMarks;
+    bool m_Paused;
     EGameState m_GameState;
     TShiftState m_MouseDown_Shift;
     int m_MouseDown_X;
@@ -109,10 +111,12 @@ private:
 public:
     static std::vector<int> ExtractDigits(int value, bool reverseOrder);
 
-public:
+public: // Getters/Setters
     int GetEllapsedTimeMilliSecs();
     EGameState GetGameState();
     ULONGLONG GetStartedTick64() const;
+    bool GetUseQuestionMarks() const;
+    void SetUseQuestionMarks(bool useQuestionMarks);
 
 public:
     TMSEngine();
@@ -126,7 +130,8 @@ public:
     bool IsGameRunning() const;
     void MouseDown(TShiftState shift, int x, int y);
     void MouseUp(TShiftState shift, int x, int y);
-    void NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime, TImage* imgMinesRemaining);
+    void NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime,
+        TImage* imgMinesRemaining, bool useQuestionMarks);
     void PauseTime();
     void ResumeTime();
 };

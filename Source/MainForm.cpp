@@ -56,14 +56,14 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner),
       m_CustomCols(30),
       m_CustomRows(16),
-      m_CustomMines(99)
+      m_CustomMines(99),
+      m_MouseDownOnImage(false)
 {
     TApp* app = &TApp::GetInstance();
 
+    m_BaseFormCaption = Caption;
 #if defined(_DEBUG)
-    Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str()) + " - Debug";
-#else
-    Caption = Caption + " - " + String(app->GetAppVer()->ToStrVer().c_str());
+    Caption = Caption + " - Debug";
 #endif
 
     AnsiString imagesDir = app->DirImages.c_str();
@@ -77,6 +77,7 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 
     m_MineSweeper.Sprites.LoadSprites(imagesDir.c_str());
     BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
+    MnuQuestionMarks->Checked = app->Settings.Gen_UseQuestionMarksInit;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormDestroy(TObject* /*sender*/)
@@ -109,7 +110,16 @@ void __fastcall TFormMain::ApplicationEventsRestore(TObject* /*sender*/)
 {
     if (m_MineSweeper.IsGameRunning())
     {
-        m_MineSweeper.ResumeTime();
+        TApp* app = &TApp::GetInstance();
+
+        if (app->Settings.Gen_EnableCheats && m_MouseDownOnImage)
+        {
+
+        }
+        else
+        {
+            m_MineSweeper.ResumeTime();
+        }
         DrawScoreboards();
     }
 }
@@ -134,6 +144,14 @@ void TFormMain::ExitApp()
 {
     TApp::GetInstance().TerminateApp();
     Application->Terminate();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormKeyDown(TObject* /*sender*/, WORD& key, TShiftState /*shift*/)
+{
+    if (VK_ESCAPE == key)
+    {
+        Application->Minimize();
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormMouseMove(TObject* /*sender*/, TShiftState shift, int /*x*/, int /*y*/)
@@ -169,6 +187,8 @@ String TFormMain::GetHighScoresFilename()
 void __fastcall TFormMain::ImageMapMouseDown(
     TObject* /*sender*/, TMouseButton /*button*/, TShiftState shift, int /*x*/, int /*y*/)
 {
+    m_MouseDownOnImage = true;
+
     if (m_MineSweeper.IsGameOver())
         return;
 
@@ -194,6 +214,11 @@ void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState sh
 void __fastcall TFormMain::ImageMapMouseUp(
     TObject* /*sender*/, TMouseButton button, TShiftState shift, int /*x*/, int /*y*/)
 {
+    if (wsMinimized == WindowState)
+        return;
+
+    m_MouseDownOnImage = false;
+
     if (m_MineSweeper.IsGameOver())
         return;
 
@@ -216,9 +241,14 @@ void __fastcall TFormMain::ImageMapMouseUp(
     int seconds = m_MineSweeper.GetEllapsedTimeMilliSecs() / 1000;
 
     if (m_MineSweeper.IsGameOver())
+    {
         TimerScoreboard->Enabled = false;
+        DrawScoreboards();
+    }
 
-    DrawScoreboards();
+    // Draw mines remaining immediately for flags
+    if (mbRight == button)
+        m_MineSweeper.DrawMinesRemaining(ImageMinesRemaining);
 
     if (EGameState::GameOver_Win == state)
     {
@@ -360,6 +390,12 @@ void __fastcall TFormMain::MnuStandardDifficultyClick(TObject* sender)
     }
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuQuestionMarksClick(TObject* /*sender*/)
+{
+    MnuQuestionMarks->Checked = !MnuQuestionMarks->Checked;
+    m_MineSweeper.SetUseQuestionMarks(MnuQuestionMarks->Checked);
+}
+//---------------------------------------------------------------------------
 void TFormMain::NewGame()
 {
     size_t nRows;
@@ -391,26 +427,24 @@ void TFormMain::NewGame()
         nMines = m_CustomMines;
     }
 
-    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap, ImageTime, ImageMinesRemaining);
+    int const oldImageMapWidth = ImageMap->Width;
+    int const oldImageMapHeight = ImageMap->Height;
+
+    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap, ImageTime, ImageMinesRemaining, MnuQuestionMarks->Checked);
     m_MineSweeper.DrawMap(ImageMap);
     DrawScoreboards();
 
-    ClientWidth = ImageMap->Width +
-        ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
-    ClientHeight = ImageMap->Height + ScrollBoxMap->Top + ScrollBoxMap->Left +
-        ((ImageMap->Top + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 2;
-
-    if (Width > Screen->Width)
-        Width = Screen->Width;
-
-    if (Height > Screen->Height - 100)
-        Height = Screen->Height - 100;
+    if (oldImageMapWidth != ImageMap->Width || oldImageMapHeight != ImageMap->Height)
+        ResizeFormToImageMap();
 
     ReCenter();
-
     BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
-
     TimerScoreboard->Enabled = true;
+
+    Caption = m_BaseFormCaption + " - W" + nCols + ", H" + nRows + ", M" + nMines;
+#if defined(_DEBUG)
+    Caption = Caption + " - Debug";
+#endif
 }
 //---------------------------------------------------------------------------
 void TFormMain::ReCenter()
@@ -435,6 +469,23 @@ void TFormMain::ResetBestTimes()
     DeleteFile(filename);
 
     MsgDlg("Best scores were reset to defaults.", "", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ResizeFormToImageMap()
+{
+    if (wsMaximized == WindowState)
+        return;
+
+    ClientWidth = ImageMap->Width +
+        ((ImageMap->Left + ScrollBoxMap->Left + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 4;
+    ClientHeight = ImageMap->Height + ScrollBoxMap->Top + ScrollBoxMap->Left +
+        ((ImageMap->Top + ScrollBoxMap->BevelWidth + BorderWidth) * 2) + 2;
+
+    if (Width > Screen->Width)
+        Width = Screen->Width;
+
+    if (Height > Screen->Height - 100)
+        Height = Screen->Height - 100;
 }
 //---------------------------------------------------------------------------
 void TFormMain::SaveBestScores(TScores& scores)

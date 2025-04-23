@@ -64,6 +64,8 @@ __published: // IDE-managed Components
     TImage* ImageTime;
     TTimer* TimerScoreboard;
     TApplicationEvents* ApplicationEvents;
+    TMenuItem* N4;
+    TMenuItem* MnuQuestionMarks;
     void __fastcall FormDestroy(TObject* Sender);
     void __fastcall MnuExitClick(TObject* Sender);
     void __fastcall MnuAboutClick(TObject* Sender);
@@ -82,12 +84,17 @@ __published: // IDE-managed Components
     void __fastcall TimerScoreboardTimer(TObject* Sender);
     void __fastcall ApplicationEventsRestore(TObject* Sender);
     void __fastcall ApplicationEventsMinimize(TObject* Sender);
+    void __fastcall MnuQuestionMarksClick(TObject* Sender);
+    void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
 
     int m_CustomCols;
     int m_CustomRows;
     int m_CustomMines;
+    bool m_MouseDownOnImage;
+
+    System::String m_BaseFormCaption;
 
     ASWMS::TMSEngine m_MineSweeper;
 
@@ -100,6 +107,7 @@ private:
     void NewGame();
     void ReCenter();
     void ResetBestTimes();
+    void ResizeFormToImageMap();
     void SaveBestScores(SweepThemMines::TScores& scores);
     void SaveBestTime_Beginner(int seconds, AnsiString const& name);
     void SaveBestTime_Expert(int seconds, AnsiString const& name);
