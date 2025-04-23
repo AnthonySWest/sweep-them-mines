@@ -216,9 +216,14 @@ void __fastcall TFormMain::ImageMapMouseUp(
     int seconds = m_MineSweeper.GetEllapsedTimeMilliSecs() / 1000;
 
     if (m_MineSweeper.IsGameOver())
+    {
         TimerScoreboard->Enabled = false;
+        DrawScoreboards();
+    }
 
-    DrawScoreboards();
+    // Draw mines remaining immediately for flags
+    if (mbRight == button)
+        m_MineSweeper.DrawMinesRemaining(ImageMinesRemaining);
 
     if (EGameState::GameOver_Win == state)
     {
