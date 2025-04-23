@@ -96,6 +96,9 @@ public:
     static bool StrNCpy_safeA(char* dest, size_t destSize_bytes, char const* src, size_t maxCount);
     static bool StrNCpy_safeT(TCHAR* dest, size_t destArrayLen, TCHAR const* src, size_t maxCount);
 
+    static bool ToBool(std::string const& str);
+    static bool ToBool(std::wstring const& str);
+
     static std::string ToLower(std::string const& str);
     static std::wstring ToLower(std::wstring const& str);
     static std::string ToUpper(std::string const& str);
