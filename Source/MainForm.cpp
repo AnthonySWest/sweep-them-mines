@@ -56,7 +56,8 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner),
       m_CustomCols(30),
       m_CustomRows(16),
-      m_CustomMines(99)
+      m_CustomMines(99),
+      m_MouseDownOnImage(false)
 {
     TApp* app = &TApp::GetInstance();
 
@@ -109,7 +110,16 @@ void __fastcall TFormMain::ApplicationEventsRestore(TObject* /*sender*/)
 {
     if (m_MineSweeper.IsGameRunning())
     {
-        m_MineSweeper.ResumeTime();
+        TApp* app = &TApp::GetInstance();
+
+        if (app->Settings.Gen_EnableCheats && m_MouseDownOnImage)
+        {
+
+        }
+        else
+        {
+            m_MineSweeper.ResumeTime();
+        }
         DrawScoreboards();
     }
 }
@@ -134,6 +144,14 @@ void TFormMain::ExitApp()
 {
     TApp::GetInstance().TerminateApp();
     Application->Terminate();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormKeyDown(TObject* /*sender*/, WORD& key, TShiftState /*shift*/)
+{
+    if (VK_ESCAPE == key)
+    {
+        Application->Minimize();
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormMouseMove(TObject* /*sender*/, TShiftState shift, int /*x*/, int /*y*/)
@@ -169,6 +187,8 @@ String TFormMain::GetHighScoresFilename()
 void __fastcall TFormMain::ImageMapMouseDown(
     TObject* /*sender*/, TMouseButton /*button*/, TShiftState shift, int /*x*/, int /*y*/)
 {
+    m_MouseDownOnImage = true;
+
     if (m_MineSweeper.IsGameOver())
         return;
 
@@ -194,6 +214,11 @@ void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState sh
 void __fastcall TFormMain::ImageMapMouseUp(
     TObject* /*sender*/, TMouseButton button, TShiftState shift, int /*x*/, int /*y*/)
 {
+    if (wsMinimized == WindowState)
+        return;
+
+    m_MouseDownOnImage = false;
+
     if (m_MineSweeper.IsGameOver())
         return;
 

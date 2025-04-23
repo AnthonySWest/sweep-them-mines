@@ -50,6 +50,7 @@ public: // Static variables
 
     // Key names - General
     static char const* const KeyName_Gen_ImagesPath;
+    static char const* const KeyName_Gen_EnableCheats;
     static char const* const KeyName_Gen_UseQuestionMarksInit;
     static char const* const KeyName_Gen_DirLogs;
     static char const* const KeyName_Gen_LogPrefix;
@@ -65,11 +66,15 @@ private:
     void Destroy_Private();
     bool Reset_Private();
 
+private:
+    bool m_EnableCheatsWasPresent;
+
 public:
     bool NeedsResaved;
 
     // General section vars
     std::string Gen_ImagesPath;
+    bool Gen_EnableCheats;
     bool Gen_UseQuestionMarksInit;
     std::string Gen_DirLogs;
     std::string Gen_LogPrefix;

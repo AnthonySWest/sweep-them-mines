@@ -85,12 +85,14 @@ __published: // IDE-managed Components
     void __fastcall ApplicationEventsRestore(TObject* Sender);
     void __fastcall ApplicationEventsMinimize(TObject* Sender);
     void __fastcall MnuQuestionMarksClick(TObject* Sender);
+    void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
 
     int m_CustomCols;
     int m_CustomRows;
     int m_CustomMines;
+    bool m_MouseDownOnImage;
 
     System::String m_BaseFormCaption;
 
