@@ -40,6 +40,7 @@ namespace ASWMS
 //---------------------------------------------------------------------------
 TMSEngine::TMSEngine()
     : m_firstClick(true),
+      m_UseQuestionMarks(true),
       m_GameState(EGameState::NotSet),
       m_MouseDown_Shift(0),
       m_MouseDown_X(-1),
@@ -179,7 +180,9 @@ void TMSEngine::DoClick(TShiftState shift, size_t row, size_t col)
         if (cell->MarkedAsMine)
         {
             cell->MarkedAsMine = false;
-            cell->MarkedAsQuestion = true;
+
+            if (m_UseQuestionMarks)
+                cell->MarkedAsQuestion = true;
         }
         else if (cell->MarkedAsQuestion)
         {
@@ -528,6 +531,11 @@ ULONGLONG TMSEngine::GetStartedTick64() const
     return m_StartTick;
 }
 //---------------------------------------------------------------------------
+bool TMSEngine::GetUseQuestionMarks() const
+{
+    return m_UseQuestionMarks;
+}
+//---------------------------------------------------------------------------
 void TMSEngine::GridCoordsFromMouse(size_t* col, size_t* row, int x, int y)
 {
     if (nullptr != col)
@@ -599,8 +607,8 @@ void TMSEngine::MouseUp(TShiftState shift, int x, int y)
     m_firstClick = false;
 }
 //---------------------------------------------------------------------------
-void TMSEngine::NewGame(
-    size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime, TImage* imgMinesRemaining)
+void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime,
+    TImage* imgMinesRemaining, bool useQuestionMarks)
 {
     delete Grid;
     Grid = new TGrid(nRows, nCols);
@@ -610,6 +618,7 @@ void TMSEngine::NewGame(
     m_GameState = EGameState::NewGame;
     m_NumMines = std::min(static_cast<int>(nRows * nCols) - 1, nMines);
     m_NumFlaggedMines = 0;
+    m_UseQuestionMarks = useQuestionMarks;
 
     m_BoomRow = GridCoord_NotSet;
     m_BoomCol = GridCoord_NotSet;
@@ -728,6 +737,11 @@ void TMSEngine::RevealAll()
             cell->Discovered = true;
         }
     }
+}
+//---------------------------------------------------------------------------
+void TMSEngine::SetUseQuestionMarks(bool useQuestionMarks)
+{
+    m_UseQuestionMarks = useQuestionMarks;
 }
 //---------------------------------------------------------------------------
 

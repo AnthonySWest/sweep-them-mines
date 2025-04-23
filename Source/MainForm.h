@@ -64,6 +64,8 @@ __published: // IDE-managed Components
     TImage* ImageTime;
     TTimer* TimerScoreboard;
     TApplicationEvents* ApplicationEvents;
+    TMenuItem* N4;
+    TMenuItem* MnuQuestionMarks;
     void __fastcall FormDestroy(TObject* Sender);
     void __fastcall MnuExitClick(TObject* Sender);
     void __fastcall MnuAboutClick(TObject* Sender);
@@ -82,6 +84,7 @@ __published: // IDE-managed Components
     void __fastcall TimerScoreboardTimer(TObject* Sender);
     void __fastcall ApplicationEventsRestore(TObject* Sender);
     void __fastcall ApplicationEventsMinimize(TObject* Sender);
+    void __fastcall MnuQuestionMarksClick(TObject* Sender);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
 

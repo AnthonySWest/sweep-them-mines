@@ -76,6 +76,7 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 
     m_MineSweeper.Sprites.LoadSprites(imagesDir.c_str());
     BtnReact->Glyph->Assign(m_MineSweeper.Sprites.FaceHappy.Bmp);
+    MnuQuestionMarks->Checked = app->Settings.Gen_UseQuestionMarksInit;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormDestroy(TObject* /*sender*/)
@@ -364,6 +365,12 @@ void __fastcall TFormMain::MnuStandardDifficultyClick(TObject* sender)
     }
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuQuestionMarksClick(TObject* /*sender*/)
+{
+    MnuQuestionMarks->Checked = !MnuQuestionMarks->Checked;
+    m_MineSweeper.SetUseQuestionMarks(MnuQuestionMarks->Checked);
+}
+//---------------------------------------------------------------------------
 void TFormMain::NewGame()
 {
     size_t nRows;
@@ -398,7 +405,7 @@ void TFormMain::NewGame()
     int const oldImageMapWidth = ImageMap->Width;
     int const oldImageMapHeight = ImageMap->Height;
 
-    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap, ImageTime, ImageMinesRemaining);
+    m_MineSweeper.NewGame(nRows, nCols, nMines, ImageMap, ImageTime, ImageMinesRemaining, MnuQuestionMarks->Checked);
     m_MineSweeper.DrawMap(ImageMap);
     DrawScoreboards();
 

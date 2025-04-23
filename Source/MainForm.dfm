@@ -347,6 +347,14 @@ object FormMain: TFormMain
         Caption = '&Custom...'
         OnClick = MnuStandardDifficultyClick
       end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object MnuQuestionMarks: TMenuItem
+        Caption = 'Question &Marks'
+        Checked = True
+        OnClick = MnuQuestionMarksClick
+      end
       object N3: TMenuItem
         Caption = '-'
       end
