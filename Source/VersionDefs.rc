@@ -2,9 +2,9 @@
 #define VER_MAJ   1
 #define VER_MIN   25
 #define VER_SUB   423
-#define VER_BUILD 1
+#define VER_BUILD 2
 
-#define VER_VERSION_STR  "1.25.423.1\0"
+#define VER_VERSION_STR  "1.25.423.2\0"
 
 #define VER_FILEVERSION        VER_MAJ,VER_MIN,VER_SUB,VER_BUILD
 #define VER_FILEVERSION_STR    ""VER_VERSION_STR"\0"
