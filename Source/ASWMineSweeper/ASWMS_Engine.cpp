@@ -237,7 +237,10 @@ void TMSEngine::DrawCell(
         size_t mouseRow;
         size_t mouseCol;
         GridCoordsFromMouse(&mouseCol, &mouseRow, mouseX, mouseY);
-        TCell const* mouseCell = Grid->GetCell(mouseRow, mouseCol);
+        TCell const* mouseCell = nullptr;
+
+        if (GridCoord_NotSet != mouseRow && GridCoord_NotSet != mouseCol)
+            mouseCell = Grid->GetCell(mouseRow, mouseCol);
 
         // Is the mouse over the cell
         if (mouseRow == row && mouseCol == col)
@@ -549,7 +552,7 @@ void TMSEngine::GridCoordsFromMouse(size_t* col, size_t* row, int x, int y)
         else
         {
             *col = static_cast<size_t>(x / GetCellDrawWidth());
-            if (*col > Grid->GetColCount())
+            if (*col >= Grid->GetColCount())
                 *col = GridCoord_NotSet;
         }
     }
@@ -563,7 +566,7 @@ void TMSEngine::GridCoordsFromMouse(size_t* col, size_t* row, int x, int y)
         else
         {
             *row = static_cast<size_t>(y / GetCellDrawHeight());
-            if (*row > Grid->GetRowCount())
+            if (*row >= Grid->GetRowCount())
                 *row = GridCoord_NotSet;
         }
     }
@@ -598,15 +601,18 @@ void TMSEngine::MouseUp(TShiftState shift, int x, int y)
     size_t col;
     GridCoordsFromMouse(&col, &row, x, y);
 
+    if (GridCoord_NotSet == row || GridCoord_NotSet == col)
+        return; // Mouse coordinates are out of bounds
+
     if (m_firstClick)
     {
+        m_firstClick = false;
         PopulateMineField(row, col);
         m_GameState = EGameState::InProgress;
         m_StartTick = ::GetTickCount64();
     }
 
     DoClick(shift, row, col);
-    m_firstClick = false;
 }
 //---------------------------------------------------------------------------
 void TMSEngine::NewGame(size_t nRows, size_t nCols, int nMines, TImage* imgMap, TImage* imgTime,
