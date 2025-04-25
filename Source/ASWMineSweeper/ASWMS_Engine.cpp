@@ -24,6 +24,7 @@ limitations under the License.
 //---------------------------------------------------------------------------
 #include <algorithm>
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 //---------------------------------------------------------------------------
@@ -199,7 +200,10 @@ void TMSEngine::DoClick(TShiftState shift, size_t row, size_t col)
 void TMSEngine::DrawCell(
     TImage* image, size_t row, size_t col, int xPos, int yPos, TShiftState shift, int mouseX, int mouseY)
 {
-    TCell const* cell = Grid->GetCell(row, col);
+    uint32_t const hashStartDiscovered = 100;
+    uint32_t const hashStartUnDiscovered = 1000;
+
+    TCell* cell = Grid->GetCell(row, col);
     Graphics::TBitmap* bmp = image->Picture->Bitmap;
     TCanvas* canvas = bmp->Canvas;
     Graphics::TBitmap* bmpTile = nullptr;
@@ -207,32 +211,45 @@ void TMSEngine::DrawCell(
     Graphics::TBitmap* bmpProx = nullptr;
     Graphics::TBitmap* bmpFlag = nullptr;
     Graphics::TBitmap* bmpFlagX = nullptr;
+    uint32_t drawHash = 0;
 
     if (cell->Discovered)
     {
         bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::Uncovered)].Bmp;
+        drawHash = hashStartDiscovered;
 
         if (cell->IsMine)
         {
             bmpMine = Sprites.Mine.Bmp;
+            drawHash++;
 
             if (row == m_BoomRow && col == m_BoomCol)
+            {
                 bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::UncoveredBoom)].Bmp;
+                drawHash++;
+            }
         }
         else
         {
             int nMines = GetNeighboringMineCount(row, col);
             if (nMines > 0)
+            {
                 bmpProx = Sprites.Digits_Proximity[static_cast<size_t>(nMines - 1)].Bmp;
+                drawHash -= static_cast<uint32_t>(nMines);
+            }
 
-            // Incorrectly marked as a mine - this condition occurs after game is over
+            // Player incorrectly marked this cell as a mine - this condition occurs after game is over
             if (cell->MarkedAsMine)
+            {
                 bmpFlagX = Sprites.FlagX.Bmp;
+                drawHash -= 10;
+            }
         }
     }
     else
     {
         bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::Covered)].Bmp;
+        drawHash = hashStartUnDiscovered;
 
         size_t mouseRow;
         size_t mouseCol;
@@ -246,15 +263,17 @@ void TMSEngine::DrawCell(
         if (mouseRow == row && mouseCol == col)
         {
             bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::CoveredLit)].Bmp;
+            drawHash++;
 
             // Note: Allow question marks to be shown as clicking
             if (shift.Contains(ssLeft) && !cell->MarkedAsMine)
             {
                 bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::CoveredClicked)].Bmp;
+                drawHash++;
             }
         }
 
-        // Player may be attempting an auto-click for multiple cells - if so, highlight cell, if neighbor
+        // Check for player attempting an auto-click for multiple cells (both mouse buttons down)
         if (GridCoord_NotSet != mouseRow && GridCoord_NotSet != mouseCol &&
             !cell->MarkedAsMine &&
             mouseCell->Discovered && shift.Contains(ssLeft) && shift.Contains(ssRight))
@@ -263,7 +282,10 @@ void TMSEngine::DrawCell(
             int diffRow = std::abs(static_cast<int>(mouseRow) - static_cast<int>(row));
 
             if (diffCol <= 1  && diffRow <= 1)
+            {
                 bmpTile = Sprites.Tiles[static_cast<size_t>(ETile::CoveredLit)].Bmp;
+                drawHash += 10;
+            }
         }
     }
 
@@ -271,11 +293,19 @@ void TMSEngine::DrawCell(
     {
         bmpFlag = Sprites.Flag.Bmp;
         m_NumFlaggedMines++;
+        drawHash -= 30;
     }
     else if (cell->MarkedAsQuestion)
     {
         bmpFlag = Sprites.Question.Bmp;
+        drawHash += 100;
     }
+
+    // Don't draw the cell if the hash didn't change
+    if (drawHash == cell->LastDrawHash)
+        return;
+
+    cell->LastDrawHash = drawHash;
 
     // Draw tile first (Layer 1)
     if (nullptr != bmpTile)
