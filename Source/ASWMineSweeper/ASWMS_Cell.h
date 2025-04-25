@@ -42,10 +42,14 @@ public:
 public:
     TCell();
     TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion, uint32_t lastDrawHash);
+#if __cplusplus >= 201103L
     TCell(TCell const&) = default;
+#endif
     ~TCell();
 
+#if __cplusplus >= 201103L
     TCell& operator=(TCell const& rhs) = default;
+#endif
 };
 
 } // namespace ASWMS

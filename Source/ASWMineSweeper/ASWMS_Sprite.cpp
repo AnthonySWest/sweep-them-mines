@@ -118,7 +118,11 @@ std::string TSprite::GetPictureFileExtension(std::string const& filename)
 
     try
     {
+#if __cplusplus >= 201103L
         in.open(filename, std::ios::in | std::ios::binary);
+#else
+        in.open(filename.c_str(), std::ios::in | std::ios::binary);
+#endif
         if (in.fail())
             throw Exception(("Failed to open file: " + filename).c_str());
     }
