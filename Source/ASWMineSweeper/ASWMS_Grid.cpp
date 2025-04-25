@@ -22,6 +22,8 @@ limitations under the License.
 // Module header
 #include "ASWMS_Grid.h"
 //---------------------------------------------------------------------------
+#include "ASWTools_Common.h"
+//---------------------------------------------------------------------------
 
 namespace ASWMS
 {

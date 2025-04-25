@@ -28,7 +28,10 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 //---------------------------------------------------------------------------
+#include <Vcl.Graphics.hpp>
+//---------------------------------------------------------------------------
 #include "ASWMS_Cell.h"
+#include "ASWTools_Common.h"
 //---------------------------------------------------------------------------
 
 namespace ASWMS
