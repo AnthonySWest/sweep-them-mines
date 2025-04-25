@@ -35,15 +35,17 @@ TCell::TCell()
     : Discovered(false),
       IsMine(false),
       MarkedAsMine(false),
-      MarkedAsQuestion(false)
+      MarkedAsQuestion(false),
+      LastDrawHash(0)
 {
 }
 //---------------------------------------------------------------------------
-TCell::TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion)
+TCell::TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion, uint32_t lastDrawHash)
     : Discovered(discovered),
       IsMine(isMine),
       MarkedAsMine(markedAsMine),
-      MarkedAsQuestion(markedAsQuestion)
+      MarkedAsQuestion(markedAsQuestion),
+      LastDrawHash(lastDrawHash)
 {
 }
 //---------------------------------------------------------------------------

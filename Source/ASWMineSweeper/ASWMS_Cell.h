@@ -21,6 +21,8 @@ limitations under the License.
 #ifndef ASWMS_CellH
 #define ASWMS_CellH
 //---------------------------------------------------------------------------
+#include <stdint.h>
+//---------------------------------------------------------------------------
 
 namespace ASWMS
 {
@@ -35,10 +37,11 @@ public:
     bool IsMine;
     bool MarkedAsMine;
     bool MarkedAsQuestion;
+    uint32_t LastDrawHash;
 
 public:
     TCell();
-    TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion);
+    TCell(bool discovered, bool isMine, bool markedAsMine, bool markedAsQuestion, uint32_t lastDrawHash);
     TCell(TCell const&) = default;
     ~TCell();
 
