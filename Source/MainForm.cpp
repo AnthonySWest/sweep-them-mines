@@ -214,7 +214,7 @@ void __fastcall TFormMain::ImageMapMouseMove(TObject* /*sender*/, TShiftState sh
 void __fastcall TFormMain::ImageMapMouseUp(
     TObject* /*sender*/, TMouseButton button, TShiftState shift, int /*x*/, int /*y*/)
 {
-    if (wsMinimized == WindowState)
+    if (wsMinimized == WindowState || mbMiddle == button)
         return;
 
     m_MouseDownOnImage = false;
