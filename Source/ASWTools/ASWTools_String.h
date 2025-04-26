@@ -99,6 +99,11 @@ public:
     static bool ToBool(std::string const& str);
     static bool ToBool(std::wstring const& str);
 
+    template <typename T>
+    static std::string ToStringA(const T& value);
+    template <typename T>
+    static std::wstring ToStringW(const T& value);
+
     static std::string ToLower(std::string const& str);
     static std::wstring ToLower(std::wstring const& str);
     static std::string ToUpper(std::string const& str);

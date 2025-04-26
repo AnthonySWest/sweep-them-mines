@@ -991,6 +991,22 @@ std::wstring TStrTool::ToLower(std::wstring const& str)
     return result;
 }
 //---------------------------------------------------------------------------
+template <typename T>
+std::string TStrTool::ToStringA(const T& value)
+{
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+//---------------------------------------------------------------------------
+template <typename T>
+std::wstring TStrTool::ToStringW(const T& value)
+{
+    std::wstringstream ss;
+    ss << value;
+    return ss.str();
+}
+//---------------------------------------------------------------------------
 std::string TStrTool::ToUpper(std::string const& str)
 {
     std::string result = str;
