@@ -43,6 +43,7 @@ __published: // IDE-managed Components
     TSpinEdit* EditMines;
     TBitBtn* BtnOK;
     TBitBtn* BtnCancel;
+    TLabel* LblLimit;
     void __fastcall BtnOKClick(TObject* Sender);
 
 private: // User declarations
