@@ -28,6 +28,8 @@ limitations under the License.
 #ifndef ASWTools_ConsoleH
 #define ASWTools_ConsoleH
 //---------------------------------------------------------------------------
+#include <cstdint>
+//---------------------------------------------------------------------------
 #include "ASWTools_Common.h"
 //---------------------------------------------------------------------------
 
@@ -40,7 +42,7 @@ namespace ASWTools
 class TConsole
 {
 public: // Static variables
-    static const int Default_MinBuffer = 8192;
+    static int const Default_MinBuffer = 8192;
 
 protected:
     static bool RedirectConsoleIO();

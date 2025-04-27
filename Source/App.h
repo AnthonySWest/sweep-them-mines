@@ -23,9 +23,13 @@ limitations under the License.
 #ifndef AppH
 #define AppH
 //---------------------------------------------------------------------------
+#if __cplusplus >= 201103L
 #include <mutex>
+#endif
 #include <string>
+#include <windows.h>
 //---------------------------------------------------------------------------
+#include "ASWTools_Common.h"
 #include "ASWTools_Version.h"
 //---------------------------------------------------------------------------
 #include "AppSettings.h"
@@ -69,7 +73,6 @@ public: // Static vars
 
 private: // Static vars
     static bool m_AppTerminating;
-    static std::mutex m_locMutex_msgOut;
 
 public:
     HANDLE AppRunningMutexHandle;
@@ -100,8 +103,20 @@ public:
 
 private:
     TApp(); // Prevent creating instances outside this class
+#if __cplusplus < 201103L
+    // Prevent copying by not implementing the copy contructor and assignment operator
+    TApp(const TApp&);
+    TApp& operator=(const TApp&);
+#endif
 
     bool m_AppStartedByCommandLine;
+
+#if __cplusplus >= 201103L
+    std::mutex m_lockMutex_msgOut;
+#else
+    CRITICAL_SECTION m_lockMutex_msgOut;
+#endif
+
 
     ASWTools::TVersion m_AppVer;
     TCommandArgList m_CommandArgList;
@@ -114,9 +129,11 @@ private:
 
 public:
     ~TApp();
+#if __cplusplus >= 201103L
     // Prevent copying by deleting the copy contructor and assignment operator
     TApp(const TApp&) = delete;
     TApp& operator=(const TApp&) = delete;
+#endif
 
     bool CreateAppRunningMutex();
     ASWTools::TVersion const* GetAppVer();

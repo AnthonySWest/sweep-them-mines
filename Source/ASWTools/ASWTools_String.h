@@ -27,7 +27,7 @@ limitations under the License.
 //---------------------------------------------------------------------------
 #include <cstdint> //int64_t
 #include <iomanip>  //for GUID stuff
-#include <stdint.h>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <windows.h>
@@ -100,9 +100,19 @@ public:
     static bool ToBool(std::wstring const& str);
 
     template <typename T>
-    static std::string ToStringA(const T& value);
+    static std::string ToStringA(T const& value)
+    {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
     template <typename T>
-    static std::wstring ToStringW(const T& value);
+    static std::wstring ToStringW(T const& value)
+    {
+        std::wstringstream ss;
+        ss << value;
+        return ss.str();
+    }
 
     static std::string ToLower(std::string const& str);
     static std::wstring ToLower(std::wstring const& str);

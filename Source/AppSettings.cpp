@@ -388,7 +388,11 @@ bool TAppSettings::ApplyChanges_General()
     {
         keyValP = &secP->KeyVals[idx];
         keyValP->Key = searchKey;
+#if __cplusplus >= 201103L
         keyValP->Value = std::to_string(static_cast<int>(Gen_LogLevel));
+#else
+        keyValP->Value = TStrTool::ToStringA(static_cast<int>(Gen_LogLevel));
+#endif
 
         //insert comment if a comment is not already before this element
         if (idx == 0 || !secP->KeyVals[idx - 1].IsComment() ||
@@ -408,7 +412,11 @@ bool TAppSettings::ApplyChanges_General()
     {
         keyValP = &secP->KeyVals[idx];
         keyValP->Key = searchKey;
+#if __cplusplus >= 201103L
         keyValP->Value = std::to_string(Gen_NDaysRetainLogs);
+#else
+        keyValP->Value = TStrTool::ToStringA(Gen_NDaysRetainLogs);
+#endif
 
         //insert comment if a comment is not already before this element
         if (idx == 0 || !secP->KeyVals[idx - 1].IsComment() ||

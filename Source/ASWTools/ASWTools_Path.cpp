@@ -466,7 +466,11 @@ bool TPathTool::File_GetLastWriteTime(std::string const& fn, FILETIME& lastwrite
     h = ::CreateFileA(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
     if (INVALID_HANDLE_VALUE == h)
         return false;
+#if __cplusplus >= 201103L
     std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
+#else
+    RAII_Handle raii_handle(h);
+#endif
 
     if (!::GetFileInformationByHandle(h, &info))
         return false;
@@ -489,7 +493,11 @@ bool TPathTool::File_GetLastWriteTime(std::wstring const& fn, FILETIME& lastwrit
     h = ::CreateFileW(fn.c_str(), GENERIC_READ, shareMode, nullptr, OPEN_EXISTING, 0, nullptr);
     if (INVALID_HANDLE_VALUE == h)
         return false;
+#if __cplusplus >= 201103L
     std::unique_ptr<void, decltype(& CloseHandle)> auto_h(h, CloseHandle);
+#else
+    RAII_Handle raii_handle(h);
+#endif
 
     if (!::GetFileInformationByHandle(h, &info))
         return false;

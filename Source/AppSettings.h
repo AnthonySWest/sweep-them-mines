@@ -27,6 +27,7 @@ limitations under the License.
 #include <string>
 //---------------------------------------------------------------------------
 #include "ASWTools_BasicINI.h"
+#include "ASWTools_Common.h"
 #include "ASWTools_Version.h"
 //---------------------------------------------------------------------------
 

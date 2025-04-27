@@ -68,10 +68,14 @@ public:
 
 public:
     TKeyVal();
+#if __cplusplus >= 201103L
     TKeyVal(TKeyVal const&) = default;
+#endif
     ~TKeyVal();
 
+#if __cplusplus >= 201103L
     TKeyVal& operator=(TKeyVal const& rhs) = default;
+#endif
 
     void Reset();
 
@@ -97,7 +101,9 @@ public:
 
 public:
     TSection();
+#if __cplusplus >= 201103L
     TSection(TSection const&) = default;
+#endif
     ~TSection();
 
     TSection& operator=(TSection const& rhs);

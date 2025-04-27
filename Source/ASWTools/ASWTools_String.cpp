@@ -25,12 +25,19 @@ limitations under the License.
 #include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 #include <algorithm>
-#include <codecvt>
+
+#if __cplusplus >= 201103L
+#   include <codecvt>
+#else
+#   include <functional>
+#   include <stdarg.h> // va_start
+#   include <wctype.h>
+#endif // #if __cplusplus >= 201103L
+
 //#include <cstdarg> //va_start
 //#include <cctype>
 #include <limits>
 #include <locale>
-#include <sstream>
 #include <stdexcept>
 #include <wctype.h>
 //---------------------------------------------------------------------------
@@ -115,29 +122,62 @@ bool TStrTool::Reset() //virtual
 // - Static
 std::string TStrTool::UnicodeStrToUtf8(std::wstring const& str)
 {
+    if (str.empty())
+        return "";
+
+#if __cplusplus >= 201103L
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif // #ifdef __clang__
+#endif
     std::wstring_convert<std::codecvt_utf8<wchar_t> > myconv;
+    return myconv.to_bytes(str);
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif // #ifdef __clang__
-    return myconv.to_bytes(str);
+#endif
+#else
+    int utf16Len = str.length();
+    int utf8Len = ::WideCharToMultiByte(CP_UTF8, 0, str.c_str(), utf16Len, nullptr, 0, nullptr, nullptr);
+    if (0 == utf8Len)
+        return "";
+
+    std::string utf8Str(utf8Len, '\0');
+    ::WideCharToMultiByte(CP_UTF8, 0, str.c_str(), utf16Len, &utf8Str[0], utf8Len, nullptr, nullptr);
+
+    return utf8Str;
+#endif // #if __cplusplus >= 201103L
 }
 //---------------------------------------------------------------------------
 // -Static
 std::wstring TStrTool::Utf8ToUnicodeStr(const std::string& str)
 {
+    if (str.empty())
+        return L"";
+
+#if __cplusplus >= 201103L
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif // #ifdef __clang__
+#endif
     std::wstring_convert<std::codecvt_utf8<wchar_t> > myconv;
+    return myconv.from_bytes(str);
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif // #ifdef __clang__
-    return myconv.from_bytes(str);
+#endif
+#else
+    int wideCharLen = ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+    if (0 == wideCharLen)
+        return L"";
+
+    std::wstring strW(wideCharLen, L'\0');
+    ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &strW[0], wideCharLen);
+    return strW;
+//    std::vector<wchar_t> wideCharBuffer(wideCharLen);
+//    ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wideCharBuffer.data(), wideCharLen);
+//    return std::wstring(wideCharBuffer.begin(), wideCharBuffer.end() - 1);
+#endif // #if __cplusplus >= 201103L
 }
 //---------------------------------------------------------------------------
 // - Static
@@ -146,16 +186,27 @@ std::wstring TStrTool::Utf8ToUnicodeStr(char const* utf8Bytes, size_t length)
     if (0 == length || nullptr == utf8Bytes)
         return L"";
 
+#if __cplusplus >= 201103L
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif // #ifdef __clang__
+#endif
     std::wstring_convert<std::codecvt_utf8<wchar_t> > myconv;
+    // Note that from_bytes does not include the character pointed to by "last", the 2nd parameter
+    return myconv.from_bytes(utf8Bytes, utf8Bytes + length);
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif // #ifdef __clang__
-    //note that from_bytes does not include the character pointed to by "last", the 2nd parameter
-    return myconv.from_bytes(utf8Bytes, utf8Bytes + length);
+#endif
+#else
+    int wideCharLen = ::MultiByteToWideChar(CP_UTF8, 0, utf8Bytes, length, nullptr, 0);
+    if (0 == wideCharLen)
+        return L"";
+
+    std::wstring strW(wideCharLen, L'\0');
+    ::MultiByteToWideChar(CP_UTF8, 0, utf8Bytes, length, &strW[0], wideCharLen);
+    return strW;
+#endif // #if __cplusplus >= 201103L
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -345,7 +396,7 @@ bool TStrTool::DateTime_Parse_ISO8601(std::string const& iso8601Str,
 
     int const nValsIfNoOffset_isUTC = 6; //y+M+d+h+m+s (e.g. "2021-08-10T15:45:36Z")
     int y = 1, month = 1, d = 1, h = 0, min = 0, s = 0, ms = 0, tzH = 0, tzM = 0;
-    float secsF = 0.0;
+    float secsF = 0.0f;
 
     //Variation of: https://visdap.blogspot.com/2018/12/how-do-i-parse-iso-8601-date-with.html
     //but cleaned, added error checking and a correction for float/double base10 to base2 issue.
@@ -574,13 +625,22 @@ bool TStrTool::StrNCpy_safeT(TCHAR* dest, size_t destArrayLen, TCHAR const* src,
 // -See: https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 void TStrTool::TrimLeft(std::string& s)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     s.erase(s.begin(),
         std::find_if(s.begin(), s.end(), [](unsigned char ch)
         {
             return !std::isspace(ch);
         })
     );
+#else
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+#endif
 }
+
+
 //---------------------------------------------------------------------------
 // -Static
 // -Trims in place
@@ -588,12 +648,23 @@ void TStrTool::TrimLeft(std::string& s)
 // -'trim_issspace', if true, will also trim spaces.
 void TStrTool::TrimLeft(std::string& s, const unsigned char trimChar, bool trim_isspace)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     s.erase(s.begin(),
         std::find_if(s.begin(), s.end(), [trimChar, trim_isspace](unsigned char ch)
         {
             return trim_isspace ? (!std::isspace(ch) && trimChar != ch) : trimChar != ch;
         })
     );
+#else
+    std::size_t i = 0;
+    std::size_t end = s.size();
+    while (i < end && (trim_isspace ? std::isspace(s[i]) || trimChar == s[i] : trimChar == s[i]))
+        i++;
+    s = s.substr(i);
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -601,12 +672,20 @@ void TStrTool::TrimLeft(std::string& s, const unsigned char trimChar, bool trim_
 // -See: https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 void TStrTool::TrimLeft(std::wstring& s)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     s.erase(s.begin(),
         std::find_if(s.begin(), s.end(), [](wchar_t ch)
         {
             return !std::iswspace(ch);
         })
     );
+#else
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+        std::not1(std::ptr_fun(static_cast<int (*)(wchar_t)>(std::iswspace)))));
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -615,12 +694,23 @@ void TStrTool::TrimLeft(std::wstring& s)
 // -'trim_iswsspace', if true, will also trim spaces.
 void TStrTool::TrimLeft(std::wstring& s, const wchar_t trimChar, bool trim_iswspace)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     s.erase(s.begin(),
         std::find_if(s.begin(), s.end(), [trimChar, trim_iswspace](wchar_t ch)
         {
             return trim_iswspace ? (!std::iswspace(ch) && trimChar != ch) : trimChar != ch;
         })
     );
+#else
+    std::size_t i = 0;
+    std::size_t end = s.size();
+    while (i < end && (trim_iswspace ? std::iswspace(s[i]) || trimChar == s[i] : trimChar == s[i]))
+        i++;
+    s = s.substr(i);
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -628,10 +718,17 @@ void TStrTool::TrimLeft(std::wstring& s, const wchar_t trimChar, bool trim_iswsp
 // -See: https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 void TStrTool::TrimRight(std::string& s)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
         {
             return !std::isspace(ch);
         }).base(), s.end());
+#else
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -640,12 +737,23 @@ void TStrTool::TrimRight(std::string& s)
 // -'trim_issspace', if true, will also trim spaces.
 void TStrTool::TrimRight(std::string& s, unsigned char const trimChar, bool trim_isspace)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     //Note: Can use [trimChar, trim_isspace] in the lambda, or just [=] to get access to
     //trimChar and trim_isspace.
     s.erase(std::find_if(s.rbegin(), s.rend(), [ = ](unsigned char ch)
         {
             return trim_isspace ? (!std::isspace(ch) && trimChar != ch) : trimChar != ch;
         }).base(), s.end());
+#else
+    while (!s.empty() &&
+           (trim_isspace ? std::isspace(s[s.size() - 1]) || trimChar == s[s.size() - 1] : trimChar == s[s.size() - 1]))
+    {
+        s.erase(s.size() - 1);
+    }
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -653,10 +761,18 @@ void TStrTool::TrimRight(std::string& s, unsigned char const trimChar, bool trim
 // -See: https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 void TStrTool::TrimRight(std::wstring& s)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     s.erase(std::find_if(s.rbegin(), s.rend(), [](wchar_t ch)
         {
             return !std::iswspace(ch);
         }).base(), s.end());
+#else
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+        std::not1(std::ptr_fun(static_cast<int (*)(wchar_t)>(std::iswspace)))).base(), s.end());
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -665,12 +781,25 @@ void TStrTool::TrimRight(std::wstring& s)
 // -'trim_iswsspace', if true, will also trim spaces.
 void TStrTool::TrimRight(std::wstring& s, wchar_t const trimChar, bool trim_iswspace)
 {
+    if (s.empty())
+        return;
+
+#if __cplusplus >= 201103L
     //Note: Can use [trimChar, trim_iswspace] in the lambda, or just [=] to get access to
     //trimChar and trim_iswspace.
     s.erase(std::find_if(s.rbegin(), s.rend(), [ = ](wchar_t ch)
         {
             return trim_iswspace ? (!std::iswspace(ch) && trimChar != ch) : trimChar != ch;
         }).base(), s.end());
+#else
+    size_t lc = s.size() - 1;
+    while (!s.empty() &&
+           (trim_iswspace ? std::iswspace(s[lc]) || trimChar == s[lc] : trimChar == s[lc]))
+    {
+        s.erase(lc);
+        lc = s.size() - 1;
+    }
+#endif
 }
 //---------------------------------------------------------------------------
 // -Static
@@ -867,7 +996,12 @@ int32_t TStrTool::StrToInt32(std::string const& str)
 {
     try
     {
+#if __cplusplus >= 201103L
         long val = std::stol(str);
+#else
+        long val = std::atol(str.c_str());
+#endif
+
 #if LONG_MAX > INT32_MAX
         if (val > std::numeric_limits<int32_t>::max())
             throw std::out_of_range("Value exceeds int32_t range");
@@ -888,7 +1022,12 @@ int64_t TStrTool::StrToInt64(std::string const& str)
 {
     try
     {
+#if __cplusplus >= 201103L
         long long val = std::stoll(str);
+#else
+        long long val = std::atoll(str.c_str());
+#endif
+
 #if LONGLONG_MAX > INT64_MAX
         if (val > std::numeric_limits<int64_t>::max())
             throw std::out_of_range("Value exceeds int64_t range");
@@ -909,7 +1048,13 @@ uint32_t TStrTool::StrToUInt32(std::string const& str)
 {
     try
     {
+#if __cplusplus >= 201103L
         unsigned long val = std::stoul(str);
+#else
+        char* endP = NULL;
+        unsigned long val = std::strtoul(str.c_str(), &endP, 10);
+#endif
+
 #if ULONG_MAX > UINT32_MAX
         if (val > std::numeric_limits<uint32_t>::max())
         {   // should not happen on Windows (unsigned long == uint32_t)
@@ -932,7 +1077,13 @@ uint64_t TStrTool::StrToUInt64(std::string const& str)
 {
     try
     {
+#if __cplusplus >= 201103L
         unsigned long long val = std::stoull(str);
+#else
+        char* endP = NULL;
+        unsigned long long val = std::strtoull(str.c_str(), &endP, 10);
+#endif
+
 #if ULONGLONG_MAX > UINT64_MAX
         if (val > std::numeric_limits<uint64_t>::max())
         {   // should not happen on Windows (unsigned long == uint32_t)
@@ -973,57 +1124,69 @@ bool TStrTool::ToBool(std::wstring const& str)
 //---------------------------------------------------------------------------
 std::string TStrTool::ToLower(std::string const& str)
 {
+    if (str.empty())
+        return "";
+
     std::string result = str;
     result.resize(str.size());
+#if __cplusplus >= 201103L
     std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
             return std::tolower(c);
         });
+#else
+    std::transform(str.begin(), str.end(), result.begin(), (int (*)(int)) std::tolower);
+#endif
     return result;
 }
 //---------------------------------------------------------------------------
 std::wstring TStrTool::ToLower(std::wstring const& str)
 {
+    if (str.empty())
+        return L"";
+
     std::wstring result = str;
     result.resize(str.size());
-    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+#if __cplusplus >= 201103L
+    std::transform(str.begin(), str.end(), result.begin(), [](wchar_t c){
             return std::towlower(c);
         });
+#else
+    std::transform(str.begin(), str.end(), result.begin(), (int (*)(wchar_t)) std::towlower);
+#endif
     return result;
-}
-//---------------------------------------------------------------------------
-template <typename T>
-std::string TStrTool::ToStringA(const T& value)
-{
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-}
-//---------------------------------------------------------------------------
-template <typename T>
-std::wstring TStrTool::ToStringW(const T& value)
-{
-    std::wstringstream ss;
-    ss << value;
-    return ss.str();
 }
 //---------------------------------------------------------------------------
 std::string TStrTool::ToUpper(std::string const& str)
 {
+    if (str.empty())
+        return "";
+
     std::string result = str;
     result.resize(str.size());
+#if __cplusplus >= 201103L
     std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
             return std::toupper(c);
         });
+#else
+    std::transform(str.begin(), str.end(), result.begin(), (int (*)(int)) std::toupper);
+#endif
     return result;
 }
 //---------------------------------------------------------------------------
 std::wstring TStrTool::ToUpper(std::wstring const& str)
 {
+    if (str.empty())
+        return L"";
+
     std::wstring result = str;
     result.resize(str.size());
-    std::transform(str.begin(), str.end(), result.begin(), [](unsigned char c){
+#if __cplusplus >= 201103L
+    std::transform(str.begin(), str.end(), result.begin(), [](wchar_t c){
             return std::towupper(c);
         });
+#else
+    std::transform(str.begin(), str.end(), result.begin(), (int (*)(wchar_t)) std::towupper);
+#endif
     return result;
 }
 //---------------------------------------------------------------------------
@@ -2018,7 +2181,11 @@ std::wstring TStrTool::DecodeBase64ToStrW(std::string const& inB64)
 int TStrTool::DecodeBase64ToBytes_Native(char const* src, BYTE* destBytes, size_t* destBytesSize)
 {
 // #pragma warning(push , 0)
+#if __cplusplus >= 201103L
     constexpr BYTE n1 = static_cast<BYTE>(-1);
+#else
+    static const BYTE n1 = static_cast<BYTE>(-1);
+#endif
     static BYTE const base64_reverse[] = {
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
         n1, n1, n1, n1, n1, n1, n1, n1, n1, n1,
@@ -2359,7 +2526,7 @@ std::string TStrTool::Fmt_printf(char const* format, ...)
     char* text = new char[bufferSize];
     std::unique_ptr<char[]> auto_text(text);
 
-    ::va_start(args, format);
+    va_start(args, format);
 
     //Get the needed length of the format string - if allocated size is enough,
     //then were done because the printf worked.
@@ -2390,7 +2557,7 @@ std::wstring TStrTool::Fmt_printf(wchar_t const* format, ...)
     wchar_t* text = new wchar_t[bufferSize];
     std::unique_ptr<wchar_t[]> auto_text(text);
 
-    ::va_start(args, format);
+    va_start(args, format);
 
     //Get the needed length of the format string - if allocated size is enough,
     //then were done because the printf worked.
@@ -2434,7 +2601,14 @@ bool TStrTool::StrToGUID(char const* idStr, GUID& guid)
 
     if (idStrLen == 0)
     {
+#if __cplusplus >= 201103L
         guid = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } }; //same as "{00000000-0000-0000-0000-000000000000}"
+#else
+        guid.Data1 = 0;
+        guid.Data2 = 0;
+        guid.Data3 = 0;
+        memset(guid.Data4, 0, sizeof(guid.Data4));
+#endif
         return true;
     }
 
@@ -2464,7 +2638,14 @@ bool TStrTool::StrToGUID(wchar_t const* idStr, GUID& guid)
 
     if (idStrLen == 0)
     {
+#if __cplusplus >= 201103L
         guid = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } }; //same as "{00000000-0000-0000-0000-000000000000}"
+#else
+        guid.Data1 = 0;
+        guid.Data2 = 0;
+        guid.Data3 = 0;
+        memset(guid.Data4, 0, sizeof(guid.Data4));
+#endif
         return true;
     }
 

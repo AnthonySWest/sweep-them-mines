@@ -126,7 +126,11 @@ bool TScores::ApplyChanges_General()
         keyValP = &secP->KeyVals[idx];
         keyValP->Key = searchKey;
         m_Check = CalcCheckHash();
+#if __cplusplus >= 201103L
         keyValP->Value = std::to_string(m_Check);
+#else
+        keyValP->Value = TStrTool::ToStringA(m_Check);
+#endif
     }
 
     return result;
@@ -187,7 +191,12 @@ uint32_t TScores::CalcCheckHash()
 //---------------------------------------------------------------------------
 std::string TScores::EncodeScoreToB64(TScore const& score) const
 {
+#if __cplusplus >= 201103L
     std::string delim = std::to_string(score.Seconds) + ScoreSplitChar + score.Name + ScoreSplitChar + score.TimeUtcStr;
+#else
+    std::string delim =
+        TStrTool::ToStringA(score.Seconds) + ScoreSplitChar + score.Name + ScoreSplitChar + score.TimeUtcStr;
+#endif
     return TStrTool::EncodeStrToBase64Str(delim, false);
 }
 //---------------------------------------------------------------------------
@@ -226,7 +235,11 @@ uint32_t TScores::GetAdler32(TScoreList const& scores)
     for (TScores::TScoreList::const_iterator it = scores.begin(); it != scores.end(); it++)
     {
         TScore const& item = *it;
+#if __cplusplus >= 201103L
         data += (std::to_string(item.Seconds) + "|" + item.Name + "|" + item.TimeUtcStr + "\n");
+#else
+        data += (TStrTool::ToStringA(item.Seconds) + "|" + item.Name + "|" + item.TimeUtcStr + "\n");
+#endif
     }
 
     return Crypt::TAdler::Adler32(data);
