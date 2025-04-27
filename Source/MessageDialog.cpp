@@ -39,7 +39,7 @@ namespace SweepThemMines
 
     A messagebox wrapper
 */
-int MsgDlg(String const& msg, String const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons)
+int MsgDlg(String const& msg, String const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons, bool scaled)
 {
     TForm* msgDlg = CreateMessageDialog(msg, dlgType, buttons);
     std::unique_ptr<TForm> auto_msgDlg(msgDlg);
@@ -57,7 +57,8 @@ int MsgDlg(String const& msg, String const& title, TMsgDlgType dlgType, TMsgDlgB
 //    msgDlg->Font->Name = "Verdana";
 //    msgDlg->Font->Size = 10;
 //    msgDlg->Canvas->Font = msgDlg->Font;
-    msgDlg->Scaled = false;
+
+    msgDlg->Scaled = scaled;
 
     mRes = msgDlg->ShowModal();
     return mRes;

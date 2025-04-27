@@ -25,7 +25,8 @@ limitations under the License.
 namespace SweepThemMines
 {
 
-int MsgDlg(System::String const& msg, System::String const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons);
+int MsgDlg(System::String const& msg, System::String const& title, TMsgDlgType dlgType, TMsgDlgButtons buttons,
+    bool scaled = true);
 
 } // namespace SweepThemMines
 
