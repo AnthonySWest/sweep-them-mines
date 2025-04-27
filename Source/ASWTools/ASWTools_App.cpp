@@ -185,10 +185,17 @@ bool TAppTool::GetAppVersion(char const* appOrDLLPath, WORD* outMajorVer, WORD* 
     if (!dwLen)
         return false;
 
+#if __cplusplus >= 201103L
     lpData = static_cast<LPVOID>(malloc(dwLen));
     if (nullptr == lpData)
         return false;
     std::unique_ptr<void, decltype(free) *> auto_lpData(lpData, free);
+#else
+    RAII_LPVOID_Malloc raii_lpData(dwLen);
+    lpData = raii_lpData.GetData();
+    if (nullptr == lpData)
+        return false;
+#endif
 
     bool result = ::GetFileVersionInfoA(appOrDLLPath, 0, dwLen, lpData);
 
@@ -223,10 +230,17 @@ bool TAppTool::GetAppVersion(wchar_t const* appOrDLLPath, WORD* outMajorVer, WOR
     if (!dwLen)
         return false;
 
+#if __cplusplus >= 201103L
     lpData = static_cast<LPVOID>(malloc(dwLen));
     if (nullptr == lpData)
         return false;
     std::unique_ptr<void, decltype(free) *> auto_lpData(lpData, free);
+#else
+    RAII_LPVOID_Malloc raii_lpData(dwLen);
+    lpData = raii_lpData.GetData();
+    if (nullptr == lpData)
+        return false;
+#endif
 
     bool result = ::GetFileVersionInfoW(appOrDLLPath, 0, dwLen, lpData);
 

@@ -24,6 +24,8 @@ limitations under the License.
 // Module header
 #include "ASWTools_Version.h"
 //---------------------------------------------------------------------------
+#include "ASWTools_String.h"
+//---------------------------------------------------------------------------
 
 namespace ASWTools
 {
@@ -193,14 +195,24 @@ bool TVersion::ExtractVersionNumbersFromVersionStr(std::wstring const& verStr, i
 //---------------------------------------------------------------------------
 std::string TVersion::ToStrVer() const
 {
+#if __cplusplus >= 201103L
     return std::to_string(Version.Major) + "." + std::to_string(Version.Minor) + "." +
         std::to_string(Version.Build) + "." + std::to_string(Version.Revision);
+#else
+    return TStrTool::ToStringA(Version.Major) + "." + TStrTool::ToStringA(Version.Minor) + "." +
+        TStrTool::ToStringA(Version.Build) + "." + TStrTool::ToStringA(Version.Revision);
+#endif
 }
 //---------------------------------------------------------------------------
 std::wstring TVersion::ToStrVerW() const
 {
+#if __cplusplus >= 201103L
     return std::to_wstring(Version.Major) + L"." + std::to_wstring(Version.Minor) + L"." +
         std::to_wstring(Version.Build) + L"." + std::to_wstring(Version.Revision);
+#else
+    return TStrTool::ToStringW(Version.Major) + L"." + TStrTool::ToStringW(Version.Minor) + L"." +
+        TStrTool::ToStringW(Version.Build) + L"." + TStrTool::ToStringW(Version.Revision);
+#endif
 }
 
 //---------------------------------------------------------------------------
