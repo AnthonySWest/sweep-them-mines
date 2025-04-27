@@ -379,6 +379,17 @@ object FormMain: TFormMain
     end
     object MnuHelp: TMenuItem
       Caption = '&Help'
+      object MnuRules: TMenuItem
+        Caption = '&Rules'
+        OnClick = MnuRulesClick
+      end
+      object MnuHints: TMenuItem
+        Caption = '&Hints'
+        OnClick = MnuHintsClick
+      end
+      object N5: TMenuItem
+        Caption = '-'
+      end
       object MnuAbout: TMenuItem
         Caption = '&About'
         OnClick = MnuAboutClick

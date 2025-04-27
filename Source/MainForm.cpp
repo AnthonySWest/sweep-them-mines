@@ -356,6 +356,11 @@ void __fastcall TFormMain::MnuGameClick(TObject* /*sender*/)
     MnuResetBestTimes->Enabled = FileExists(GetHighScoresFilename());
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuHintsClick(TObject* /*sender*/)
+{
+    ShowHints();
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::MnuNewGameClick(TObject* /*sender*/)
 {
     NewGame();
@@ -364,6 +369,11 @@ void __fastcall TFormMain::MnuNewGameClick(TObject* /*sender*/)
 void __fastcall TFormMain::MnuResetBestTimesClick(TObject* /*sender*/)
 {
     ResetBestTimes();
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::MnuRulesClick(TObject* /*sender*/)
+{
+    ShowRules();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::MnuStandardDifficultyClick(TObject* sender)
@@ -561,6 +571,42 @@ void TFormMain::ShowBestTimes()
     AddScoresToLines(dlgLines, scores.Expert);
 
     MsgDlg(dlgLines->Text, "Best Times", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ShowHints()
+{
+    TStringList* dlgLines = new TStringList();
+    std::unique_ptr<TStringList> auto_dlgLines(dlgLines);
+
+    dlgLines->Add("Hints:\n");
+    dlgLines->Add("- Numbered squares indicate the number of mines in the eight squares surrounding the number.\n");
+    dlgLines->Add("- Quickly uncover squares by clicking numbers with both mouse buttons. If the numbered square");
+    dlgLines->Add("  is surrounded by the same number of flags, all unflagged squares will be uncovered.\n");
+    dlgLines->Add("- Common number patterns can indicate a corresponding pattern of mines. For example, the ");
+    dlgLines->Add("  pattern 2-3-2 at the edge of a group of uncovered squares indicates a row of three mines ");
+    dlgLines->Add("  next to the three numbers.\n");
+
+    MsgDlg(dlgLines->Text, "Hints", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
+}
+//---------------------------------------------------------------------------
+void TFormMain::ShowRules()
+{
+    TStringList* dlgLines = new TStringList();
+    std::unique_ptr<TStringList> auto_dlgLines(dlgLines);
+
+    dlgLines->Add("Goal:\n");
+    dlgLines->Add(" - Find all mines as quickly as possible without uncovering any of them.\n");
+
+    dlgLines->Add("Playing Sweep Them Mines:\n");
+    dlgLines->Add("1. Start a new game under the 'Game' menu. The difficulty can also be changed here.");
+    dlgLines->Add("2. Start the timer by left-clicking any square on the playing field.");
+    dlgLines->Add("3. Left-clicking a square reveals either a mine, a blank, or a number.");
+    dlgLines->Add("4. Right-clicking an uncovered square cycles between a flag, a question mark, and normal.");
+    dlgLines->Add("    - A flag protects the square, preventing a reveal.");
+    dlgLines->Add("    - A question mark does not protect the square but can help track potential mine locations.");
+    dlgLines->Add("5. Uncover all non-mine squares to win the game.\n");
+
+    MsgDlg(dlgLines->Text, "Rules", TMsgDlgType::mtInformation, TMsgDlgButtons() << TMsgDlgBtn::mbOK);
 }
 //---------------------------------------------------------------------------
 TModalResult TFormMain::ShowCustomDifficulty()
