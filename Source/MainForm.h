@@ -66,6 +66,9 @@ __published: // IDE-managed Components
     TApplicationEvents* ApplicationEvents;
     TMenuItem* N4;
     TMenuItem* MnuQuestionMarks;
+    TMenuItem* N5;
+    TMenuItem* MnuRules;
+    TMenuItem* MnuHints;
     void __fastcall FormDestroy(TObject* Sender);
     void __fastcall MnuExitClick(TObject* Sender);
     void __fastcall MnuAboutClick(TObject* Sender);
@@ -86,6 +89,8 @@ __published: // IDE-managed Components
     void __fastcall ApplicationEventsMinimize(TObject* Sender);
     void __fastcall MnuQuestionMarksClick(TObject* Sender);
     void __fastcall FormKeyDown(TObject* Sender, WORD& Key, TShiftState Shift);
+    void __fastcall MnuRulesClick(TObject* Sender);
+    void __fastcall MnuHintsClick(TObject* Sender);
 private: // User declarations
     static char const* const BaseFilename_HighScores;
 
@@ -113,6 +118,8 @@ private:
     void SaveBestTime_Expert(int seconds, AnsiString const& name);
     void SaveBestTime_Intermediate(int seconds, AnsiString const& name);
     void ShowBestTimes();
+    void ShowHints();
+    void ShowRules();
     TModalResult ShowCustomDifficulty();
 
 public:  // User declarations

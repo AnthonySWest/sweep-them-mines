@@ -3,73 +3,80 @@ object FormCustomField: TFormCustomField
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Custom Field'
-  ClientHeight = 211
+  ClientHeight = 231
   ClientWidth = 284
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -16
-  Font.Name = 'Segoe UI'
-  Font.Style = []
+  ParentFont = True
   Position = poScreenCenter
   Scaled = False
-  TextHeight = 21
+  DesignSize = (
+    284
+    231)
+  TextHeight = 15
   object LblHeight: TLabel
-    Left = 24
-    Top = 25
-    Width = 49
-    Height = 21
+    Left = 23
+    Top = 49
+    Width = 39
+    Height = 15
     Caption = '&Height:'
   end
   object LblWidth: TLabel
-    Left = 24
-    Top = 64
-    Width = 45
-    Height = 21
+    Left = 23
+    Top = 88
+    Width = 35
+    Height = 15
     Caption = '&Width:'
   end
   object LblMines: TLabel
-    Left = 24
-    Top = 101
-    Width = 45
-    Height = 21
+    Left = 23
+    Top = 125
+    Width = 35
+    Height = 15
     Caption = '&Mines:'
   end
+  object LblLimit: TLabel
+    Left = 8
+    Top = 8
+    Width = 145
+    Height = 15
+    Caption = 'Limits: 100x100, 9999 mines'
+  end
   object EditHeight: TSpinEdit
-    Left = 96
-    Top = 22
-    Width = 121
-    Height = 31
+    Left = 88
+    Top = 46
+    Width = 100
+    Height = 24
     MaxValue = 1000
     MinValue = 1
     TabOrder = 0
     Value = 16
   end
   object EditWidth: TSpinEdit
-    Left = 96
-    Top = 61
-    Width = 121
-    Height = 31
+    Left = 88
+    Top = 85
+    Width = 100
+    Height = 24
     MaxValue = 1000
     MinValue = 1
     TabOrder = 1
     Value = 30
   end
   object EditMines: TSpinEdit
-    Left = 96
-    Top = 98
-    Width = 121
-    Height = 31
+    Left = 88
+    Top = 122
+    Width = 130
+    Height = 24
     MaxValue = 9999
     MinValue = 1
     TabOrder = 2
-    Value = 0
+    Value = 1
   end
   object BtnOK: TBitBtn
     Left = 112
-    Top = 168
+    Top = 188
     Width = 75
     Height = 25
+    Anchors = [akRight, akBottom]
     Caption = 'OK'
     Default = True
     ModalResult = 1
@@ -78,9 +85,10 @@ object FormCustomField: TFormCustomField
   end
   object BtnCancel: TBitBtn
     Left = 201
-    Top = 168
+    Top = 188
     Width = 75
     Height = 25
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = 'Cancel'
     ModalResult = 2

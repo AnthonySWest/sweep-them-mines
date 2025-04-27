@@ -50,7 +50,7 @@ void __fastcall TFormCustomField::BtnOKClick(TObject* /*Sender*/)
     if (EditHeight->Value > 100)
         EditHeight->Value = 100;
 
-    if (EditMines->Value > 100 * 100)
-        EditMines->Value = 100 * 100;
+    if (EditMines->Value >= 100 * 100)
+        EditMines->Value = (100 * 100) - 1;
 }
 //---------------------------------------------------------------------------

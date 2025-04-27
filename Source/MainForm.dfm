@@ -7,11 +7,7 @@ object FormMain: TFormMain
   Color = clBtnFace
   Constraints.MinHeight = 250
   Constraints.MinWidth = 296
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -15
-  Font.Name = 'Segoe UI'
-  Font.Style = []
+  ParentFont = True
   Icon.Data = {
     0000010001002020000001002000A81000001600000028000000200000004000
     0000010020000000000000100000C30E0000C30E00000000000000000000E290
@@ -160,7 +156,7 @@ object FormMain: TFormMain
   DesignSize = (
     660
     669)
-  TextHeight = 20
+  TextHeight = 15
   object ImageMinesRemaining: TImage
     Left = 10
     Top = 5
@@ -379,6 +375,17 @@ object FormMain: TFormMain
     end
     object MnuHelp: TMenuItem
       Caption = '&Help'
+      object MnuRules: TMenuItem
+        Caption = '&Rules'
+        OnClick = MnuRulesClick
+      end
+      object MnuHints: TMenuItem
+        Caption = '&Hints'
+        OnClick = MnuHintsClick
+      end
+      object N5: TMenuItem
+        Caption = '-'
+      end
       object MnuAbout: TMenuItem
         Caption = '&About'
         OnClick = MnuAboutClick
