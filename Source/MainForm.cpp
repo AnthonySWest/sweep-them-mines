@@ -59,6 +59,8 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
       m_CustomMines(99),
       m_MouseDownOnImage(false)
 {
+    Application->DefaultFont->Size = 10;
+
     TApp* app = &TApp::GetInstance();
 
     m_BaseFormCaption = Caption;
