@@ -23,6 +23,7 @@ limitations under the License.
 #include "ASWMS_Sprites.h"
 //---------------------------------------------------------------------------
 #include "ASWTools_Path.h"
+#include "ASWTools_String.h"
 //---------------------------------------------------------------------------
 using namespace ASWTools;
 using namespace System;
@@ -57,7 +58,11 @@ void TSprites::LoadDigits_Proximity(std::string const& digitsDir)
         TSprite sprite;
         Digits_Proximity.push_back(sprite);
 
+#if __cplusplus >= 201103L
         filename = "Proximity_" + std::to_string(i + 1) + ".png";
+#else
+        filename = "Proximity_" + TStrTool::ToStringA(i + 1) + ".png";
+#endif
         filename = TPathTool::Combine(digitsDir, filename);
         Digits_Proximity[i].LoadFromFile(filename);
     }
@@ -75,7 +80,11 @@ void TSprites::LoadDigits_Score(std::string const& digitsDir)
         TSprite sprite;
         Digits_Score.push_back(sprite);
 
+#if __cplusplus >= 201103L
         filename = "Digit_" + std::to_string(i) + ".png";
+#else
+        filename = "Digit_" + TStrTool::ToStringA(i) + ".png";
+#endif
         filename = TPathTool::Combine(digitsDir, filename);
         Digits_Score[i].LoadFromFile(filename);
     }

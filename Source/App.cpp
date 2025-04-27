@@ -22,7 +22,7 @@ limitations under the License.
 // Module header
 #include "App.h"
 //---------------------------------------------------------------------------
-#include <mutex>
+#include <iostream>
 #include <shlobj.h> //for CSIDL_LOCAL_APPDATA and the like
 #include <windows.h>
 //---------------------------------------------------------------------------
@@ -44,7 +44,6 @@ namespace SweepThemMines
 
 TApp::EExitCode TApp::ExitCode = TApp::EExitCode::Success;
 bool TApp::m_AppTerminating = false;
-std::mutex TApp::m_locMutex_msgOut;
 
 //---------------------------------------------------------------------------
 TApp::TApp()
@@ -53,6 +52,9 @@ TApp::TApp()
       AppGlobalMutexName("Global\\ASWSoftware_SweepThemMines"),
       m_AppStartedByCommandLine(false)
 {
+#if __cplusplus < 201103L
+    ::InitializeCriticalSection(&m_lockMutex_msgOut);
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -60,6 +62,9 @@ TApp::~TApp()
 {
     FreeAppRunningMutex();
     Cleanup();
+#if __cplusplus < 201103L
+    ::DeleteCriticalSection(&m_lockMutex_msgOut);
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -78,7 +83,11 @@ int TApp::Callback_Log(void* thisP, const std::string& msg)
 // Static
 void TApp::Callback_MessageOut(void* thisP, const std::string& msg, bool& cancel)
 {
-    m_locMutex_msgOut.lock();
+#if __cplusplus >= 201103L
+    std::lock_guard<std::mutex> lock(reinterpret_cast<TApp*>(thisP)->m_lockMutex_msgOut);
+#else
+    RAII_MutexLock lock(reinterpret_cast<TApp*>(thisP)->m_lockMutex_msgOut);
+#endif
 
     std::cout << msg;
     fflush(stdout);
@@ -88,7 +97,6 @@ void TApp::Callback_MessageOut(void* thisP, const std::string& msg, bool& cancel
 
     if (m_AppTerminating)
         cancel = true;
-    m_locMutex_msgOut.unlock();
 }
 
 //---------------------------------------------------------------------------
@@ -382,7 +390,7 @@ bool TApp::InitLogger()
     std::string tmpStr;
 
     // get log dir
-    tmpStr = Settings.Gen_DirLogs.length() > 0 ? Settings.Gen_DirLogs : TAppSettings::Default_DirLogs;
+    tmpStr = (Settings.Gen_DirLogs.length() > 0 ? Settings.Gen_DirLogs : std::string(TAppSettings::Default_DirLogs));
 
     if (!TPathTool::ExpandEnvironmentVars(tmpStr, DirLogs))
     {
