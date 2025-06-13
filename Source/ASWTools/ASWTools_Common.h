@@ -65,7 +65,7 @@ public:
 
     ~RAII_Handle()
     {
-        if (INVALID_HANDLE_VALUE != m_handle)
+        if (INVALID_HANDLE_VALUE != m_handle && nullptr != m_handle)
             ::CloseHandle(m_handle);
     }
 
