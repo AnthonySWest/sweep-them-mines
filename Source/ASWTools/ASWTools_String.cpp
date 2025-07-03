@@ -26,6 +26,10 @@ limitations under the License.
 //---------------------------------------------------------------------------
 #include <algorithm>
 
+// Visual Studio NOTE: '__cplusplus' is not defined to the latest unless '/Zc:__cplusplus' is added to
+// 'Additional Options' because Microsoft likes to make things difficult. If using C++ 11 and up, add
+// this option to: Properties-> C/C++ -> All Options -> Additional Options
+
 #if __cplusplus >= 201103L
 #   include <codecvt>
 #else
@@ -39,7 +43,7 @@ limitations under the License.
 #include <limits>
 #include <locale>
 #include <stdexcept>
-#include <wctype.h>
+#include <cwctype>
 //---------------------------------------------------------------------------
 
 #ifndef strcmpI
