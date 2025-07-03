@@ -6,6 +6,10 @@ Contains routines for file/folder path manipulation
 
 Every attempt should be made to keep this module at least Windows portable.
 
+  Visual Studio NOTE: '__cplusplus' is not defined to the latest unless '/Zc:__cplusplus' is added to
+  'Additional Options' because Microsoft likes to make things difficult. If using C++ 11 and up, add
+  this option to: Properties-> C/C++ -> All Options -> Additional Options
+
 Copyright 2019 Anthony S. West
 
 Licensed under the Apache License, Version 2.0 (the "License");
