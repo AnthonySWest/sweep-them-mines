@@ -18,10 +18,6 @@ limitations under the License.
 
 ************************************************************************** */
 
-#include <vcl.h>
-#if !defined(__clang__)
-#pragma hdrstop
-#endif // #if !defined(__clang__)
 
 //---------------------------------------------------------------------------
 // Module header
@@ -37,7 +33,6 @@ limitations under the License.
 //---------------------------------------------------------------------------
 using namespace ASWTools;
 using namespace ASWTools::BasicINI;
-using namespace System;
 //---------------------------------------------------------------------------
 
 namespace SweepThemMines
