@@ -11,7 +11,7 @@ A nod to the classic MineSweeper from Windows 98
   ```
   %localappdata%\ASWSoftware\SweepThemMines
   ```
-  where there will be a `SweeThemMines.ini`. Within this settings file, a custom images folder can be specified using property `ImagesPath`.
+  where there will be a `SweepThemMines.ini`. Within this settings file, a custom images folder can be specified using property `ImagesPath`.
   Note: Logging settings are there as well, however, logging is not yet implemented, as of this writing.
 
 # Donations:
