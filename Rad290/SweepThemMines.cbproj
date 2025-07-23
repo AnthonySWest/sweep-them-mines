@@ -128,7 +128,7 @@
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
+        <BCC_EnableBatchCompilation>false</BCC_EnableBatchCompilation>
         <BCC_PCHName_Clang>SweepThemMinesPCH1.h</BCC_PCHName_Clang>
         <AppDPIAwarenessMode>unaware</AppDPIAwarenessMode>
         <BCC_UserSuppliedOptions>-Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-c++98-compat-pedantic -Wno-format-nonliteral -Wno-used-but-marked-unused -Wno-language-extension-token</BCC_UserSuppliedOptions>
