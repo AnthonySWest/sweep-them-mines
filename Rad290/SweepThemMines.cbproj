@@ -88,9 +88,9 @@
         <AllPackageLibs>rtl.lib;vcl.lib;vclimg.lib;VclSmp.lib;vclx.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
-        <Icon_MainIcon>..\Resource\land-mine_multi.ico</Icon_MainIcon>
-        <UWP_CppLogo44>..\Resource\land-mine_44.png</UWP_CppLogo44>
-        <UWP_CppLogo150>..\Resource\land-mine_150.png</UWP_CppLogo150>
+        <Icon_MainIcon>..\Resource\land-mine_Blue_multi.ico</Icon_MainIcon>
+        <UWP_CppLogo44>..\Resource\land-mine_Blue_44.png</UWP_CppLogo44>
+        <UWP_CppLogo150>..\Resource\land-mine_Blue_150.png</UWP_CppLogo150>
         <SanitizedProjectName>SweepThemMines</SanitizedProjectName>
         <IncludePath>..\Source\ASWMineSweeper\;..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
         <ILINK_LibraryPath>..\Source\ASWMineSweeper\;..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
@@ -179,7 +179,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <Icon_MainIcon>..\Resource\land-mine_multi.ico</Icon_MainIcon>
+        <Icon_MainIcon>..\Resource\land-mine_Blue_multi.ico</Icon_MainIcon>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="SweepThemMines.cpp">
