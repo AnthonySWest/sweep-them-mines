@@ -88,9 +88,9 @@
         <AllPackageLibs>rtl.lib;vcl.lib;vclimg.lib;VclSmp.lib;vclx.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
-        <Icon_MainIcon>..\Resource\land-mine_multi.ico</Icon_MainIcon>
-        <UWP_CppLogo44>..\Resource\land-mine_44.png</UWP_CppLogo44>
-        <UWP_CppLogo150>..\Resource\land-mine_150.png</UWP_CppLogo150>
+        <Icon_MainIcon>..\Resource\land-mine_Blue_multi.ico</Icon_MainIcon>
+        <UWP_CppLogo44>..\Resource\land-mine_Blue_44.png</UWP_CppLogo44>
+        <UWP_CppLogo150>..\Resource\land-mine_Blue_150.png</UWP_CppLogo150>
         <SanitizedProjectName>SweepThemMines</SanitizedProjectName>
         <IncludePath>..\Source\ASWMineSweeper\;..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(IncludePath)</IncludePath>
         <ILINK_LibraryPath>..\Source\ASWMineSweeper\;..\Source\ASWTools\Crypt\;..\Source\ASWTools\;..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
@@ -128,7 +128,7 @@
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
+        <BCC_EnableBatchCompilation>false</BCC_EnableBatchCompilation>
         <BCC_PCHName_Clang>SweepThemMinesPCH1.h</BCC_PCHName_Clang>
         <AppDPIAwarenessMode>unaware</AppDPIAwarenessMode>
         <BCC_UserSuppliedOptions>-Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-c++98-compat-pedantic -Wno-format-nonliteral -Wno-used-but-marked-unused -Wno-language-extension-token</BCC_UserSuppliedOptions>
@@ -179,7 +179,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <Icon_MainIcon>..\Resource\land-mine_multi.ico</Icon_MainIcon>
+        <Icon_MainIcon>..\Resource\land-mine_Blue_multi.ico</Icon_MainIcon>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="SweepThemMines.cpp">

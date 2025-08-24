@@ -55,6 +55,18 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
         Application->ShowException(&exception);
         TApp::ExitCode = TApp::EExitCode::Err_Exception;
     }
+    catch (std::exception const& ex)
+    {
+        TApp::ExitCode = TApp::EExitCode::Err_Exception;
+        try
+        {
+            throw Exception(ex.what());
+        }
+        catch (Exception& exception)
+        {
+            Application->ShowException(&exception);
+        }
+    }
     catch (...)
     {
         TApp::ExitCode = TApp::EExitCode::Err_Exception;
